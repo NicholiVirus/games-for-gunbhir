@@ -125,6 +125,10 @@
     }
   });
   window.addEventListener('keyup', function (e) { keys[e.code] = false; });
+  document.addEventListener('click', function (e) {
+    var bb = e.target.closest('.backbtn'); if (bb) { just.Escape = true; return; }
+    if (e.target.closest('#pauseBtn')) { just.Escape = true; }
+  });
   window.addEventListener('blur', function () { keys = {}; });
   window.addEventListener('pointerdown', function () { KC.Audio.init(); });
 
@@ -514,7 +518,7 @@
       var k = a.slot === 'special' ? keys.s : a.slot === 'alt' ? '↓+' + keys.s : keys.x;
       out += '<div class="abil"><span class="ak">' + k + '</span>' + (a.slot === 'super' ? '<b>SUPER</b> ' : '') + esc(a.name) + '</div>';
     });
-    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + (2 + Save.rank(ch.id)) + '</span>Projectiles on screen (+1 per rank)</div>';
+    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + Math.min(6, 3 + Save.rank(ch.id)) + '</span>Projectiles on screen (3 base, +1 per rank, max 6)</div>';
     if (ch.passive) out += '<div class="abil passive"><span class="ak">★</span><b>' + esc(ch.passive.name) + ':</b> ' + esc(KC.PASSIVES[ch.passive.id]) + '</div>';
     out += '</div><div class="rarline">' + r.abilities + ' abilit' + (r.abilities > 1 ? 'ies' : 'y') + (r.power > 1 ? ' · +' + Math.round((r.power - 1) * 100) + '% damage perk' : '') + (ch.passive ? ' · passive' : '') + '</div>';
     return out;
@@ -565,6 +569,13 @@
         html += cellHTML(ch, i, (c1 ? 'c1 ' : '') + (c2 ? 'c2' : ''), tags);
       });
       $('selGrid').innerHTML = html;
+      var me = this;
+      $('selGrid').querySelectorAll('.cell').forEach(function (c) {
+        var i = +c.dataset.i;
+        function clickFor(pl) { var p = sel.p[pl]; if (p.locked) return; if (p.cur === i) me.pick(pl); else { p.cur = i; p.gold = p.gold && Save.hasGold(KC.ROSTER[i].id); p.confirm = -1; KC.Audio.play('move'); me.render(true); } }
+        c.onclick = function () { clickFor(sel.two && sel.p[0].locked ? 1 : 0); };
+        c.oncontextmenu = function (e) { e.preventDefault(); if (sel.two) clickFor(1); };
+      });
       $('selMode').innerHTML = $('selMode').innerHTML.replace(/<span class="coin"><\/span>\d+$/, G.coin(Save.data.coins));
       var p1c = KC.ROSTER[sel.p[0].cur];
       $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'T' }, confirm: sel.p[0].confirm === sel.p[0].cur });
@@ -572,9 +583,10 @@
         $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: ';' }, confirm: sel.p[1].confirm === sel.p[1].cur });
       } else {
         if (sel.mode === 'tour') { $('selP2').innerHTML = levelHTML(KC.level(sel.levelNo)); }
-        else $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'CAMPAIGN' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
-          (sel.mode === 'campaign' ? 'Win five races in a row, then face the final boss. Losing a stop lets you retry it. Clearing it pays ' + G.coin(KC.COINS.campaignClear) + ' bonus.' : 'A random rival is drawn from the whole roster — even fighters you have not recruited yet. Beat them to earn coins.') + '</div>';
+        else $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'ELECTION ARCADE' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
+          (sel.mode === 'campaign' ? 'Win five races in a row, then face the final boss. Losing a stop lets you retry it. Clearing it pays ' + G.coin(KC.COINS.campaignClear) + ' bonus plus a Golden chest.' : 'A random rival is drawn from the whole roster — even fighters you have not recruited yet. Beat them to earn coins.') + '</div>';
       }
+      ['selP1', 'selP2'].forEach(function (id, pl) { var sk = $(id).querySelector('.skin'); if (sk) { sk.style.cursor = 'pointer'; sk.onclick = function () { me.skin(pl); }; } var li = $(id).querySelector('.lockinfo.can'); if (li) { li.style.cursor = 'pointer'; li.onclick = function () { me.pick(pl); }; } });
       if (rebuild) this.previews();
     },
     previews: function () {
@@ -689,17 +701,26 @@
         return '<div class="lad ' + cls + '"><img src="' + por(s.ch) + '" style="' + (hide ? 'filter:brightness(0) drop-shadow(0 0 2px #f2c14e)' : '') + '" alt=""><div class="ln">' + (hide ? '???' : esc(s.ch.short)) + '</div><div class="ld">' + (isBoss ? 'FINAL BOSS' : s.level.toUpperCase()) + '</div></div>';
       }).join('');
       $('ladderNext').textContent = 'NEXT: ' + (stop.ch.id === 'speaker' ? 'THE SPEAKER — ORDER INCARNATE' : stop.ch.name.toUpperCase());
+      var me = this;
+      $('ladBtns').innerHTML = '<button type="button" class="bigbtn" id="ladFight">FIGHT ▸</button><button type="button" class="bigbtn ghost" id="ladQuit">WITHDRAW</button>';
+      $('ladFight').onclick = function () { me.fight(); };
+      $('ladQuit').onclick = function () { me.quit(); };
       KC.Audio.playMusic('menu');
     },
+    fight: function () {
+      var c = G.campaign, stop = c.stops[c.idx];
+      KC.Audio.play('select');
+      startMatch({ mode: 'campaign', chars: [c.player, stop.ch], skins: [c.skin, c.player === stop.ch ? KC.MIRROR_SKIN : null], ai: [null, stop.level] });
+    },
     update: function () {
-      if (Input.menu('ok')) {
-        var c = G.campaign, stop = c.stops[c.idx];
-        KC.Audio.play('select');
-        startMatch({ mode: 'campaign', chars: [c.player, stop.ch], skins: [c.skin, c.player === stop.ch ? KC.MIRROR_SKIN : null], ai: [null, stop.level] });
-      } else if (Input.menu('back')) {
+      if (Input.menu('ok')) this.fight();
+      else if (Input.menu('back')) this.quit();
+    },
+    quit: function () {
+      {
         KC.Audio.play('back');
-        showList({ title: 'WITHDRAW FROM CAMPAIGN?', sub: 'Your progress on this run will be lost.', items: [
-          { label: 'KEEP CAMPAIGNING', action: function () { go('ladder'); } },
+        showList({ title: 'WITHDRAW FROM THE ARCADE?', sub: 'Your progress on this run will be lost.', items: [
+          { label: 'KEEP GOING', action: function () { go('ladder'); } },
           { label: 'WITHDRAW', action: function () { G.campaign = null; go('menu'); } }
         ], back: function () { go('ladder'); } });
       }
@@ -807,7 +828,7 @@
       var pips = ''; for (var i = 0; i < KC.TAP_UPGRADE.length; i++) pips += '<span class="tp' + (i < this.taps ? ' used' : '') + '"></span>';
       $('chPips').innerHTML = this.phase === 'tap' ? pips : '';
       $('chHint').innerHTML = this.phase === 'tap' ? 'TAP to shake it — it might <b>upgrade</b>! (' + (KC.TAP_UPGRADE.length - this.taps) + ' taps left)'
-        : this.phase === 'ready' ? '<b>TAP TO OPEN!</b>' : '';
+        : this.phase === 'ready' ? '<b>OPENING…</b>' : '';
     },
     tap: function () {
       KC.Audio.init();
@@ -820,7 +841,7 @@
           if (this.tier >= 3) KC.Audio.say(KC.CHESTS[this.tier].id === 'legend' ? 'Legendary!' : KC.CHESTS[this.tier].id === 'mythic' ? 'Mythic!' : 'Epic!');
           var sq = Save.data.chestQueue; if (sq && sq.length) { sq[0] = this.tier; Save.write(); }
         } else { KC.Audio.play('hitL'); fx.hit(0, 0.5, '#ffffff', 6); }
-        if (this.taps >= KC.TAP_UPGRADE.length) this.phase = 'ready';
+        if (this.taps >= KC.TAP_UPGRADE.length) { this.phase = 'ready'; this.autoOpen = 0.7; }
         this.ui();
       } else if (this.phase === 'ready') {
         this.phase = 'done'; this.open = 0.001;
@@ -857,6 +878,7 @@
     exit: function () { if (chestObj) { scene.remove(chestObj.g); chestObj = null; } stage.setMode('day'); },
     update: function (dt) {
       this.t += dt;
+      if (this.phase === 'ready' && this.autoOpen > 0) { this.autoOpen -= dt; if (this.autoOpen <= 0) this.tap(); }
       if (chestObj) {
         var c = chestObj;
         this.shake = Math.max(0, this.shake - dt);
@@ -921,6 +943,14 @@
       }
       html += '<p style="font-style:italic;opacity:.85">“' + esc(ch.quote) + '”</p>';
       $('colInfo').innerHTML = html;
+      var lk = $('colLock');
+      if (!owned) {
+        var need = KC.shardsNeeded(ch), have = Save.shards(ch.id), full = KC.priceOf(ch);
+        lk.innerHTML = '<div class="lk-title">🔒 LOCKED · ' + esc(ch.short) + '</div>' +
+          '<div class="lk-row"><span class="shard"></span> Shards <b>' + have + ' / ' + need + '</b></div><div class="lk-bar shards"><div style="width:' + Math.round(have / need * 100) + '%"></div></div>' +
+          '<div class="lk-row"><span class="coin"></span> Coins <b>' + Math.min(d.coins, price) + ' / ' + price + '</b>' + (price < full ? ' <span class="lk-disc">(was ' + full + ')</span>' : '') + '</div><div class="lk-bar coins"><div style="width:' + Math.min(100, Math.round(d.coins / Math.max(1, price) * 100)) + '%"></div></div>';
+        lk.classList.add('show');
+      } else lk.classList.remove('show');
       $('colInfo').querySelectorAll('.buybox').forEach(function (b) { b.onclick = function () { self.buy(b.dataset.act || null); }; });
       if (rebuild) {
         var pv = setPreview(0, ch, this.gold ? KC.ALT_SKIN : null, false, 0.15, 0.3);
@@ -1014,7 +1044,9 @@
     var oneP = G.ai[1 - i] != null;
     return Input.player(i, oneP && i === 0);
   };
-  G.skipPressed = function () { return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyU', 'KeyO', 'Pad0_a', 'Pad1_a']); };
+  G.skipClick = false;
+  window.addEventListener('mousedown', function (e) { if (G.screen === 'fight' && !e.target.closest('button')) G.skipClick = true; });
+  G.skipPressed = function () { if (G.skipClick) { G.skipClick = false; return true; } return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyU', 'KeyO', 'Pad0_a', 'Pad1_a']); };
   screens.fight = {
     update: function () {
       if (Input.menu('pause') && G.match && G.match.phase !== 'matchEnd') pauseMenu();
@@ -1026,7 +1058,7 @@
     showList({ title: 'RECESS', sub: 'The session is paused.', items: [
       { label: 'RESUME', action: resume },
       { label: 'RESTART MATCH', action: function () { startMatch(G.matchCfg); } },
-      { label: G.matchCfg.mode === 'campaign' ? 'BACK TO CAMPAIGN' : 'CHARACTER SELECT', action: function () { endMatchTo(G.matchCfg.mode === 'campaign' ? 'ladder' : 'select'); } },
+      { label: G.matchCfg.mode === 'campaign' ? 'BACK TO ARCADE LADDER' : G.matchCfg.mode === 'tour' ? 'LEVEL MAP' : 'CHARACTER SELECT', action: function () { endMatchTo(G.matchCfg.mode === 'campaign' ? 'ladder' : 'select'); } },
       { label: 'MAIN MENU', action: function () { endMatchTo('menu'); } }
     ], back: resume });
     function resume() {
@@ -1065,8 +1097,8 @@
     if (r.superKO && humanWon) add('Super finish', C.superKO);
     if (humanWon && cfg.mode !== 'versus') add('Opposition: ' + lvl.toUpperCase(), C.difficulty[lvl] || 0);
     var finalStop = cfg.mode === 'campaign' && G.campaign && G.campaign.idx === G.campaign.stops.length - 1;
-    if (cfg.mode === 'campaign' && humanWon) add('Campaign stop cleared', C.campaignStop);
-    if (finalStop && humanWon) add('CAMPAIGN COMPLETE', C.campaignClear);
+    if (cfg.mode === 'campaign' && humanWon) add('Arcade stop cleared', C.campaignStop);
+    if (finalStop && humanWon) { add('ARCADE COMPLETE', C.campaignClear); d.chestQueue = d.chestQueue || []; d.chestQueue.push(2); }
     var firstClear = false;
     if (cfg.mode === 'tour' && humanWon) {
       var LV = KC.level(cfg.levelNo); firstClear = cfg.levelNo > (d.tour || 0);
@@ -1108,7 +1140,7 @@
       var w = m.winner, title, sub;
       if (w < 0) { title = 'HUNG PARLIAMENT'; sub = 'A draw. New elections are called.'; }
       else if (cfg.mode === 'versus') { title = (w === 0 ? 'PLAYER 1' : 'PLAYER 2') + ' WINS'; sub = m.f[w].ch.name + ' forms the government.'; }
-      else if (info.humanWon) { title = info.finalStop ? 'CAMPAIGN WON!' : 'VICTORY'; sub = m.f[w].ch.name + ' carries the vote.'; }
+      else if (info.humanWon) { title = info.finalStop ? 'ARCADE WON!' : 'VICTORY'; sub = m.f[w].ch.name + ' carries the vote.'; }
       else { title = 'DEFEAT'; sub = m.f[w].ch.name + ' wins this session.'; }
       $('resTitle').textContent = title; $('resSub').textContent = sub;
       var earn = '<h3>COINS EARNED</h3>' + info.lines.map(function (l) { return '<div class="row"><span>' + esc(l[0]) + '</span><b>+' + G.coin(l[1]) + '</b></div>'; }).join('');
@@ -1135,7 +1167,7 @@
         if (info.humanWon && !info.finalStop) opts.push({ label: 'NEXT STOP', fn: function () { G.campaign.idx++; endMatchTo('ladder'); } });
         else if (!info.humanWon) opts.push({ label: 'RETRY STOP', fn: function () { endMatchTo('ladder'); } });
         opts.push({ label: info.finalStop && info.humanWon ? 'MAIN MENU' : 'WITHDRAW', fn: function () { G.campaign = null; endMatchTo('menu'); } });
-        if (info.finalStop && info.humanWon) opts.push({ label: 'SHOP', fn: function () { G.campaign = null; endMatchTo('shop'); } });
+        if (info.finalStop && info.humanWon) { opts.unshift({ label: 'OPEN CHEST', fn: function () { G.campaign = null; endMatchTo('chest'); } }); opts.push({ label: 'SHOP', fn: function () { G.campaign = null; endMatchTo('shop'); } }); }
       } else if (cfg.mode === 'tour') {
         var tp = G.tourPick;
         if ((Save.data.chestQueue || []).length) opts.push({ label: 'OPEN CHEST (' + Save.data.chestQueue.length + ')', fn: function () { endMatchTo('chest'); } });
@@ -1153,14 +1185,16 @@
       R.opts = opts; R.sel = 0;
       this.renderOpts();
       G.inputLock = 0.6;
+      this.autoChest = info.chest || (info.finalStop && info.humanWon && cfg.mode === 'campaign') ? 2.2 : 0;
     },
     renderOpts: function () {
       var R = resCfg;
       $('resMenu').innerHTML = R.opts.map(function (o, i) { return '<li class="' + (i === R.sel ? 'sel' : '') + '" data-i="' + i + '">' + o.label + '</li>'; }).join('');
       $('resMenu').querySelectorAll('li').forEach(function (li) { li.onmouseenter = function () { R.sel = +li.dataset.i; highlight($('resMenu'), R.sel); }; li.onclick = function () { R.opts[+li.dataset.i].fn(); }; });
     },
-    update: function () {
+    update: function (dt) {
       var R = resCfg;
+      if (this.autoChest > 0) { this.autoChest -= dt; if (this.autoChest <= 0 && (Save.data.chestQueue || []).length) { endMatchTo('chest'); return; } }
       if (Input.menu('left') || Input.menu('up')) { R.sel = (R.sel - 1 + R.opts.length) % R.opts.length; KC.Audio.play('move'); this.renderOpts(); }
       if (Input.menu('right') || Input.menu('down')) { R.sel = (R.sel + 1) % R.opts.length; KC.Audio.play('move'); this.renderOpts(); }
       if (Input.menu('ok')) { KC.Audio.play('select'); R.opts[R.sel].fn(); }

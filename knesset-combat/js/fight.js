@@ -40,7 +40,7 @@
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
     this.maxHealth = 1000 + this.rank * U.health;
-    this.projMax = 2 + this.rank;
+    this.projMax = Math.min(6, 3 + this.rank);   // 3 on screen by default, +1 per rank, max 6
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -373,7 +373,7 @@
   MP.hasProjectile = function (f) {
     var n = 0;
     for (var i = 0; i < this.hazards.length; i++) if (this.hazards[i].owner === f && this.hazards[i].kind === 'proj' && this.hazards[i].alive) n++;
-    return n >= f.projMax;   // 2 projectiles on screen by default, +1 per upgrade rank
+    return n >= f.projMax;
   };
 
   /* ---- hit resolution ---- */

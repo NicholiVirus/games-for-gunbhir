@@ -352,3 +352,46 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .shard { display: inline-block; width: 0.8em; height: 1em; background: linear-gradient(135deg, #e6ccff, #b46cff 60%, #6a2fc0); clip-path: polygon(50% 0, 100% 40%, 70% 100%, 30% 100%, 0 40%); }
 .chestdrop { display: flex; gap: 10px; align-items: center; margin-top: 10px; padding: 8px 10px; border: 2px solid; border-radius: 10px; background: rgba(255,255,255,0.05); font-size: 13px; animation: pop 0.5s cubic-bezier(.2,1.6,.4,1) 0.3s backwards; }
 .cd-box { width: 34px; height: 28px; border-radius: 5px; border: 3px solid #1b1f2e; flex: none; }
+
+/* ---------- mouse + shop readability ---------- */
+.backbtn { position: absolute; top: 12px; left: 12px; z-index: 20; font-family: var(--display); font-size: 15px; padding: 8px 14px; border-radius: 9px; border: 2px solid var(--line); background: var(--panel2); color: #fff; cursor: pointer; }
+.backbtn:hover { background: var(--blue); border-color: var(--gold); }
+#collection .backbtn { left: auto; right: 12px; top: auto; bottom: 12px; }
+#select .backbtn { top: 14px; }
+.timer-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pausebtn { pointer-events: auto; font-size: 13px; font-weight: 900; padding: 3px 12px; border-radius: 8px; border: 2px solid #fff; background: rgba(9,15,32,0.8); color: #fff; cursor: pointer; }
+.pausebtn:hover { background: var(--blue); }
+.ladder-panel { top: auto; bottom: 16px; transform: translateX(-50%); }
+.ladder-btns { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+.bigbtn { font-family: var(--display); font-size: 20px; padding: 12px 26px; border-radius: 12px; border: 0; cursor: pointer; color: #1b1200; background: linear-gradient(90deg, #f2c14e, #fff3b0); }
+.bigbtn.ghost { background: var(--panel2); color: #fff; border: 2px solid var(--line); }
+.bigbtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.cell { cursor: pointer; }
+.sel-panel .lockinfo.can:hover { filter: brightness(1.2); }
+/* bigger shop text */
+.col-left { width: min(470px, calc(100% - 28px)); }
+.col-left h2 { font-size: clamp(26px, 3.4vw, 38px); }
+#colSub { font-size: 17px; }
+.col-grid { grid-template-columns: repeat(6, minmax(0, 66px)); gap: 7px; }
+.col-info { width: min(430px, calc(100% - 28px)); }
+.col-info .name { font-size: 32px; }
+.col-info .ttl { font-size: 16px; }
+.col-info p { font-size: 16.5px; line-height: 1.5; }
+.col-info .abil { font-size: 15.5px; }
+.col-info .abil .ak { font-size: 12px; min-width: 38px; }
+.col-info .rarline, .col-info .shardbar { font-size: 14.5px; }
+.col-info .rankbox, .col-info .req { font-size: 15px; }
+.col-info .buybox { font-size: 16px; }
+.col-info .buybox .bb-price { font-size: 28px; }
+#collection .rar { font-size: 12px; padding: 3px 9px; }
+#collection .hint { font-size: 15px; }
+.col-lock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); width: min(360px, calc(100% - 32px)); background: var(--panel); border: 2px solid #ff8a8e; border-radius: 14px; padding: 12px 16px; display: none; z-index: 6; }
+.col-lock.show { display: block; animation: pop 0.35s ease-out; }
+.lk-title { font-family: var(--display); font-size: 20px; color: #ffc9cb; margin-bottom: 6px; }
+.lk-row { font-size: 16px; margin-top: 6px; display: flex; align-items: center; gap: 6px; }
+.lk-disc { color: #7dff9b; font-size: 13px; }
+.lk-bar { height: 14px; border-radius: 8px; background: #1a2546; overflow: hidden; margin-top: 4px; }
+.lk-bar > div { height: 100%; transition: width 0.5s; }
+.lk-bar.shards > div { background: linear-gradient(90deg, #6a2fc0, #e6ccff); }
+.lk-bar.coins > div { background: linear-gradient(90deg, #b8860b, #fff3b0); }
+@media (max-width: 1100px) { .col-lock { left: auto; right: 14px; transform: none; bottom: 70px; } }

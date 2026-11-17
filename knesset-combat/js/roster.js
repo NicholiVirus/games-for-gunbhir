@@ -348,7 +348,7 @@ KC.UPGRADE = {
   mult: { common: 1, rare: 1.5, epic: 2, legendary: 2.5 },
   cost: function (ch, toRank) { return Math.round(80 * toRank * KC.UPGRADE.mult[ch.rarity]); },
   describe: function (rank) {
-    return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP · ' + (2 + rank) + ' projectiles' : 'No upgrades yet · 2 projectiles';
+    return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP · ' + Math.min(6, 3 + rank) + ' projectiles' : 'No upgrades yet · 3 projectiles';
   }
 };
 
@@ -387,4 +387,4 @@ KC.CHESTS = [
 ];
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
 KC.chestBase = function (n) { return Math.min(4, Math.floor((n - 1) / 50) + (n % 10 === 0 ? 1 : 0)); };
-KC.TAP_UPGRADE = [0.45, 0.3, 0.18];   // chance each of the 3 taps upgrades the chest
+KC.TAP_UPGRADE = [0.3, 0.3, 0.3];   // each of the 3 taps has a 30% chance to upgrade the chest

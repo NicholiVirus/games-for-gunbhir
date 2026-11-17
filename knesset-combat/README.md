@@ -23,7 +23,11 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
 - **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super.
-- `Esc` pauses, `M` toggles music.
+- `Esc` or the ❚❚ button pauses, and `M` toggles music.
+- **Mouse:** everything is clickable.
+  - Select screen: left-click picks for P1, right-click for P2, and clicking a highlighted fighter again picks or recruits them.
+  - Every screen has a ◂ BACK button.
+  - Clicking skips intros.
 - In 1-player modes, the solo player can use either side of the keyboard.
 
 ## Modes
@@ -38,7 +42,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 2 tiers better.
 - **Tiers:** Wooden → Silver → Golden → Epic → Mythic → Legendary. The base tier rises every 50 levels.
-- **Tap to upgrade:** tap a chest 3 times before opening it. The taps have a 45%, 30% and 18% chance to upgrade it one tier.
+- **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
+- **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
 - **Recruiting with shards:** collect 5 (Common), 10 (Rare), 15 (Epic) or 25 (Legendary) shards to recruit a leader for free.
   - Each shard also lowers that leader's coin price.
@@ -46,8 +51,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.
   - Shards of leaders you already own become coins.
-- **Projectiles:** each fighter can have 2 on screen at once, +1 per upgrade rank.
-- **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins.
+- **Projectiles:** each fighter can have 3 on screen at once, +1 per upgrade rank, up to 6.
+- **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins plus a Golden chest.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
 - **Shop:** recruit fighters, upgrade them, and buy gold skins with coins.
 
