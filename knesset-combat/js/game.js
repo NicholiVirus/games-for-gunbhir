@@ -72,17 +72,17 @@
   var keys = {}, just = {};
   var MAP = [
     { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyT', 'Pad0_y'] },
-    { u: ['ArrowUp', 'Pad1_up'], d: ['ArrowDown', 'Pad1_down'], l: ['ArrowLeft', 'Pad1_left'], r: ['ArrowRight', 'Pad1_right'], p: ['KeyK', 'Numpad1', 'Pad1_a'], k: ['KeyL', 'Numpad2', 'Pad1_b'], s: ['KeyO', 'Numpad4', 'Pad1_x'], x: ['KeyP', 'Numpad5', 'Pad1_y'] }
+    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['KeyO', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['Semicolon', 'Numpad5', 'Pad1_y'] }
   ];
   var MENU = {
-    up: ['KeyW', 'ArrowUp', 'Pad0_up', 'Pad1_up'], down: ['KeyS', 'ArrowDown', 'Pad0_down', 'Pad1_down'],
-    left: ['KeyA', 'ArrowLeft', 'Pad0_left', 'Pad1_left'], right: ['KeyD', 'ArrowRight', 'Pad0_right', 'Pad1_right'],
-    ok: ['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyK', 'Numpad1', 'Pad0_a', 'Pad1_a', 'Pad0_start', 'Pad1_start'],
-    back: ['Escape', 'Backspace', 'KeyG', 'KeyL', 'Pad0_b', 'Pad1_b'],
+    up: ['KeyW', 'KeyI', 'ArrowUp', 'Pad0_up', 'Pad1_up'], down: ['KeyS', 'KeyK', 'ArrowDown', 'Pad0_down', 'Pad1_down'],
+    left: ['KeyA', 'KeyJ', 'ArrowLeft', 'Pad0_left', 'Pad1_left'], right: ['KeyD', 'KeyL', 'ArrowRight', 'Pad0_right', 'Pad1_right'],
+    ok: ['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Numpad1', 'Pad0_a', 'Pad1_a', 'Pad0_start', 'Pad1_start'],
+    back: ['Escape', 'Backspace', 'KeyG', 'KeyO', 'Pad0_b', 'Pad1_b'],
     pause: ['Escape', 'Backspace', 'Pad0_start', 'Pad1_start']
   };
   var PREVENT = {};
-  ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Backspace', 'Tab'].forEach(function (c) { PREVENT[c] = 1; });
+  ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Backspace', 'Tab', 'Semicolon'].forEach(function (c) { PREVENT[c] = 1; });
   var cheatBuf = '';
   window.addEventListener('keydown', function (e) {
     if (PREVENT[e.code]) e.preventDefault();
@@ -214,7 +214,7 @@
         el.querySelector('.nm').textContent = (G.matchCfg && G.ai && G.ai[i] ? 'CPU · ' : (i === 0 ? 'P1 · ' : 'P2 · ')) + f.ch.short;
         trails[i] = 1; lastHp[i] = 1; trailDelay[i] = 0; comboT[i] = 0; calloutT[i] = 0;
         hudEls.combo[i].classList.remove('on'); hudEls.callout[i].classList.remove('on');
-        hudEls.meter[i].querySelector('.mkey').textContent = G.ai && G.ai[i] ? 'CPU' : (i === 0 ? 'T' : 'P');
+        hudEls.meter[i].querySelector('.mkey').textContent = G.ai && G.ai[i] ? 'CPU' : (i === 0 ? 'T' : ';');
         hudEls.meter[i].classList.toggle('none', !f.hasSuper);
         hudEls.meter[i].querySelector('.mlabel').textContent = f.hasSuper ? 'SUPER' : 'NO SUPER · ' + KC.RARITY[f.ch.rarity].name.toUpperCase();
       }
@@ -351,7 +351,7 @@
   /* ---------- main menu ---------- */
   var MENU_ITEMS = [
     { id: 'campaign', label: 'ELECTION CAMPAIGN', desc: 'Arcade ladder vs CPU: beat five rivals, then face the final boss. The biggest coin payout in the game.' },
-    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on the arrows + K L O P. Both players earn coins for the shared wallet.' },
+    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on IJKL + U O P ;. Both players earn coins for the shared wallet.' },
     { id: 'cpu', label: 'VS CPU', desc: 'Pick a difficulty and fight the machine. Harder CPUs pay more coins.' },
     { id: 'shop', label: 'SHOP · RECRUIT FIGHTERS', desc: 'Spend coins to unlock fighters and gold skins. Higher rarity = more abilities.' },
     { id: 'howto', label: 'HOW TO PLAY', desc: 'Controls, rarity, abilities, blocking and how coins work.' },
@@ -525,8 +525,8 @@
       var st = Save.data.settings;
       $('selStage').innerHTML = 'Chamber: <b>' + { random: 'Random', day: 'Day Session', night: 'Night Session' }[st.stage] + '</b> · First to <b>' + st.rounds + '</b> round' + (st.rounds > 1 ? 's' : '') + ' · Timer <b>' + (st.timer >= 1000 ? '∞' : st.timer) + '</b> <span style="opacity:.6">(change in Settings)</span>';
       $('selHint').innerHTML = two
-        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick/buy · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>Arrows</kbd> move · <kbd>K</kbd> pick/buy · <kbd>L</kbd> undo · <kbd>O</kbd> skin'
-        : '<kbd>WASD</kbd>/<kbd>Arrows</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick or buy · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
+        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick/buy · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>IJKL</kbd> move · <kbd>U</kbd> pick/buy · <kbd>O</kbd> undo · <kbd>P</kbd> skin'
+        : '<kbd>WASD</kbd>/<kbd>IJKL</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick or buy · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
       this.render(true);
     },
     refresh: function () { this.render(true); },
@@ -542,7 +542,7 @@
       var p1c = KC.ROSTER[sel.p[0].cur];
       $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'T' }, confirm: sel.p[0].confirm === sel.p[0].cur });
       if (sel.two) {
-        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'O', pickKey: 'K', keys: { s: 'O', x: 'P' }, confirm: sel.p[1].confirm === sel.p[1].cur });
+        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: ';' }, confirm: sel.p[1].confirm === sel.p[1].cur });
       } else {
         $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'CAMPAIGN' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
           (sel.mode === 'campaign' ? 'Win five races in a row, then face the final boss. Losing a stop lets you retry it. Clearing it pays ' + G.coin(KC.COINS.campaignClear) + ' bonus.' : 'A random rival is drawn from the whole roster — even fighters you have not recruited yet. Beat them to earn coins.') + '</div>';
@@ -737,9 +737,9 @@
       if (Input.menu('up')) c = (c - cols + n) % n;
       if (Input.menu('down')) c = (c + cols) % n;
       if (c !== this.cur) { this.cur = c; this.gold = false; this.confirm = null; KC.Audio.play('move'); this.render(true); }
-      if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyK', 'Pad0_a', 'Pad1_a'])) this.buy();
-      if (Input.hit(['KeyR', 'KeyO', 'Pad0_x', 'Pad1_x'])) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
-      if (Input.hit(['Escape', 'Backspace', 'KeyG', 'KeyL', 'Pad0_b', 'Pad1_b'])) { KC.Audio.play('back'); go('menu'); }
+      if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Pad0_a', 'Pad1_a'])) this.buy();
+      if (Input.hit(['KeyR', 'KeyP', 'Pad0_x', 'Pad1_x'])) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
+      if (Input.hit(['Escape', 'Backspace', 'KeyG', 'KeyO', 'Pad0_b', 'Pad1_b'])) { KC.Audio.play('back'); go('menu'); }
     }
   };
 
@@ -769,7 +769,7 @@
     var oneP = G.ai[1 - i] != null;
     return Input.player(i, oneP && i === 0);
   };
-  G.skipPressed = function () { return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyK', 'KeyL', 'Pad0_a', 'Pad1_a']); };
+  G.skipPressed = function () { return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyU', 'KeyO', 'Pad0_a', 'Pad1_a']); };
   screens.fight = {
     update: function () {
       if (Input.menu('pause') && G.match && G.match.phase !== 'matchEnd') pauseMenu();

@@ -14,12 +14,12 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 | Action | Player 1 | Player 2 |
 |---|---|---|
-| Move / Jump / Crouch | `A` `D` / `W` / `S` | `←` `→` / `↑` / `↓` |
-| Punch | `F` | `K` or `Num1` |
-| Kick | `G` | `L` or `Num2` |
-| Ability 1 · Special | `R` | `O` or `Num4` |
-| Ability 2 · Down-Special (Epic and Legendary) | `S` + `R` | `↓` + `O` |
-| Super (Rare and up, meter full) | `T` | `P` or `Num5` |
+| Move / Jump / Crouch | `A` `D` / `W` / `S` | `J` `L` / `I` / `K` (arrows also work) |
+| Punch | `F` | `U` or `Num1` |
+| Kick | `G` | `O` or `Num2` |
+| Ability 1 · Special | `R` | `P` or `Num4` |
+| Ability 2 · Down-Special (Epic and Legendary) | `S` + `R` | `K` + `P` |
+| Super (Rare and up, meter full) | `T` | `;` or `Num5` |
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
 - **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super.
