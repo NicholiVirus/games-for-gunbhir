@@ -315,6 +315,7 @@
       case 'beam': return s.t < 8 ? P.throwWind() : P.throw();
       case 'rain': return P.power(t);
       case 'drop': case 'vehicle': return P.victory('point', t);
+      case 'reflect': return P.counterStance(t);
     }
     return P.idle(t);
   };
@@ -634,6 +635,20 @@
         if (s.t >= 50) finish(10);
         break;
       }
+      case 'reflect': {
+        // Mirror shield: for 4 seconds every enemy projectile that reaches it flies back faster and harder
+        f.vx = 0;
+        if (s.t === 1) {
+          var mg = new T.Group();
+          var shell = new T.Mesh(new T.SphereGeometry(1.15, 20, 14), M.glow(col, 0.22)); shell.scale.set(0.75, 1.15, 0.75); shell.position.y = 1.0; mg.add(shell);
+          for (var ri = 0; ri < 3; ri++) { var ring = new T.Mesh(new T.TorusGeometry(0.95 - ri * 0.12, 0.025, 6, 30), M.glow('#ffffff', 0.6)); ring.position.y = 0.5 + ri * 0.5; ring.rotation.x = Math.PI / 2; mg.add(ring); }
+          mg.position.set(f.x, 0, 0);
+          this.addHazard({ kind: 'mirror', owner: f, x: f.x, y: 0, y0: 0, y1: 2.2, hw: 1.0, mesh: mg, cd: 99999, life: 240, reflected: 0 });
+          KC.Audio.play('beam'); this.fx.ring(f.x, 1.1, col, 2, true);
+        }
+        if (s.t >= 16) finish(6);
+        break;
+      }
       case 'vehicle': {
         f.vx = 0;
         if (s.t === 1) {
@@ -654,8 +669,30 @@
 
   MP.updateHazards = function () {
     var self = this;
+    // mirror shields (reflect super): bounce enemy projectiles back at their thrower
+    this.hazards.forEach(function (mr) {
+      if (!mr.alive || mr.kind !== 'mirror') return;
+      mr.t++; mr.x = mr.owner.x;
+      if (mr.mesh) { mr.mesh.position.x = mr.x; mr.mesh.rotation.y += 0.08; var fade = mr.t > mr.life - 30 ? (mr.life - mr.t) / 30 : 1; mr.mesh.scale.setScalar(0.9 + Math.sin(mr.t * 0.3) * 0.04); mr.mesh.visible = fade > 0.05 && (fade > 0.4 || mr.t % 4 < 2); }
+      if (mr.t > mr.life || mr.owner.state === 'ko') { mr.alive = false; return; }
+      self.hazards.forEach(function (h) {
+        if (!h.alive || h.owner === mr.owner || (h.kind !== 'proj' && h.kind !== 'wave' && h.kind !== 'fall')) return;
+        if (Math.abs(h.x - mr.x) > mr.hw + h.hw) return;
+        if (h.kind === 'fall') { h.alive = false; self.fx.hit(h.x, h.y, '#9ad1ff', 10); KC.Audio.play('block'); return; }
+        var thrower = h.owner;
+        h.owner = mr.owner; h.vx = -h.vx * 1.35; h.t = 0; h.cd = 0; h.hitCount = 0;
+        h.hit = Object.assign({}, h.hit, { dmg: Math.round(h.hit.dmg * 1.5), superHit: true });
+        if (h.lastHit) h.lastHit = Object.assign({}, h.lastHit, { dmg: Math.round(h.lastHit.dmg * 1.5), superHit: true });
+        h.x = mr.x + (h.vx > 0 ? 1 : -1) * (mr.hw + h.hw + 0.05);
+        if (h.mesh) { h.mesh.rotation.y += Math.PI; h.mesh.position.x = h.x; }
+        mr.reflected++;
+        self.fx.ring(mr.x + (thrower.x > mr.x ? 0.9 : -0.9), h.y + 0.3, '#9ad1ff', 1.1, true); self.fx.hit(h.x, h.y + 0.3, '#ffffff', 12);
+        KC.Audio.play('block'); KC.Audio.play('proj');
+        self.callout(mr.owner, 'REFLECTED!', true);
+      });
+    });
     this.hazards.forEach(function (h) {
-      if (!h.alive) return;
+      if (!h.alive || h.kind === 'mirror') return;
       h.t++; if (h.cd > 0) h.cd--;
       var o = h.owner.opp;
       switch (h.kind) {
@@ -729,7 +766,7 @@
     for (var i = 0; i < this.hazards.length; i++) for (var j = i + 1; j < this.hazards.length; j++) {
       var a = this.hazards[i], b = this.hazards[j];
       if (!a.alive || !b.alive || a.owner === b.owner) continue;
-      if (Math.abs(a.x - b.x) < a.hw + b.hw && (a.kind === 'proj' || b.kind === 'proj') && a.kind !== 'beam' && b.kind !== 'beam' && a.kind !== 'drop' && b.kind !== 'drop' && a.kind !== 'fall' && b.kind !== 'fall') {
+      if (Math.abs(a.x - b.x) < a.hw + b.hw && (a.kind === 'proj' || b.kind === 'proj') && a.kind !== 'beam' && b.kind !== 'beam' && a.kind !== 'drop' && b.kind !== 'drop' && a.kind !== 'fall' && b.kind !== 'fall' && a.kind !== 'mirror' && b.kind !== 'mirror') {
         if (Math.abs(a.y - b.y) > 1.5 && a.kind === 'proj' && b.kind === 'proj') continue;
         if (a.kind === 'proj') a.alive = false;
         if (b.kind === 'proj') b.alive = false;

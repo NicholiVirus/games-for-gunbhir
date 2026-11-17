@@ -42,7 +42,9 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
 - **Recruiting with shards:** collect 5 (Common), 10 (Rare), 15 (Epic) or 25 (Legendary) shards to recruit a leader for free.
   - Each shard also lowers that leader's coin price.
-  - You can buy single shards in the Shop with `B`.
+  - You can buy single shards in the Shop with `B`. They cost a premium: about 6× more per shard than recruiting outright.
+- **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
+- **Reset save:** Settings → Reset Save, then confirm.
   - Shards of leaders you already own become coins.
 - **Projectiles:** each fighter can have 2 on screen at once, +1 per upgrade rank.
 - **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins.

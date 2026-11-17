@@ -72,7 +72,7 @@
     /* ---- super ---- */
     if (f.meter >= 100 && f.hasSuper && R() < 0.02 * L.superUse) {
       var t = f.ch.super.type;
-      var good = (t === 'beam' || t === 'wave' || t === 'vehicle' || t === 'drop' || t === 'rain') ? dist < 7 : dist < 3.2;
+      var good = (t === 'beam' || t === 'wave' || t === 'vehicle' || t === 'drop' || t === 'rain') ? dist < 7 : t === 'reflect' ? m.hazards.some(function (h) { return h.owner === o && h.kind === 'proj'; }) : dist < 3.2;
       if (good && o.state !== 'knockdown' && o.state !== 'getup') return this.tap(inp, 'x');
     }
 

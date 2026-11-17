@@ -263,12 +263,13 @@ KC.ROSTER = [
     quote: 'I only needed one eye for that.', victory: 'salute'
   },
   {
-    id: 'eban', name: 'Abba Eban', short: 'EBAN', title: 'The Silver Tongue', rarity: 'common',
+    id: 'eban', name: 'Abba Eban', short: 'EBAN', title: 'The Silver Tongue', rarity: 'rare',
     group: 'icon', years: 'Foreign Minister',
     bio: 'Foreign Minister and legendary orator, famous for speeches delivered in flawless English.',
     look: { height: 0.97, girth: 1.08, skin: '#ebbd9a', hair: 'short', hairColor: '#8a8a86', glasses: 'thick', glassesColor: '#1d1d1d', outfit: 'suit', top: '#353a46', pants: '#2f343f', shirt: '#f2f2f2', tie: '#2a4a7a', shoes: '#1d1d1d' },
     stats: { speed: 1.0, power: 1.0, defense: 1.02, jump: 1.0, projSpeed: 1.15 },
     special: { type: 'projectile', name: 'Silver Tongue', proj: 'soundring' },
+    super: { type: 'reflect', name: 'Diplomatic Immunity', color: '#9ad1ff' },
     quote: 'Eloquently defeated.', victory: 'bow'
   },
   {
@@ -372,7 +373,7 @@ KC.level = function (n) {
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
 KC.SHARDS = { common: 5, rare: 10, epic: 15, legendary: 25 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
-KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)); };
+KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 5; };   // shards are a premium shortcut (5x)
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 
 /* ---------- Ballot-box chests ---------- */

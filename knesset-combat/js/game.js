@@ -470,7 +470,7 @@
   };
 
   function showSettings(sel) {
-    var s = Save.data.settings, resetCount = 0;
+    var s = Save.data.settings;
     function cyc(arr, v, dir) { var i = arr.indexOf(v); return arr[(i + dir + arr.length) % arr.length]; }
     function apply() { KC.Audio.musicOn = s.music; KC.Audio.sfxOn = s.sfx; KC.Audio.voiceOn = s.voice; Save.write(); }
     showList({ title: 'SETTINGS', sub: 'Use ←/→ to change a value.', sel: sel || 0, items: [
@@ -480,10 +480,11 @@
       { label: 'MUSIC', value: function () { return s.music ? 'ON' : 'OFF'; }, change: function () { s.music = !s.music; apply(); } },
       { label: 'SOUND EFFECTS', value: function () { return s.sfx ? 'ON' : 'OFF'; }, change: function () { s.sfx = !s.sfx; apply(); } },
       { label: 'ANNOUNCER VOICE', value: function () { return s.voice ? 'ON' : 'OFF'; }, change: function () { s.voice = !s.voice; apply(); } },
-      { label: 'RESET PROGRESS', desc: 'Press ENTER three times to wipe coins and recruited fighters.', value: function () { return resetCount ? 'PRESS ' + (3 - resetCount) + ' MORE' : ''; }, action: function () {
-        resetCount++;
-        if (resetCount >= 3) { Save.reset(); resetCount = 0; G.toast('Progress reset. Back to 1948.'); }
-        screens.list.render();
+      { label: 'RESET SAVE', desc: 'Delete all coins, fighters, upgrades, shards, chests and campaign progress.', action: function () {
+        showList({ title: 'RESET SAVE?', sub: 'This permanently deletes your coins, recruited fighters, upgrade ranks, shards, unopened chests and campaign progress. Your settings are kept.', sel: 0, items: [
+          { label: 'NO, KEEP MY SAVE', action: function () { showSettings(6); } },
+          { label: 'YES, DELETE EVERYTHING', action: function () { Save.reset(); try { localStorage.removeItem(OLD_KEY); } catch (e) { /* ignore */ } KC.Audio.play('gavel'); G.toast('Save reset. Back to 1948 — Ben-Gurion awaits.'); showSettings(6); } }
+        ], back: function () { showSettings(6); } });
       } },
       { label: 'BACK', action: function () { stage.setMode('day'); go('menu'); } }
     ], back: function () { stage.setMode('day'); go('menu'); } });
