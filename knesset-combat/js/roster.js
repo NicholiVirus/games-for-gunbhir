@@ -65,7 +65,7 @@ KC.ROSTER = [
     quote: 'Interim? I am here to stay.', victory: 'salute'
   },
   {
-    id: 'meir', name: 'Golda Meir', short: 'MEIR', title: 'The Iron Grandmother', rarity: 'legendary',
+    id: 'meir', name: 'Golda Meir', short: 'MEIR', title: 'The Iron Grandmother', rarity: 'mythic',
     group: 'pm', years: '1969–74',
     bio: 'Fourth Prime Minister and one of the world\'s first female heads of government. Held her famous "kitchen cabinet" meetings at home.',
     look: { height: 0.94, girth: 1.12, skin: '#e4b58f', hair: 'bun', hairColor: '#a9a7a2', outfit: 'dress', top: '#2d3142', pants: '#2d3142', shirt: '#2d3142', tie: null, shoes: '#1d1d1d', prop: 'handbag', propColor: '#3b2a20' },
@@ -120,7 +120,7 @@ KC.ROSTER = [
     quote: 'The future belongs to the bold — and the quick.', victory: 'wave'
   },
   {
-    id: 'netanyahu', name: 'Benjamin Netanyahu', short: 'NETANYAHU', title: 'The Survivor', rarity: 'mythic',
+    id: 'netanyahu', name: 'Benjamin Netanyahu', short: 'NETANYAHU', title: 'The Survivor', rarity: 'legendary',
     group: 'pm', years: '1996–99, 2009–21, 2022–',
     bio: 'Israel\'s longest-serving Prime Minister. Drew a red line on a cartoon bomb at the UN in 2012.',
     look: { height: 1.0, girth: 1.04, skin: '#e9b48e', hair: 'combed', hairColor: '#d9d9d6', outfit: 'suit', top: '#1e2a44', pants: '#1b263d', shirt: '#f6f6f6', tie: '#2b6cd0', shoes: '#111111' },
@@ -143,7 +143,7 @@ KC.ROSTER = [
     quote: 'That was allegro. You were largo.', victory: 'bow'
   },
   {
-    id: 'sharon', name: 'Ariel Sharon', short: 'SHARON', title: 'The Bulldozer', rarity: 'legendary',
+    id: 'sharon', name: 'Ariel Sharon', short: 'SHARON', title: 'The Bulldozer', rarity: 'mythic',
     group: 'pm', years: '2001–06',
     bio: 'Eleventh Prime Minister. A former general whose nickname said it all: "the Bulldozer".',
     look: { height: 0.97, girth: 1.5, skin: '#eab593', hair: 'short', hairColor: '#f2f2ee', outfit: 'suit', top: '#2e3440', pants: '#2a2f3a', shirt: '#f4f4f4', tie: '#40527a', shoes: '#1d1d1d' },
@@ -252,7 +252,7 @@ KC.ROSTER = [
     quote: 'The experiment was a success. You were the control group.', victory: 'bow'
   },
   {
-    id: 'dayan', name: 'Moshe Dayan', short: 'DAYAN', title: 'The Eyepatch', rarity: 'legendary',
+    id: 'dayan', name: 'Moshe Dayan', short: 'DAYAN', title: 'The Eyepatch', rarity: 'mythic',
     group: 'icon', years: 'Minister & MK',
     bio: 'Former IDF Chief of Staff, later Defense and Foreign Minister — instantly recognisable by his eyepatch.',
     look: { height: 0.98, girth: 1.02, skin: '#ddA27a', hair: 'fringe', hairColor: '#3a2f26', eyepatch: true, outfit: 'shirt', top: '#9a9468', pants: '#4e4a36', shirt: '#9a9468', tie: null, shoes: '#2a2018' },
@@ -403,7 +403,7 @@ KC.ROSTER = [
     quote: 'Calculated. Engineered. Done.', victory: 'salute'
   },
   {
-    id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'legendary', price: 800,
+    id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'mythic', price: 800,
     group: 'boss', years: 'Final Boss (fictional)',
     bio: 'The fictional keeper of order in the plenum. Final boss of the Election Campaign.',
     look: { height: 1.1, girth: 1.2, skin: '#d9a37c', hair: 'short', hairColor: '#55504a', beard: '#4a4540', glasses: 'thin', glassesColor: '#d4a017', outfit: 'suit', top: '#14161c', pants: '#121318', shirt: '#f2f2f2', tie: '#d4a017', shoes: '#0d0d0d', prop: 'gavel', propColor: '#6b3e1f' },

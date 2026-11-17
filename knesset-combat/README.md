@@ -106,7 +106,7 @@ Progress saves in your browser (`localStorage`). Settings → Reset Progress wip
 
 ## The roster (38)
 
-Mythic (between Epic and Legendary): Benjamin Netanyahu and Yigael Yadin.
+Legendary (the only one): Benjamin Netanyahu. Mythic (between Epic and Legendary): Golda Meir, Ariel Sharon, Moshe Dayan, Yigael Yadin and The Speaker.
 
 Added in this update: Yigael Yadin (Mythic), Ezer Weizman, Reuven Rivlin, Mansour Abbas, Moshe Arens (Rare), Amir Peretz (Epic, with the Iron Dome reflect super), Yitzhak Navon, Shulamit Aloni, Merav Michaeli and Moshe Kahlon (Common).
 
