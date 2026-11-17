@@ -1,0 +1,135 @@
+/* Knesset Combat 26' — CPU opponent. Produces a virtual controller state every frame. */
+(function () {
+  var LEVELS = {
+    easy: { react: 24, block: 0.15, aggro: 0.35, think: 26, combo: 0.15, anti: 0.1, superUse: 0.3, jumpProj: 0.25 },
+    normal: { react: 13, block: 0.45, aggro: 0.55, think: 16, combo: 0.45, anti: 0.35, superUse: 0.7, jumpProj: 0.45 },
+    hard: { react: 7, block: 0.75, aggro: 0.72, think: 9, combo: 0.8, anti: 0.65, superUse: 0.95, jumpProj: 0.6 },
+    boss: { react: 5, block: 0.82, aggro: 0.8, think: 7, combo: 0.9, anti: 0.75, superUse: 1, jumpProj: 0.65 }
+  };
+  var AI = KC.AI = function (fighter, level) {
+    this.f = fighter; this.L = LEVELS[level] || LEVELS.normal; this.level = level;
+    this.intent = 'approach'; this.intentT = 0; this.hold = {}; this.threatT = -1; this.defend = 0; this.defendLow = false;
+    this.press = null; this.pressT = 0; this.jumpPlan = 0;
+  };
+  function R() { return Math.random(); }
+
+  AI.prototype.input = function (m) {
+    var f = this.f, o = f.opp, L = this.L;
+    var inp = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0 };
+    var dx = o.x - f.x, dist = Math.abs(dx), toward = dx >= 0 ? 'r' : 'l', away = dx >= 0 ? 'l' : 'r';
+
+    // release a pressed button after one frame so the next press registers as fresh
+    if (this.pressT > 0) { this.pressT--; if (this.pressT === 0) this.press = null; }
+
+    /* ---- defence ---- */
+    var threat = false, lowThreat = false, projThreat = false;
+    if ((o.state === 'attack' || o.state === 'rush' || o.state === 'super') && dist < 2.4) { threat = true; lowThreat = o.move && o.move.level === 'low'; if (o.move && o.move.air) lowThreat = false; }
+    for (var i = 0; i < m.hazards.length; i++) {
+      var h = m.hazards[i];
+      if (h.owner !== o) continue;
+      var hd = (f.x - h.x) * (h.vx >= 0 ? 1 : -1);
+      if (h.kind === 'beam' || h.kind === 'drop' || h.kind === 'fall') { threat = true; continue; }
+      if (hd > -0.5 && hd < 3.6) { threat = true; projThreat = h.kind === 'proj' || h.kind === 'wave'; }
+    }
+    if (threat && this.threatT < 0) this.threatT = L.react + ((R() * 6) | 0);
+    if (!threat) this.threatT = -1;
+    if (this.threatT > 0) this.threatT--;
+    if (this.threatT === 0) {
+      this.threatT = -2; // decided
+      if (projThreat && f.actionable() && R() < L.jumpProj && dist > 2.2) { this.jumpPlan = 1; }
+      else if (R() < L.block) { this.defend = 26; this.defendLow = lowThreat || (R() < 0.3 && o.state !== 'super'); }
+    }
+    if (this.jumpPlan) { this.jumpPlan = 0; inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; return inp; }
+    if (this.defend > 0) {
+      this.defend--;
+      if (o.move && o.state === 'attack') this.defendLow = o.move.level === 'low';
+      inp[away] = 1; if (this.defendLow) inp.d = 1;
+      if (f.state === 'blockstun') this.defend = Math.max(this.defend, 6);
+      return inp;
+    }
+    if (f.state === 'blockstun' && R() < L.block) { inp[away] = 1; inp.d = this.defendLow ? 1 : 0; return inp; }
+
+    /* ---- combos: cancel after a connecting normal ---- */
+    if (f.state === 'attack' && f.moveHit && f.move && !f.move.air) {
+      if (R() < L.combo * 0.25) {
+        if (f.meter >= 100 && R() < L.superUse) return this.tap(inp, 'x');
+        if (f.move.id === 'LP' || f.move.id === 'CP') return this.tap(inp, R() < 0.5 ? 'p' : (R() < 0.5 ? 'k' : 's'));
+        return this.tap(inp, 's');
+      }
+      return inp;
+    }
+    if (f.state === 'jump' && !f.airUsed && f.vy < 0.05 && dist < 1.6) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
+    if (!f.actionable()) return inp;
+
+    /* ---- anti-air ---- */
+    if (!o.grounded() && dist < 1.9 && o.vy < 0.08 && R() < L.anti * 0.3) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
+
+    /* ---- super ---- */
+    if (f.meter >= 100 && R() < 0.02 * L.superUse) {
+      var t = f.ch.super.type;
+      var good = (t === 'beam' || t === 'wave' || t === 'vehicle' || t === 'drop' || t === 'rain') ? dist < 7 : dist < 3.2;
+      if (good && o.state !== 'knockdown' && o.state !== 'getup') return this.tap(inp, 'x');
+    }
+
+    /* ---- intent selection ---- */
+    this.intentT--;
+    if (this.intentT <= 0) this.pickIntent(dist);
+    switch (this.intent) {
+      case 'approach':
+        if (dist > 1.05) inp[toward] = 1;
+        else { this.intent = R() < 0.5 ? 'poke' : 'heavy'; this.intentT = 10; }
+        break;
+      case 'poke':
+        if (dist > 1.15) { inp[toward] = 1; break; }
+        if (R() < 0.3 + L.aggro * 0.3) { if (R() < 0.4) inp.d = 1; return this.tap(inp, 'p'); }
+        break;
+      case 'heavy':
+        if (dist > 1.3) { inp[toward] = 1; break; }
+        if (R() < 0.35) { if (R() < 0.45) inp.d = 1; return this.tap(inp, 'k'); }
+        break;
+      case 'zone':
+        if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && R() < 0.12) return this.tap(inp, 's'); }
+        else if (dist > 1.4 && dist < 3.6 && R() < 0.08) return this.tap(inp, 's');
+        else if (dist < 1.4) inp[away] = 1;
+        else inp[toward] = 1;
+        break;
+      case 'jumpin':
+        if (dist < 3.6 && dist > 1.4) { inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; }
+        else if (dist >= 3.6) inp[toward] = 1;
+        else { this.intent = 'poke'; this.intentT = 12; }
+        break;
+      case 'retreat':
+        inp[away] = 1; if (R() < 0.04) this.intentT = 0;
+        break;
+      case 'crouch':
+        inp.d = 1; if (dist < 1.3 && R() < 0.12) return this.tap(inp, R() < 0.5 ? 'k' : 'p');
+        break;
+      case 'wait':
+      default:
+        break;
+    }
+    return inp;
+  };
+  AI.prototype.tap = function (inp, btn) {
+    if (this.press === btn) return inp; // still holding previous press
+    inp[btn] = 1; this.press = btn; this.pressT = 2;
+    return inp;
+  };
+  AI.prototype.pickIntent = function (dist) {
+    var L = this.L, r = R();
+    this.intentT = L.think + ((R() * L.think) | 0);
+    if (dist > 4.2) {
+      if (r < 0.45) this.intent = 'zone'; else if (r < 0.85) this.intent = 'approach'; else this.intent = 'jumpin';
+    } else if (dist > 1.8) {
+      if (r < L.aggro * 0.6) this.intent = 'approach';
+      else if (r < L.aggro * 0.6 + 0.2) this.intent = 'zone';
+      else if (r < L.aggro * 0.6 + 0.35) this.intent = 'jumpin';
+      else this.intent = R() < 0.5 ? 'wait' : 'retreat';
+    } else {
+      if (r < L.aggro * 0.5) this.intent = 'poke';
+      else if (r < L.aggro * 0.8) this.intent = 'heavy';
+      else if (r < L.aggro * 0.8 + 0.12) this.intent = 'crouch';
+      else this.intent = R() < 0.5 ? 'retreat' : 'zone';
+    }
+  };
+})();

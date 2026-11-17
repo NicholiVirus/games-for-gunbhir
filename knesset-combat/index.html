@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knesset Combat 26'</title>
+<meta name="description" content="A 3D same-keyboard fighting game set in the Knesset plenum. Pick a Prime Minister, unlock the rest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="vignette"></div>
+
+<!-- loading -->
+<div id="loading" class="screen show">
+  <div class="logo small"><span class="k">KNESSET</span><span class="c">COMBAT</span><span class="y">26'</span></div>
+  <div class="load-text" id="loadText">Convening the plenum…</div>
+</div>
+
+<!-- title -->
+<div id="title" class="screen">
+  <div class="logo"><span class="k">KNESSET</span><span class="c">COMBAT</span><span class="y">26'</span></div>
+  <div class="heb">קרב הכנסת</div>
+  <div class="press">PRESS <b>ENTER</b> TO CALL THE SESSION TO ORDER</div>
+  <div class="foot">P1: WASD + F G R T &nbsp;·&nbsp; P2: ARROWS + K L O P &nbsp;·&nbsp; Gamepads supported</div>
+</div>
+
+<!-- main menu -->
+<div id="menu" class="screen">
+  <div class="menu-col">
+    <div class="logo small"><span class="k">KNESSET</span><span class="c">COMBAT</span><span class="y">26'</span></div>
+    <ul class="menu-list" id="menuList"></ul>
+    <div class="menu-desc" id="menuDesc"></div>
+  </div>
+  <div class="mandate-box" id="mandateBox"></div>
+</div>
+
+<!-- generic list screen (difficulty, settings, pause, results options) -->
+<div id="listScreen" class="screen">
+  <div class="panel center-panel">
+    <h2 id="listTitle"></h2>
+    <div id="listSub" class="sub"></div>
+    <ul class="menu-list compact" id="listItems"></ul>
+    <div class="hint" id="listHint">W/S or ↑/↓ to move · ENTER / F / K to choose · ESC to go back</div>
+  </div>
+</div>
+
+<!-- character select -->
+<div id="select" class="screen">
+  <div class="sel-head"><span id="selTitle">CHOOSE YOUR CANDIDATE</span><span class="sel-mode" id="selMode"></span></div>
+  <div class="sel-bottom">
+    <div class="sel-panel p1" id="selP1"></div>
+    <div class="sel-center">
+      <div class="sel-grid" id="selGrid"></div>
+      <div class="sel-stage" id="selStage"></div>
+      <div class="hint" id="selHint"></div>
+    </div>
+    <div class="sel-panel p2" id="selP2"></div>
+  </div>
+</div>
+
+<!-- campaign ladder -->
+<div id="ladder" class="screen">
+  <div class="panel ladder-panel">
+    <h2>ELECTION CAMPAIGN</h2>
+    <div class="sub" id="ladderSub"></div>
+    <div class="ladder-row" id="ladderRow"></div>
+    <div class="ladder-next" id="ladderNext"></div>
+    <div class="hint">ENTER / F to campaign · ESC to withdraw</div>
+  </div>
+</div>
+
+<!-- collection -->
+<div id="collection" class="screen">
+  <div class="col-left panel">
+    <h2>CABINET ROOM</h2>
+    <div class="sub" id="colSub"></div>
+    <div class="sel-grid col-grid" id="colGrid"></div>
+    <div class="hint">Arrows/WASD to browse · R / O to preview skin · ESC to go back</div>
+  </div>
+  <div class="col-info panel" id="colInfo"></div>
+</div>
+
+<!-- how to play -->
+<div id="howto" class="screen">
+  <div class="panel howto-panel">
+    <h2>HOW TO PLAY</h2>
+    <div class="howto-grid">
+      <div class="ctl p1c">
+        <h3>PLAYER 1</h3>
+        <table>
+          <tr><td>Move / Jump / Crouch</td><td><kbd>A</kbd><kbd>D</kbd> <kbd>W</kbd> <kbd>S</kbd></td></tr>
+          <tr><td>Punch</td><td><kbd>F</kbd></td></tr>
+          <tr><td>Kick</td><td><kbd>G</kbd></td></tr>
+          <tr><td>Special</td><td><kbd>R</kbd></td></tr>
+          <tr><td>Super (meter full)</td><td><kbd>T</kbd></td></tr>
+        </table>
+      </div>
+      <div class="ctl p2c">
+        <h3>PLAYER 2</h3>
+        <table>
+          <tr><td>Move / Jump / Crouch</td><td><kbd>←</kbd><kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td></tr>
+          <tr><td>Punch</td><td><kbd>K</kbd> or <kbd>Num1</kbd></td></tr>
+          <tr><td>Kick</td><td><kbd>L</kbd> or <kbd>Num2</kbd></td></tr>
+          <tr><td>Special</td><td><kbd>O</kbd> or <kbd>Num4</kbd></td></tr>
+          <tr><td>Super (meter full)</td><td><kbd>P</kbd> or <kbd>Num5</kbd></td></tr>
+        </table>
+      </div>
+      <div class="rules">
+        <h3>THE RULES OF ORDER</h3>
+        <ul>
+          <li><b>Block</b> by holding <b>away</b> from your opponent. Crouch-block (<b>down + away</b>) stops sweeps; jump attacks must be blocked <b>standing</b>.</li>
+          <li><b>Crouch + Kick</b> is a sweep that knocks down. <b>Punch</b> chains into more punches, a kick, or your Special.</li>
+          <li>Every hit fills your <b>MANDATE</b> meter. At 100% press <b>Super</b> for a cinematic finisher.</li>
+          <li>Win rounds to earn <b>Mandates</b> — they unlock every Prime Minister in order. Contenders and the secret boss have their own challenges.</li>
+          <li>Win 3 matches with a fighter to unlock their <b>Election Night Gold</b> skin. Toggle skins on the select screen with <kbd>R</kbd> / <kbd>O</kbd>.</li>
+          <li>Gamepads: D-pad/stick to move, <b>A</b> punch, <b>B</b> kick, <b>X</b> special, <b>Y</b> super. Pad 1 = P1, Pad 2 = P2.</li>
+          <li><kbd>ESC</kbd> pauses. <kbd>M</kbd> toggles music.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="hint">ESC / ENTER to go back</div>
+  </div>
+</div>
+
+<!-- fight HUD -->
+<div id="hud">
+  <div class="hud-top">
+    <div class="hp p1">
+      <img class="por" alt="">
+      <div class="hp-body">
+        <div class="nm"></div>
+        <div class="bar"><div class="trail"></div><div class="fill"></div></div>
+        <div class="pips"></div>
+      </div>
+    </div>
+    <div class="timer"><span>99</span></div>
+    <div class="hp p2">
+      <img class="por" alt="">
+      <div class="hp-body">
+        <div class="nm"></div>
+        <div class="bar"><div class="trail"></div><div class="fill"></div></div>
+        <div class="pips"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hud-bottom">
+    <div class="meter p1"><div class="mfill"></div><span class="mlabel">MANDATE</span><span class="mkey">T</span></div>
+    <div class="meter p2"><div class="mfill"></div><span class="mlabel">MANDATE</span><span class="mkey">P</span></div>
+  </div>
+  <div class="combo p1"></div><div class="combo p2"></div>
+  <div class="callout p1"></div><div class="callout p2"></div>
+</div>
+<div id="banner"><div class="big"></div><div class="sub"></div></div>
+<div id="vs">
+  <div class="vs-side l"><img alt=""><div class="vs-name"></div><div class="vs-title"></div></div>
+  <div class="vs-mid">VS</div>
+  <div class="vs-side r"><img alt=""><div class="vs-name"></div><div class="vs-title"></div></div>
+  <div class="vs-skip">press any attack button</div>
+</div>
+<div id="supercut"><img alt=""><div class="sc-text"><div class="sc-who"></div><div class="sc-move"></div></div></div>
+<div id="flash"></div>
+
+<!-- results -->
+<div id="results" class="screen">
+  <div class="panel results-panel">
+    <h2 id="resTitle"></h2>
+    <div class="sub" id="resSub"></div>
+    <div class="res-cols">
+      <div class="res-earn" id="resEarn"></div>
+      <div class="res-unlocks" id="resUnlocks"></div>
+    </div>
+    <ul class="menu-list compact horizontal" id="resMenu"></ul>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="lib/three.min.js"></script>
+<script src="js/roster.js"></script>
+<script src="js/models.js"></script>
+<script src="js/stage.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/fight.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
