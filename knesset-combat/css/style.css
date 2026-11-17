@@ -464,3 +464,21 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .payline { position: absolute; left: 50%; top: 0; bottom: 0; width: 112px; transform: translateX(-50%); border: 3px solid var(--gold); border-radius: 10px; z-index: 3; pointer-events: none; box-shadow: 0 0 14px rgba(242,193,78,0.6); }
 .reel.stopped .payline { animation: payflash 0.5s ease-out 2; border-color: #fff; }
 @keyframes payflash { 50% { box-shadow: 0 0 40px #fff; transform: translateX(-50%) scale(1.08); } }
+
+/* ---------- one consistent highlight for keyboard + mouse ---------- */
+.bigbtn.sel { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 18px rgba(242,193,78,0.8); }
+.bigbtn.ghost.sel { background: var(--blue); border-color: var(--gold); }
+.lv:hover:not(.sel) { filter: brightness(1.25); }
+.menu-list li:hover:not(.sel) { color: #fff; }
+
+/* vertical slot reels */
+.slot-machine { flex-direction: row; align-items: stretch; gap: 12px; }
+.reel { width: 112px; height: 336px; max-width: none; max-height: calc(100vh - 260px); }
+.reel::before, .reel::after { left: 0; right: 0; width: auto; height: 80px; }
+.reel::before { top: 0; bottom: auto; background: linear-gradient(180deg, #070a14, rgba(7,10,20,0)); }
+.reel::after { bottom: 0; top: auto; background: linear-gradient(0deg, #070a14, rgba(7,10,20,0)); }
+.strip { flex-direction: column; height: auto; }
+.sc { flex: 0 0 112px; width: 112px; border-right: 0; border-bottom: 2px solid #1a2546; }
+.payline { left: 0; right: 0; top: 50%; bottom: auto; width: auto; height: 112px; transform: translateY(-50%); }
+@keyframes payflash { 50% { box-shadow: 0 0 40px #fff; transform: translateY(-50%) scale(1.08); } }
+.ch-rewards { bottom: 100px; }

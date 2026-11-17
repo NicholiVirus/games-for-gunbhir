@@ -569,8 +569,25 @@
         : '<kbd>WASD</kbd>/<kbd>IJKL</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick or buy · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
       this.render(true);
     },
-    refresh: function () { this.render(true); },
+    refresh: function () { this.gridBuilt = false; this.render(true); },
+    syncGrid: function () {
+      $('selGrid').querySelectorAll('.cell').forEach(function (c) {
+        var i = +c.dataset.i, c1 = sel.p[0].cur === i, c2 = sel.two && sel.p[1].cur === i;
+        c.classList.toggle('c1', c1); c.classList.toggle('c2', c2);
+        c.querySelectorAll('.tag').forEach(function (t) { t.remove(); });
+        if (c1) c.insertAdjacentHTML('beforeend', '<span class="tag t1">1P</span>');
+        if (c2) c.insertAdjacentHTML('beforeend', '<span class="tag t2">2P</span>');
+      });
+    },
+    mousePlayer: function () { return sel.two && sel.p[0].locked ? 1 : 0; },
+    hoverTo: function (pl, i) {
+      var p = sel.p[pl]; if (p.locked || p.cur === i) return;
+      p.cur = i; p.gold = p.gold && Save.hasGold(KC.ROSTER[i].id); p.confirm = -1;
+      KC.Audio.play('move'); this.render(true);
+    },
     render: function (rebuild) {
+      if (this.gridBuilt && this.builtFor === sel) { this.syncGrid(); this.renderPanels(rebuild); return; }
+      this.gridBuilt = true; this.builtFor = sel;
       var html = '';
       KC.ROSTER.forEach(function (ch, i) {
         var c1 = sel.p[0].cur === i, c2 = sel.two && sel.p[1].cur === i;
@@ -581,10 +598,15 @@
       var me = this;
       $('selGrid').querySelectorAll('.cell').forEach(function (c) {
         var i = +c.dataset.i;
-        function clickFor(pl) { var p = sel.p[pl]; if (p.locked) return; if (p.cur === i) me.pick(pl); else { p.cur = i; p.gold = p.gold && Save.hasGold(KC.ROSTER[i].id); p.confirm = -1; KC.Audio.play('move'); me.render(true); } }
-        c.onclick = function () { clickFor(sel.two && sel.p[0].locked ? 1 : 0); };
-        c.oncontextmenu = function (e) { e.preventDefault(); if (sel.two) clickFor(1); };
+        // hover = arrow keys (moves the cursor), click = Enter (picks), right-click = Player 2 picks
+        c.onmouseenter = function () { me.hoverTo(me.mousePlayer(), i); };
+        c.onclick = function () { var pl = me.mousePlayer(); me.hoverTo(pl, i); me.pick(pl); };
+        c.oncontextmenu = function (e) { e.preventDefault(); if (!sel.two) return; me.hoverTo(1, i); me.pick(1); };
       });
+      this.renderPanels(rebuild);
+    },
+    renderPanels: function (rebuild) {
+      var me = this;
       $('selMode').innerHTML = $('selMode').innerHTML.replace(/<span class="coin"><\/span>\d+$/, G.coin(Save.data.coins));
       var p1c = KC.ROSTER[sel.p[0].cur];
       $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'T' }, confirm: sel.p[0].confirm === sel.p[0].cur });
@@ -706,8 +728,12 @@
       $('ladderNext').textContent = 'NEXT: ' + (stop.ch.id === 'speaker' ? 'THE SPEAKER — ORDER INCARNATE' : stop.ch.name.toUpperCase());
       var me = this;
       $('ladBtns').innerHTML = '<button type="button" class="bigbtn" id="ladFight">FIGHT ▸</button><button type="button" class="bigbtn ghost" id="ladQuit">WITHDRAW</button>';
-      $('ladFight').onclick = function () { me.fight(); };
-      $('ladQuit').onclick = function () { me.quit(); };
+      this.btn = 0;
+      [$('ladFight'), $('ladQuit')].forEach(function (b, i) {
+        b.onmouseenter = function () { me.btn = i; me.hl(); };
+        b.onclick = function () { me.btn = i; me.activate(); };
+      });
+      this.hl();
       KC.Audio.playMusic('menu');
     },
     fight: function () {
@@ -715,8 +741,12 @@
       KC.Audio.play('select');
       startMatch({ mode: 'campaign', chars: [c.player, stop.ch], skins: [c.skin, c.player === stop.ch ? KC.MIRROR_SKIN : null], ai: [null, stop.level] });
     },
+    hl: function () { var me = this; [$('ladFight'), $('ladQuit')].forEach(function (b, i) { if (b) b.classList.toggle('sel', i === me.btn); }); },
+    activate: function () { if (this.btn === 1) this.quit(); else this.fight(); },
     update: function () {
-      if (Input.menu('ok')) this.fight();
+      if (Input.menu('left') || Input.menu('up')) { this.btn = 0; this.hl(); KC.Audio.play('move'); }
+      if (Input.menu('right') || Input.menu('down')) { this.btn = 1; this.hl(); KC.Audio.play('move'); }
+      if (Input.menu('ok')) this.activate();
       else if (Input.menu('back')) this.quit();
     },
     quit: function () {
@@ -754,14 +784,25 @@
       }
       $('lvGrid').innerHTML = html;
       $('lvGrid').querySelectorAll('.lv').forEach(function (b) {
-        b.onclick = function () { var n = +b.dataset.n; if (n === self.cur) self.play(); else { self.cur = n; KC.Audio.play('move'); self.render(); } };
+        b.onmouseenter = function () { self.moveTo(+b.dataset.n, false); };
+        b.onclick = function () { self.moveTo(+b.dataset.n, false); self.play(); };
       });
       var cw = (Save.data.campWins || 0) % 10, cq = (Save.data.chestQueue || []).length;
       $('lvSub').innerHTML = 'Cleared ' + (Save.data.tour || 0) + ' / ' + KC.LEVELS + ' &nbsp;·&nbsp; Wallet ' + G.coin(Save.data.coins) +
         '<div class="streak"><span>BIG CHEST STREAK</span><div class="sbar"><div style="width:' + (cw * 10) + '%"></div></div><b>' + cw + '/10 wins</b>' +
         (cq ? '<button type="button" id="lvChest" class="lv-chest">🎁 OPEN CHESTS (' + cq + ')</button>' : '') + '</div>';
       var lc = $('lvChest'); if (lc) lc.onclick = function () { KC.Audio.play('select'); go('chest'); };
-      var selB = $('lvGrid').querySelector('.lv.sel'); if (selB && selB.scrollIntoView) selB.scrollIntoView({ block: 'nearest' });
+      this.info(true);
+    },
+    moveTo: function (n, scroll) {
+      if (n === this.cur) return;
+      this.cur = n; KC.Audio.play('move');
+      $('lvGrid').querySelectorAll('.lv').forEach(function (b) { b.classList.toggle('sel', +b.dataset.n === n); });
+      this.info(scroll);
+    },
+    info: function (scroll) {
+      var self = this, top = Math.min(KC.LEVELS, (Save.data.tour || 0) + 1);
+      var selB = $('lvGrid').querySelector('.lv.sel'); if (scroll && selB && selB.scrollIntoView) selB.scrollIntoView({ block: 'nearest' });
       $('lvInfo').innerHTML = levelHTML(KC.level(this.cur)) + (this.cur > top ? '<div class="lockinfo">🔒 Clear level ' + top + ' first.</div>' : '<button class="lv-go" id="lvGo" type="button">FIGHT LEVEL ' + this.cur + ' ▸</button>');
       var go_ = $('lvGo'); if (go_) go_.onclick = function () { self.play(); };
     },
@@ -776,7 +817,7 @@
       if (Input.menu('left')) c--; if (Input.menu('right')) c++;
       if (Input.menu('up')) c -= 10; if (Input.menu('down')) c += 10;
       c = Math.max(1, Math.min(KC.LEVELS, c));
-      if (c !== this.cur) { this.cur = c; KC.Audio.play('move'); this.render(); }
+      if (c !== this.cur) this.moveTo(c, true);
       if (Input.menu('ok')) this.play();
       else if (Input.hit(['KeyC'])) G.openChests();
       else if (Input.menu('back')) { KC.Audio.play('back'); go('menu'); }
@@ -873,7 +914,7 @@
         if (G.tourPick) b += '<button type="button" data-a="next">PLAY LEVEL ' + nxt + '</button>';
         b += '<button type="button" data-a="map">LEVEL MAP</button><button type="button" data-a="shop">SHOP</button>';
         $('chBtns').innerHTML = b; this.btn = 0;
-        $('chBtns').querySelectorAll('button').forEach(function (bt) { bt.onclick = function () { self.act(bt.dataset.a); }; });
+        $('chBtns').querySelectorAll('button').forEach(function (bt, i) { bt.onmouseenter = function () { self.btn = i; self.hl(); }; bt.onclick = function () { self.act(bt.dataset.a); }; });
         this.hl();
         this.ui();
       }
@@ -934,11 +975,11 @@
     targets.forEach(function (t, i) {
       var cells = '';
       for (var c = 0; c < LEN; c++) cells += cellFor(c === STOP ? t : decoy());
-      html += '<div class="reel" style="width:' + (CELL * VIEW) + 'px"><div class="strip" id="strip' + i + '">' + cells + '</div><div class="payline"></div></div>';
+      html += '<div class="reel" style="height:' + (CELL * VIEW) + 'px"><div class="strip" id="strip' + i + '">' + cells + '</div><div class="payline"></div></div>';
     });
     html += '</div>';
     $('chRewards').innerHTML = html;
-    var finalX = -(STOP * CELL - (CELL * VIEW / 2 - CELL / 2));
+    var finalY = -(STOP * CELL - (CELL * VIEW / 2 - CELL / 2));   // vertical reels
     var stopped = 0, timers = [], tickT = null, finished = false;
     function finishAll() {
       if (finished) return; finished = true;
@@ -950,10 +991,10 @@
     tickT = setInterval(function () { tickAt += 30; if (tickAt >= tickGap) { tickAt = 0; KC.Audio.play('tick'); tickGap = Math.min(260, tickGap * 1.07); } }, 30);
     targets.forEach(function (t, i) {
       var el = $('strip' + i), dur = 1.9 + i * 0.75;
-      el.style.transform = 'translateX(0px)';
+      el.style.transform = 'translateY(0px)';
       void el.offsetWidth;
       el.style.transition = 'transform ' + dur + 's cubic-bezier(0.12, 0.65, 0.18, 1)';
-      el.style.transform = 'translateX(' + finalX + 'px)';
+      el.style.transform = 'translateY(' + finalY + 'px)';
       timers.push(setTimeout(function () {
         el.parentNode.classList.add('stopped');
         var rare = t.ch && (t.ch.rarity === 'mythic' || t.ch.rarity === 'legendary' || t.ch.rarity === 'epic');
@@ -963,7 +1004,7 @@
       }, dur * 1000));
     });
     slotState = { skip: function () {
-      targets.forEach(function (t, i) { var el = $('strip' + i); if (el) { el.style.transition = 'none'; el.style.transform = 'translateX(' + finalX + 'px)'; el.parentNode.classList.add('stopped'); } });
+      targets.forEach(function (t, i) { var el = $('strip' + i); if (el) { el.style.transition = 'none'; el.style.transform = 'translateY(' + finalY + 'px)'; el.parentNode.classList.add('stopped'); } });
       KC.Audio.play('select'); finishAll();
     } };
   };
@@ -981,6 +1022,7 @@
       });
       return out;
     },
+    moveTo: function (i) { if (i === this.cur) return; this.cur = i; this.gold = false; this.confirm = null; KC.Audio.play('move'); this.render(true); },
     setFilter: function (f) { this.filter = f; this.confirm = null; this.gold = false; KC.Audio.play('move'); this.render(true); },
     cycleFilter: function (d) { var ids = G.SHOP_FILTERS.map(function (x) { return x.id; }), i = ids.indexOf(this.filter || 'all'); this.setFilter(ids[(i + d + ids.length) % ids.length]); },
     refresh: function () { this.render(true); },
@@ -992,8 +1034,18 @@
       $('shopTabs').querySelectorAll('.stab').forEach(function (b) { b.onclick = function () { self.setFilter(b.dataset.f); }; });
       var list = this.list();
       if (list.indexOf(this.cur) < 0 && list.length) { this.cur = list[0]; rebuild = true; }
+      var gridKey = (this.filter || 'all') + '|' + list.join(',') + '|' + Save.data.owned.length + '|' + JSON.stringify(Save.data.shards);
+      if (this.gridKey === gridKey) {
+        $('colGrid').querySelectorAll('.cell').forEach(function (c) { c.classList.toggle('c1', +c.dataset.i === self.cur); });
+      } else {
+      this.gridKey = gridKey;
       $('colGrid').innerHTML = list.length ? list.map(function (i) { return cellHTML(KC.ROSTER[i], i, i === self.cur ? 'c1' : ''); }).join('') : '<div class="next-unlock" style="grid-column:1/-1">No fighters in this group.</div>';
-      $('colGrid').querySelectorAll('.cell').forEach(function (c) { c.onclick = function () { if (self.cur === +c.dataset.i) self.buy(); else { self.cur = +c.dataset.i; self.gold = false; self.confirm = null; KC.Audio.play('move'); self.render(true); } }; });
+      $('colGrid').querySelectorAll('.cell').forEach(function (c) {
+        // hover = arrow keys (moves the cursor), click = Enter (buy / upgrade)
+        c.onmouseenter = function () { self.moveTo(+c.dataset.i); };
+        c.onclick = function () { self.moveTo(+c.dataset.i); self.buy(); };
+      });
+      }
       var ch = KC.ROSTER[this.cur], owned = Save.owns(ch.id), price = G.recruitPrice(ch);
       var wins = d.charWins[ch.id] || 0, goldOk = Save.hasGold(ch.id);
       var html = '<div class="ttl">' + rarBadge(ch) + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
@@ -1001,7 +1053,7 @@
       if (!owned) {
         var sp = KC.shardPrice(ch), canS = Save.canAfford(sp);
         html += G.shardBar(ch) + '<div class="req no">🔒 Can\'t be bought outright. Collect ' + KC.shardsNeeded(ch) + ' shards to recruit — they drop from campaign chests.</div>';
-        html += '<div class="buybox ' + (canS ? 'can' : '') + '" data-act="shard"><div class="bb-price">' + G.coin(sp) + '</div><div>Buy <b>1 shard</b> — press <b>ENTER / B</b> or click.</div></div>';
+        html += '<div class="buybox ' + (canS ? 'can' : '') + '" data-act="shard"><div class="bb-price">' + G.coin(sp) + '</div><div>' + (this.confirm === 'shard' ? '<b>Press ENTER / click again to confirm</b>' : 'Buy <b>1 shard</b> — press <b>ENTER / B</b> or click') + '</div></div>';
       } else {
         var rk = Save.rank(ch.id), pips = '';
         for (var q = 1; q <= KC.UPGRADE.max; q++) pips += '<span class="rp' + (q <= rk ? ' on' : '') + '"></span>';
@@ -1040,6 +1092,8 @@
         if (Save.owns(ch.id)) return;
         var sp = KC.shardPrice(ch);
         if (!Save.canAfford(sp)) { KC.Audio.play('deny'); G.toast('A shard costs ' + G.coin(sp) + '.'); return; }
+        if (this.confirm !== 'shard') { this.confirm = 'shard'; KC.Audio.play('move'); this.render(false); return; }
+        this.confirm = null;
         var res = Save.buyShard(ch);
         KC.Audio.play(res && res.recruited ? 'unlock' : 'select');
         G.toast(res && res.recruited ? 'All shards collected — ' + esc(ch.name) + ' recruited!' : '+1 ' + esc(ch.short) + ' shard (' + Save.shards(ch.id) + '/' + KC.shardsNeeded(ch) + ')');
@@ -1078,7 +1132,7 @@
         if (Input.menu('down')) pos = (pos + cols) % n;
       }
       var c = n ? list[pos] : this.cur;
-      if (c !== this.cur) { this.cur = c; this.gold = false; this.confirm = null; KC.Audio.play('move'); this.render(true); }
+      if (c !== this.cur) this.moveTo(c);
       if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Pad0_a', 'Pad1_a'])) this.buy();
       if (Input.hit(['KeyB', 'Pad0_y', 'Pad1_y'])) this.buy(Save.owns(KC.ROSTER[this.cur].id) ? 'gold' : 'shard');
       if (Input.hit(['KeyR', 'KeyP', 'Pad0_x', 'Pad1_x'])) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
