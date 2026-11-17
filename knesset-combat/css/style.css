@@ -400,3 +400,6 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .rar.r-mythic { background: linear-gradient(90deg, #ff4d6d, #ff9ab0); color: #fff; }
 .cell.r-mythic { border-color: #e0334f; background: linear-gradient(180deg, #5a1626, #240810); }
 .cell.r-mythic::before { background: #ff4d6d; }
+
+.cell .price.shardp { color: #e6d7ff; }
+.cell .price.shardp .shard { width: 0.7em; height: 0.85em; vertical-align: -0.1em; margin-right: 1px; }

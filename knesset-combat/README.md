@@ -46,7 +46,6 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
 - **Recruiting with shards:** collect 5 (Common), 10 (Rare), 15 (Epic), 20 (Mythic) or 25 (Legendary) shards to recruit a leader for free.
-  - Each shard also lowers that leader's coin price.
   - You can buy single shards in the Shop with `B`. They cost a premium: about 6× more per shard than recruiting outright.
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.
@@ -99,7 +98,7 @@ You start with **David Ben-Gurion**, Israel's first Prime Minister (Rare). Every
 | Campaign | 20 per stop, 250 for clearing it |
 
 - A normal 2–0 win vs CPU pays about 100 coins, and a loss still pays 20–35.
-- Spend coins in the **Shop**, or buy a locked fighter straight from the select screen by pressing pick twice.
+- **Fighters can't be bought outright.** The only way to recruit one is to collect their shards, from campaign chests or by buying single shards in the Shop.
 - **Election Night Gold** skin: win 3 matches with a fighter, or buy it for 150 coins.
 
 Progress saves in your browser (`localStorage`). Settings → Reset Progress wipes it.

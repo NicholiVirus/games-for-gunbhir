@@ -36,6 +36,7 @@
     hasGold: function (id) { return Save.data.gold.indexOf(id) >= 0; },
     canAfford: function (n) { return Save.data.coins >= n; },
     buy: function (ch) {
+      return false;   // fighters can no longer be bought outright — collect shards instead
       var p = G.recruitPrice(ch);
       if (Save.owns(ch.id) || !Save.canAfford(p)) return false;
       Save.data.coins -= p; Save.data.owned.push(ch.id); delete Save.data.shards[ch.id]; Save.write(); return true;
@@ -67,7 +68,7 @@
       return golds;
     },
     lockedByPrice: function () {
-      return KC.ROSTER.filter(function (c) { return !Save.owns(c.id); }).sort(function (a, b) { return G.recruitPrice(a) - G.recruitPrice(b); });
+      return KC.ROSTER.filter(function (c) { return !Save.owns(c.id); }).sort(function (a, b) { return (KC.shardsNeeded(a) - Save.shards(a.id)) - (KC.shardsNeeded(b) - Save.shards(b.id)); });
     },
     unlockAll: function () {
       Save.data.owned = KC.ROSTER.map(function (c) { return c.id; });
@@ -388,7 +389,7 @@
     { id: 'tour', label: 'CAMPAIGN · 250 LEVELS', desc: 'Fight through 250 levels of CPU rivals. Every 10th level is a boss. Wins drop tap-to-upgrade chests full of coins and leader shards.' },
     { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on IJKL + U O P ;. Both players earn coins for the shared wallet.' },
     { id: 'campaign', label: 'ELECTION ARCADE', desc: 'Quick arcade ladder: beat five random rivals, then face the final boss in one run.' },
-    { id: 'shop', label: 'SHOP · RECRUIT & UPGRADE', desc: 'Spend coins to recruit fighters, upgrade them to Rank 5, and buy gold skins.' },
+    { id: 'shop', label: 'SHOP · SHARDS & UPGRADES', desc: 'Buy shards toward locked fighters, upgrade your fighters to Rank 5, and buy gold skins.' },
     { id: 'howto', label: 'HOW TO PLAY', desc: 'Controls, rarity, abilities, blocking and how coins work.' },
     { id: 'settings', label: 'SETTINGS', desc: 'Rounds, round timer, chamber lighting, music, sound and announcer.' }
   ];
@@ -409,10 +410,9 @@
       var d = Save.data, locked = Save.lockedByPrice(), own = d.owned.length;
       var html = '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
       if (locked.length) {
-        var nx = locked[0], price = G.recruitPrice(nx);
-        var pct = Math.min(100, d.coins / price * 100);
-        html += '<div class="progress"><div style="width:' + pct.toFixed(0) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" class="dim" alt=""><div>Cheapest recruit: <b>' + esc(nx.name) + '</b> ' + rarBadge(nx) + '<br>' +
-          (d.coins >= price ? '<span style="color:#7dff9b;font-weight:800">You can afford it — visit the Shop!</span>' : '<span style="color:#9fb0d4">' + G.coin(price - d.coins) + ' more to go — every match pays coins</span>') + '</div></div>';
+        var nx = locked[0], need = KC.shardsNeeded(nx), have = Save.shards(nx.id);
+        html += '<div class="progress"><div style="width:' + Math.round(have / need * 100) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" class="dim" alt=""><div>Closest recruit: <b>' + esc(nx.name) + '</b> ' + rarBadge(nx) + '<br>' +
+          '<span style="color:#e6d7ff"><span class="shard"></span> ' + have + ' / ' + need + ' shards — win campaign chests to collect more</span></div></div>';
       } else html += '<div class="mb-next" style="margin-top:8px">Full cabinet: all ' + KC.ROSTER.length + ' fighters recruited.</div>';
       $('mandateBox').innerHTML = html;
     },
@@ -506,7 +506,7 @@
   function cellHTML(ch, i, extraCls, tags) {
     var owned = Save.owns(ch.id);
     var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'icon' ? 'MK' : '';
-    var price = owned ? '' : '<span class="price' + (Save.canAfford(G.recruitPrice(ch)) ? ' ok' : '') + '">' + G.coin(G.recruitPrice(ch)) + '</span>';
+    var price = owned ? '' : '<span class="price shardp"><span class="shard"></span>' + Save.shards(ch.id) + '/' + KC.shardsNeeded(ch) + '</span>';
     return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + price + (tags || '') + '</div>';
   }
   G.cellHTML = cellHTML;
@@ -530,10 +530,7 @@
     var body = '<div class="bio">' + esc(ch.bio) + '</div>' + abilityHTML(ch, st.keys) +
       '<div class="stats"><span>SPEED</span>' + statBar(s.speed) + '<span>POWER</span>' + statBar(s.power) + '<span>DEFENSE</span>' + statBar(s.defense) + '<span>JUMP</span>' + statBar(s.jump) + '</div>';
     if (!owned) {
-      var can = Save.canAfford(price);
-      return head + body + G.shardBar(ch) + '<div class="lockinfo ' + (can ? 'can' : '') + '">' + (can
-        ? (st.confirm ? 'Press <b>' + st.pickKey + '</b> again to recruit for ' + G.coin(price) : 'Locked · press <b>' + st.pickKey + '</b> to recruit for ' + G.coin(price))
-        : 'Locked · costs ' + G.coin(price) + ' — you need ' + G.coin(price - Save.data.coins) + ' more') + '</div>';
+      return head + body + G.shardBar(ch) + '<div class="lockinfo">🔒 Locked · collect ' + (KC.shardsNeeded(ch) - Save.shards(ch.id)) + ' more shards from campaign chests (or buy shards in the Shop)</div>';
     }
     var gold = st.gold, goldOk = Save.hasGold(ch.id);
     return head + body +
@@ -612,14 +609,8 @@
       var p = sel.p[i], ch = KC.ROSTER[p.cur];
       if (p.locked) return;
       if (!Save.owns(ch.id)) {
-        var price = G.recruitPrice(ch);
-        if (!Save.canAfford(price)) { KC.Audio.play('deny'); G.toast(esc(ch.name) + ' costs ' + G.coin(price) + ' — you have ' + G.coin(Save.data.coins) + '. Play matches to earn more!'); return; }
-        if (p.confirm !== p.cur) { p.confirm = p.cur; KC.Audio.play('move'); this.render(false); return; }
-        Save.buy(ch); p.confirm = -1;
-        KC.Audio.play('unlock'); G.toast('Recruited ' + esc(ch.name) + '! ' + rarBadge(ch));
-        KC.Audio.say(ch.name + ' recruited!');
-        if (previews[i]) previews[i].cheer = 2;
-        this.render(false);
+        KC.Audio.play('deny');
+        G.toast('🔒 ' + esc(ch.name) + ' is locked — ' + Save.shards(ch.id) + ' / ' + KC.shardsNeeded(ch) + ' shards. Win campaign chests to collect them.');
         return;
       }
       p.locked = true; KC.Audio.play('select');
@@ -918,13 +909,9 @@
       var html = '<div class="ttl">' + rarBadge(ch) + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
       html += '<p>' + esc(ch.bio) + '</p>' + abilityHTML(ch, { s: 'Special', x: 'Super' });
       if (!owned) {
-        var can = Save.canAfford(price);
-        html += '<div class="buybox ' + (can ? 'can' : '') + '"><div class="bb-price">' + G.coin(price) + '</div><div>' + (can
-          ? (this.confirm === 'fighter' ? '<b>Press ENTER / F again to confirm</b>' : 'Press <b>ENTER / F</b> to recruit')
-          : 'You need ' + G.coin(price - d.coins) + ' more. Every match pays coins.') + '</div></div>';
         var sp = KC.shardPrice(ch), canS = Save.canAfford(sp);
-        html = html.replace('<div class="buybox', G.shardBar(ch) + '<div class="buybox');
-        html += '<div class="buybox small ' + (canS ? 'can' : '') + '" data-act="shard"><div class="bb-price">' + G.coin(sp) + '</div><div>Buy <b>1 shard</b> — press <b>B</b> or click. Shards also drop from campaign chests and lower the recruit price.</div></div>';
+        html += G.shardBar(ch) + '<div class="req no">🔒 Can\'t be bought outright. Collect ' + KC.shardsNeeded(ch) + ' shards to recruit — they drop from campaign chests.</div>';
+        html += '<div class="buybox ' + (canS ? 'can' : '') + '" data-act="shard"><div class="bb-price">' + G.coin(sp) + '</div><div>Buy <b>1 shard</b> — press <b>ENTER / B</b> or click.</div></div>';
       } else {
         var rk = Save.rank(ch.id), pips = '';
         for (var q = 1; q <= KC.UPGRADE.max; q++) pips += '<span class="rp' + (q <= rk ? ' on' : '') + '"></span>';
@@ -948,7 +935,7 @@
         var need = KC.shardsNeeded(ch), have = Save.shards(ch.id), full = KC.priceOf(ch);
         lk.innerHTML = '<div class="lk-title">🔒 LOCKED · ' + esc(ch.short) + '</div>' +
           '<div class="lk-row"><span class="shard"></span> Shards <b>' + have + ' / ' + need + '</b></div><div class="lk-bar shards"><div style="width:' + Math.round(have / need * 100) + '%"></div></div>' +
-          '<div class="lk-row"><span class="coin"></span> Coins <b>' + Math.min(d.coins, price) + ' / ' + price + '</b>' + (price < full ? ' <span class="lk-disc">(was ' + full + ')</span>' : '') + '</div><div class="lk-bar coins"><div style="width:' + Math.min(100, Math.round(d.coins / Math.max(1, price) * 100)) + '%"></div></div>';
+          '<div class="lk-row" style="font-size:14px;color:#c8d3ef">Shards only — from chests or the Shop</div>';
         lk.classList.add('show');
       } else lk.classList.remove('show');
       $('colInfo').querySelectorAll('.buybox').forEach(function (b) { b.onclick = function () { self.buy(b.dataset.act || null); }; });
@@ -980,15 +967,8 @@
         if (previews[0]) previews[0].cheer = 2.2;
         this.render(false); return;
       }
-      if (!Save.owns(ch.id)) {
-        if (!Save.canAfford(G.recruitPrice(ch))) { KC.Audio.play('deny'); G.toast('Not enough coins yet — you have ' + G.coin(Save.data.coins) + '.'); return; }
-        if (this.confirm !== 'fighter') { this.confirm = 'fighter'; KC.Audio.play('move'); this.render(false); return; }
-        Save.buy(ch); this.confirm = null;
-        KC.Audio.play('unlock'); KC.Audio.say(ch.name + ' recruited!');
-        G.toast('Recruited ' + esc(ch.name) + '! ' + rarBadge(ch));
-        if (previews[0]) previews[0].cheer = 2.2;
-        this.render(false);
-      } else if (!Save.hasGold(ch.id)) {
+      if (!Save.owns(ch.id)) { this.buy('shard'); return; }
+      else if (!Save.hasGold(ch.id)) {
         if (!Save.canAfford(KC.ALT_SKIN_PRICE)) { KC.Audio.play('deny'); G.toast('Gold skin costs ' + G.coin(KC.ALT_SKIN_PRICE) + '.'); return; }
         if (this.confirm !== 'gold') { this.confirm = 'gold'; KC.Audio.play('move'); this.render(false); return; }
         Save.buyGold(ch); this.confirm = null; this.gold = true;
@@ -1151,13 +1131,11 @@
       var u = '';
       info.golds.forEach(function (ch, i) { u += '<div class="unl" style="animation-delay:' + (0.3 + i * 0.15) + 's"><img src="' + por(ch, true) + '" alt=""><div><div class="u1">NEW SKIN</div><div class="u2">' + esc(ch.short) + ' — ' + KC.ALT_SKIN.name + '</div></div></div>'; });
       var locked = Save.lockedByPrice();
-      var newly = locked.filter(function (c) { var p = G.recruitPrice(c); return p <= d.coins && p > info.before; });
-      if (newly.length) KC.Audio.say('New recruits available in the shop!');
+      var newly = [];
       if (locked.length) {
-        u += '<h3>' + (newly.length ? 'NOW AFFORDABLE!' : 'SHOP PICKS') + '</h3>';
-        (newly.length ? newly : locked).slice(0, 3).forEach(function (c, i) {
-          var p = G.recruitPrice(c), can = p <= d.coins;
-          u += '<div class="unl' + (can ? '' : ' far') + '" style="animation-delay:' + (0.2 + i * 0.15) + 's"><img src="' + por(c) + '" alt=""><div><div class="u1">' + G.rarBadge(c) + '</div><div class="u2">' + esc(c.name) + '</div><div style="font-size:12px;color:' + (can ? '#7dff9b' : '#9fb0d4') + '">' + G.coin(p) + (can ? ' — you can recruit now!' : ' — ' + (p - d.coins) + ' to go') + '</div></div></div>';
+        u += '<h3>CLOSEST RECRUITS</h3>';
+        locked.slice(0, 3).forEach(function (c, i) {
+          u += '<div class="unl far" style="animation-delay:' + (0.2 + i * 0.15) + 's"><img src="' + por(c) + '" alt=""><div><div class="u1">' + G.rarBadge(c) + '</div><div class="u2">' + esc(c.name) + '</div><div style="font-size:12px;color:#e6d7ff"><span class="shard"></span> ' + Save.shards(c.id) + ' / ' + KC.shardsNeeded(c) + ' shards</div></div></div>';
         });
       } else u += '<h3>FULL CABINET</h3><div class="next-unlock">Every fighter recruited. All 120 seats are yours.</div>';
       if (info.golds.length || newly.length) setTimeout(function () { KC.Audio.play('unlock'); }, 300);
