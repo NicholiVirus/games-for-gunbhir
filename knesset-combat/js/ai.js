@@ -75,10 +75,10 @@
         var go = R() < L.combo;
         var id = f.move.id, nxt = null;
         if (go) {
-          var canChain = (id === 'LP' || id === 'CP') && f.chainCount < 2;
+          var canChain = ((id === 'LP' || id === 'CP') && f.chainCount < 2) || (f.comboMaster && f.chainCount < 3);
           var superOK = f.meter >= 100 && f.hasSuper && R() < L.superUse;
           var spOK = f.ch.special.type !== 'projectile' || !m.hasProjectile(f);
-          if (canChain && R() < 0.65) nxt = { b: 'p', d: id === 'CP' ? 1 : 0 };
+          if (canChain && R() < 0.65) nxt = { b: f.comboMaster && R() < 0.4 ? 'k' : 'p', d: id === 'CP' ? 1 : 0 };
           else if (superOK) nxt = { b: 'x', d: 0 };
           else if (spOK) nxt = { b: 's', d: 0 };
           else if (f.alt && R() < 0.5) nxt = { b: 's', d: 1 };

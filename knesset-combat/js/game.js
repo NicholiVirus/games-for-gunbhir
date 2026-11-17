@@ -308,9 +308,10 @@
       if (span.textContent !== txt) span.textContent = txt;
       hudEls.timer.classList.toggle('low', tl !== Infinity && tl <= 10);
     },
-    combo: function (slot, n) {
+    combo: function (slot, n, master) {
       if (!hudEls) return;
-      hudEls.combo[slot].innerHTML = n + '<small>HIT COMBO</small>';
+      hudEls.combo[slot].innerHTML = n + '<small>' + (master ? '★ MASTER COMBO +15%' : 'HIT COMBO') + '</small>';
+      hudEls.combo[slot].classList.toggle('master', !!master);
       hudEls.combo[slot].classList.add('on'); comboT[slot] = 70;
     },
     callout: function (slot, text, isSuper) {
@@ -1092,6 +1093,7 @@
           html += '<div class="buybox ' + (canU ? 'can' : '') + '" data-act="up"><div class="bb-price">' + G.coin(uc) + '</div><div>Upgrade to <b>Rank ' + (rk + 1) + '</b>: ' + KC.UPGRADE.describe(rk + 1) + '<br>' +
             (canU ? (this.confirm === 'up' ? '<b>Press ENTER / F again to confirm</b>' : 'Press <b>ENTER / F</b> or click to upgrade') : 'You need ' + G.coin(uc - d.coins) + ' more.') + '</div></div>';
         } else html += '<div class="req ok">★ Fully upgraded</div>';
+        html += '<div class="mastery' + (rk >= KC.UPGRADE.max ? ' on' : '') + '"><b>' + (rk >= KC.UPGRADE.max ? '★ COMBO MASTERY UNLOCKED' : '🔒 COMBO MASTERY · reach Rank ' + KC.UPGRADE.max) + '</b><br>' + KC.MASTERY_TEXT + '</div>';
         if (goldOk) html += '<div class="req ok">✔ ' + KC.ALT_SKIN.name + ' skin owned</div>';
         else {
           var canG = Save.canAfford(KC.ALT_SKIN_PRICE);

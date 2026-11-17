@@ -80,6 +80,10 @@ Every chest, bought or earned, starts with 3 upgrade taps, and each tap has a 30
 - Each rank adds **+5% damage, +5% defense and +50 HP**, in every mode.
 - Rank N costs 80 × N coins × the rarity multiplier: Common ×1, Rare ×1.5, Epic ×2, Legendary ×2.5.
 - Example: a Legendary fighter's Rank 5 costs 1,000 coins.
+- **Rank 5 unlocks Combo Mastery:**
+  - chain any punch or kick into any other, for 4-hit strings
+  - cancel specials and charges into your Super
+  - deal +15% damage from the 4th hit of a combo
 
 ## Rarity and abilities
 

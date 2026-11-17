@@ -44,7 +44,8 @@
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
     this.maxHealth = 1000 + this.rank * U.health;
-    this.projMax = Math.min(KC.PROJ_MAX, 3 + this.rank);   // 3 on screen by default, +1 per rank, max 6
+    this.projMax = Math.min(KC.PROJ_MAX, 3 + this.rank);
+    this.comboMaster = this.rank >= KC.UPGRADE.max;   // Rank 5: Combo Mastery   // 3 on screen by default, +1 per rank, max 6
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -110,12 +111,13 @@
     var crouch = this.input.d;
     if (this.fresh('k')) {
       if (air) { if (this.airUsed) return false; this.consume('k'); this.startMove(MOVES.JK); return true; }
-      if (cancel === 'chain') return false;
+      if (cancel === 'chain' && (!this.comboMaster || this.chainCount >= 3)) return false;
+      this.chainCount = cancel === 'chain' ? this.chainCount + 1 : 0;
       this.consume('k'); this.startMove(crouch ? MOVES.CK : MOVES.HK); return true;
     }
     if (this.fresh('p')) {
       if (air) { if (this.airUsed) return false; this.consume('p'); this.startMove(MOVES.JP); return true; }
-      if (cancel === 'chain' && this.chainCount >= 2) return false;
+      if (cancel === 'chain' && this.chainCount >= (this.comboMaster ? 3 : 2)) return false;
       this.consume('p');
       this.chainCount = cancel === 'chain' ? this.chainCount + 1 : 0;
       this.startMove(crouch ? MOVES.CP : MOVES.LP); return true;
@@ -220,7 +222,7 @@
         if (!mv.air) this.vx *= 0.7;
         if (this.st > mv.startup && this.st <= mv.startup + mv.active) m.meleeCheck(this, mv);
         if (this.moveHit && this.st > mv.startup) {
-          if (mv.id === 'LP' || mv.id === 'CP') { if (this.tryAttack(m, 'chain')) break; }
+          if (mv.id === 'LP' || mv.id === 'CP' || this.comboMaster) { if (this.tryAttack(m, 'chain')) break; }
           else if (!mv.air) { if (this.tryAttack(m, 'special')) break; }
         }
         if (!mv.air && this.st >= total) { this.setState(this.input.d ? 'crouch' : 'idle'); this.move = null; }
@@ -230,6 +232,8 @@
       case 'special': {
         this.vx *= 0.6;
         if (this.st === 13) m.spawnProjectile(this, this.curSpec);
+        // Combo Mastery: cancel a special into your Super
+        if (this.comboMaster && this.st > 13 && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); break; }
         if (this.st >= 38) this.setState('idle');
         break;
       }
@@ -240,6 +244,7 @@
           this.vx = spd * this.facing;
           m.boxCheck(this, [0.0, 0.85, 0.4, 1.7], { dmg: 95, knockdown: true, chip: 10, bstun: 16, push: 0.12, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 });
           if (this.st % 3 === 0) m.fx.hit(this.x - this.facing * 0.3, 0.1, '#d9cdb4', 2, -this.facing);
+        } else if (this.comboMaster && this.moveHit && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); break;
         } else {
           this.vx *= 0.7; this.armor = 0;
           if (!this.rushStop) this.rushStop = this.st;
@@ -474,7 +479,8 @@
     var comboing = def.state === 'hitstun' || def.state === 'airhit';
     def.combo = comboing ? def.combo + 1 : 1; def.comboTimer = 50;
     var scale = Math.max(hit.superHit ? 0.6 : 0.4, 1 - 0.1 * (def.combo - 1));
-    var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale * (def.passive === 'thickskin' ? 0.88 : 1)));
+    var mastery = att.comboMaster && def.combo >= 4 ? 1.15 : 1;   // Combo Mastery: +15% from the 4th hit on
+    var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale * mastery * (def.passive === 'thickskin' ? 0.88 : 1)));
     def.health -= dmg; def.dmgTaken += dmg;
     this.survive(def);
     if (!hit.superHit) this.addMeter(att, dmg * KC.METER_PER_DMG);   // super charges by damage dealt (supers never charge it)
@@ -490,7 +496,7 @@
     } else {
       def.lowHit = def.isCrouching();
       def.setState('hitstun'); def.stun = hit.stun || 14;
-      def.vx = (hit.push || 0.06) * dir;
+      def.vx = (hit.push || 0.06) * dir * (att.comboMaster && !hit.superHit ? 0.45 : 1);   // mastery strings keep the target close
       if (melee && Math.abs(def.x) > STAGE_BOUND - 0.15) att.vx = -(hit.push || 0.06) * dir * 0.9;
     }
     this.hitstop = Math.max(this.hitstop, hit.hitstop || 5);
@@ -500,7 +506,7 @@
     if (heavy) this.fx.ring(cx, cy, '#ffffff', 0.8, true);
     this.shake(heavy ? 0.12 : 0.05);
     KC.Audio.play(hit.sfx || 'hitL');
-    if (def.combo >= 2) KC.HUD.combo(att.slot, def.combo);
+    if (def.combo >= 2) KC.HUD.combo(att.slot, def.combo, att.comboMaster && def.combo >= 4);
     if (heavy || def.combo >= 3) { this.stage.cheer(heavy ? 0.25 : 0.15, def.x); }
     return 'hit';
   };

@@ -453,6 +453,8 @@ KC.UPGRADE = {
   }
 };
 
+KC.MASTERY_TEXT = 'Chain any punch or kick into any other (4-hit strings), cancel specials and charges into your Super, and deal +15% damage from the 4th hit of a combo.';
+
 /* ---------- Campaign: 100 levels vs CPU ---------- */
 KC.LEVELS = 250;
 KC.level = function (n) {

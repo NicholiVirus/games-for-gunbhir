@@ -482,3 +482,8 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .payline { left: 0; right: 0; top: 50%; bottom: auto; width: auto; height: 112px; transform: translateY(-50%); }
 @keyframes payflash { 50% { box-shadow: 0 0 40px #fff; transform: translateY(-50%) scale(1.08); } }
 .ch-rewards { bottom: 100px; }
+
+.combo.master { color: #ff9ab0; text-shadow: 0 3px 0 #000, 0 0 24px rgba(255,77,109,0.8); }
+.col-info .mastery { margin: 8px 0; padding: 10px 12px; border-radius: 10px; font-size: 14.5px; background: rgba(255,255,255,0.05); border: 1px dashed #6f7fa8; color: #b9c6e6; }
+.col-info .mastery.on { border: 2px solid #ff4d6d; background: rgba(255,77,109,0.12); color: #ffd6de; }
+.col-info .mastery b { color: #ff9ab0; }
