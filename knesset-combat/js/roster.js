@@ -473,7 +473,7 @@ KC.level = function (n) {
 };
 
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
-KC.SHARDS = { common: 5, rare: 10, superrare: 12, epic: 15, mythic: 20, legendary: 25 };
+KC.SHARDS = { common: 10, rare: 15, superrare: 17, epic: 20, mythic: 25, legendary: 30 };   // +5 each
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
 KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 10; };   // single shards are a premium shortcut (10x base)
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
@@ -490,7 +490,8 @@ KC.CHESTS = [
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
 KC.chestBase = function (n) { return Math.min(3, Math.floor((n - 1) / 80) + (n % 10 === 0 ? 1 : 0)); };   // lower-tier chests: base rises every 80 levels, max Epic
 KC.TAP_CHANCE = 0.3;     // every tap has a 30% chance to upgrade the chest one tier
-KC.BASE_TAPS = 3;        // every chest starts with 3 upgrade taps
+KC.BASE_TAPS = 3;
+KC.CAMPAIGN_CHEST_COINS = 2;   // campaign chests pay double coins        // every chest starts with 3 upgrade taps
 KC.TAP_UPGRADE = [0.3, 0.3, 0.3];
 /* Chest Store: buy chests with coins; lucky chests come with extra upgrade taps */
 KC.CHEST_STORE = [

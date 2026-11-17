@@ -828,8 +828,8 @@
 
   /* ---------- chests: tap to upgrade, then open ---------- */
   function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
-  G.rollChest = function (tierIdx) {
-    var t = KC.CHESTS[tierIdx], out = { coins: rnd(t.coins[0], t.coins[1]), items: [] };
+  G.rollChest = function (tierIdx, coinMult) {
+    var t = KC.CHESTS[tierIdx], out = { coins: Math.round(rnd(t.coins[0], t.coins[1]) * (coinMult || 1)), items: [] };
     var total = rnd(t.shards[0], t.shards[1]);
     var locked = KC.ROSTER.filter(function (c) { return !Save.owns(c.id) && !c.starter; });
     var picks = Math.min(t.picks, Math.max(1, locked.length));
@@ -859,7 +859,7 @@
       camMode = 'chest'; stage.setMode('night'); clearPreviews(); KC.Audio.playMusic('menu');
       var q = Save.data.chestQueue || [];
       var item = KC.chestItem(q.length ? q[0] : 0);
-      this.tier = item.tier; this.maxTaps = item.taps || KC.BASE_TAPS;
+      this.tier = item.tier; this.maxTaps = item.taps || KC.BASE_TAPS; this.camp = !!item.camp || typeof (q.length ? q[0] : 0) === 'number';
       this.taps = 0; this.phase = 'tap'; this.shake = 0; this.t = 0; this.open = 0; this.flash = 0;
       if (chestObj) scene.remove(chestObj.g);
       chestObj = M.buildChest(); chestObj.g.position.set(0, 0, 2.2); scene.add(chestObj.g);
@@ -887,14 +887,14 @@
           this.tier++; chestObj.setTier(KC.CHESTS[this.tier]); this.flash = 1;
           KC.Audio.play('unlock'); fx.ring(0, 0.6, KC.CHESTS[this.tier].glow, 2.4, true); fx.hit(0, 0.8, KC.CHESTS[this.tier].glow, 26);
           if (this.tier >= 3) KC.Audio.say(KC.CHESTS[this.tier].id === 'legend' ? 'Legendary!' : KC.CHESTS[this.tier].id === 'mythic' ? 'Mythic!' : 'Epic!');
-          var sq = Save.data.chestQueue; if (sq && sq.length) { sq[0] = { tier: this.tier, taps: this.maxTaps }; Save.write(); }
+          var sq = Save.data.chestQueue; if (sq && sq.length) { sq[0] = { tier: this.tier, taps: this.maxTaps, camp: this.camp }; Save.write(); }
         } else { KC.Audio.play('hitL'); fx.hit(0, 0.5, '#ffffff', 6); }
         if (this.taps >= this.maxTaps) { this.phase = 'ready'; this.autoOpen = 0.7; }
         this.ui();
       } else if (this.phase === 'ready') {
         this.phase = 'done'; this.open = 0.001;
         (Save.data.chestQueue || []).shift();
-        var r = G.rollChest(this.tier);
+        var r = G.rollChest(this.tier, this.camp ? KC.CAMPAIGN_CHEST_COINS : 1);
         KC.Audio.play('boom'); KC.Audio.play('cheer', 1.2); stage.cheer(1, 0);
         fx.hit(0, 1.0, '#ffd166', 40); fx.papers_(0, 1.2, 18, 0); fx.ring(0, 1, KC.CHESTS[this.tier].glow, 3, false);
         var html = '<div class="chr coin-r"><span class="coin big"></span>+' + r.coins + ' coins</div>';
@@ -1256,7 +1256,7 @@
     if (humanWon && cfg.mode !== 'versus') add('Opposition: ' + lvl.toUpperCase(), C.difficulty[lvl] || 0);
     var finalStop = cfg.mode === 'campaign' && G.campaign && G.campaign.idx === G.campaign.stops.length - 1;
     if (cfg.mode === 'campaign' && humanWon) add('Arcade stop cleared', C.campaignStop);
-    if (finalStop && humanWon) { add('ARCADE COMPLETE', C.campaignClear); d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: 2, taps: KC.BASE_TAPS }); }
+    if (finalStop && humanWon) { add('ARCADE COMPLETE', C.campaignClear); d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: 2, taps: KC.BASE_TAPS, camp: true }); }
     var firstClear = false;
     if (cfg.mode === 'tour' && humanWon) {
       var LV = KC.level(cfg.levelNo); firstClear = cfg.levelNo > (d.tour || 0);
@@ -1277,7 +1277,7 @@
       var LV2 = KC.level(cfg.levelNo), streak = d.campWins % 10 === 0;
       if (LV2.boss || streak || Math.random() < 0.6) {
         chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 1 : 0)), streak: streak };
-        d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: chestDrop.tier, taps: KC.BASE_TAPS });
+        d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: chestDrop.tier, taps: KC.BASE_TAPS, camp: true });
       }
     }
     var golds = Save.refreshGold();

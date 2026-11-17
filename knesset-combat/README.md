@@ -62,7 +62,7 @@ Every chest, bought or earned, starts with 3 upgrade taps, and each tap has a 30
 - **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
-- **Recruiting with shards:** collect 5 (Common), 10 (Rare), 12 (Super Rare), 15 (Epic), 20 (Mythic) or 25 (Legendary) shards to recruit a leader for free.
+- **Recruiting with shards:** collect 10 (Common), 15 (Rare), 17 (Super Rare), 20 (Epic), 25 (Mythic) or 30 (Legendary) shards to recruit a leader for free.
   - You can buy single shards in the Shop with `B`. They cost a premium: about 6× more per shard than recruiting outright.
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.

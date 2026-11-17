@@ -19,7 +19,9 @@
   var AI = KC.AI = function (fighter, level, skill) {
     this.f = fighter; this.level = level;
     this.skill = skill != null ? skill : (SKILL[level] != null ? SKILL[level] : 0.42);
+    this.skill = Math.min(1, this.skill + 0.06);   // slightly smarter across the board
     this.L = blend(this.skill);
+    this.plan = null; this.planT = 0;
     this.intent = 'approach'; this.intentT = 0; this.hold = {}; this.threatT = -1; this.defend = 0; this.defendLow = false;
     this.press = null; this.pressT = 0; this.jumpPlan = 0;
   };
@@ -65,14 +67,57 @@
     }
     if (f.state === 'blockstun' && R() < L.block) { inp[away] = 1; inp.d = this.defendLow ? 1 : 0; return inp; }
 
-    /* ---- combos: cancel after a connecting normal ---- */
+    /* ---- combos: hit-confirm into a planned route ---- */
     if (f.state === 'attack' && f.moveHit && f.move && !f.move.air) {
-      if (R() < L.combo * 0.25) {
-        if (f.meter >= 100 && f.hasSuper && R() < L.superUse) return this.tap(inp, 'x');
-        if (f.move.id === 'LP' || f.move.id === 'CP') return this.tap(inp, R() < 0.5 ? 'p' : (R() < 0.5 ? 'k' : 's'));
-        return this.tap(inp, 's');
+      if (!this.routeFor || this.routeFor !== f.move) {
+        this.routeFor = f.move;
+        // decide once per connecting hit: continue the string, cash out into special/super, or stop
+        var go = R() < L.combo;
+        var id = f.move.id, nxt = null;
+        if (go) {
+          var canChain = (id === 'LP' || id === 'CP') && f.chainCount < 2;
+          var superOK = f.meter >= 100 && f.hasSuper && R() < L.superUse;
+          var spOK = f.ch.special.type !== 'projectile' || !m.hasProjectile(f);
+          if (canChain && R() < 0.65) nxt = { b: 'p', d: id === 'CP' ? 1 : 0 };
+          else if (superOK) nxt = { b: 'x', d: 0 };
+          else if (spOK) nxt = { b: 's', d: 0 };
+          else if (f.alt && R() < 0.5) nxt = { b: 's', d: 1 };
+        }
+        this.route = nxt; this.routeDelay = Math.max(1, 6 - Math.round(L.combo * 5));
+      }
+      if (this.route) {
+        if (this.routeDelay > 0) { this.routeDelay--; return inp; }
+        var rt = this.route; this.route = null;
+        if (rt.d) inp.d = 1;
+        return this.tap(inp, rt.b);
       }
       return inp;
+    }
+    if (f.state !== 'attack') this.routeFor = null;
+
+    /* ---- setups: juggle, meaty on wake-up, mix-ups after blocked strings ---- */
+    if (f.actionable() && R() < L.combo) {
+      // juggle a falling opponent with an uppercut / air attack
+      if (o.state === 'airhit' && o.y < 1.4 && dist < 1.4 && o.vy < 0 && f.alt && f.alt.type === 'rising') { inp.d = 1; return this.tap(inp, 's'); }
+      // opponent is down: walk to point-blank and time an attack as they stand
+      if (o.state === 'knockdown' || o.state === 'getup') {
+        this.plan = 'meaty';
+        if (dist > 1.05) { inp[toward] = 1; return inp; }
+        if (o.state === 'getup' && o.st >= 14) { if (R() < 0.5) inp.d = 1; return this.tap(inp, R() < 0.5 ? 'k' : 'p'); }
+        if (dist < 0.75) { inp[away] = 1; return inp; }
+        return inp;
+      }
+      // they blocked our string: mix them up (low sweep vs. jump-in overhead vs. frame-trap jab)
+      if (o.state === 'blockstun' && dist < 1.5) {
+        var mix = R();
+        if (mix < 0.35) { inp.d = 1; return this.tap(inp, 'k'); }
+        if (mix < 0.55 && dist > 0.9) { inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; return inp; }
+        if (mix < 0.8) return this.tap(inp, 'p');
+        // keep them pinned so their guard meter runs out
+        inp[toward] = 1; return inp;
+      }
+      // they keep blocking: lean in to pressure their 2.5 s guard
+      if ((o.blockTime || 0) > KC.GUARD_FRAMES * 0.5 && dist < 1.4) return this.tap(inp, R() < 0.6 ? 'p' : 'k');
     }
     if (f.state === 'jump' && !f.airUsed && f.vy < 0.05 && dist < 1.6) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
     if (!f.actionable()) return inp;
