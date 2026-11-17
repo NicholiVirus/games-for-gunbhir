@@ -445,3 +445,22 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .ammo .ap.on { background: radial-gradient(circle at 35% 35%, #fff6c8, #ffb347); box-shadow: 0 0 6px #ffb347; }
 .ammo .rl { width: 70px; height: 7px; border-radius: 4px; background: rgba(0,0,0,0.55); overflow: hidden; border: 1px solid #fff; }
 .ammo .rl span { display: block; height: 100%; background: #ff8a3d; }
+
+/* ---------- chest slot machine ---------- */
+.slot-machine { display: flex; flex-direction: column; gap: 10px; align-items: center; padding: 14px 18px; border-radius: 18px; background: linear-gradient(180deg, #1b1230, #0b0f1c); border: 4px solid var(--col); box-shadow: 0 0 30px var(--glow), inset 0 0 20px rgba(0,0,0,0.6); }
+.reel { position: relative; height: 112px; overflow: hidden; border-radius: 12px; background: #070a14; border: 3px solid #2b3d70; max-width: calc(100vw - 80px); }
+.reel::before, .reel::after { content: ''; position: absolute; top: 0; bottom: 0; width: 70px; z-index: 2; pointer-events: none; }
+.reel::before { left: 0; background: linear-gradient(90deg, #070a14, rgba(7,10,20,0)); }
+.reel::after { right: 0; background: linear-gradient(270deg, #070a14, rgba(7,10,20,0)); }
+.strip { display: flex; height: 100%; will-change: transform; }
+.sc { flex: 0 0 112px; height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-right: 2px solid #1a2546; background: #121c3a; }
+.sc img { width: 70px; height: 70px; border-radius: 10px; }
+.sc b { font-family: var(--display); font-size: 13px; color: #fff; }
+.sc.coin-cell { background: radial-gradient(circle, #3a2c08, #121c3a); }
+.sc.coin-cell .coin { width: 40px; height: 40px; }
+.sc.coin-cell b { font-size: 20px; color: var(--gold); }
+.sc.r-rare { box-shadow: inset 0 -5px 0 #3d8bff; } .sc.r-superrare { box-shadow: inset 0 -5px 0 #2fd4b4; } .sc.r-epic { box-shadow: inset 0 -5px 0 #b46cff; }
+.sc.r-mythic { box-shadow: inset 0 -5px 0 #ff4d6d; background: #2a0d16; } .sc.r-legendary { box-shadow: inset 0 -5px 0 #f2c14e; background: #2a2208; } .sc.r-common { box-shadow: inset 0 -5px 0 #a7b1c4; }
+.payline { position: absolute; left: 50%; top: 0; bottom: 0; width: 112px; transform: translateX(-50%); border: 3px solid var(--gold); border-radius: 10px; z-index: 3; pointer-events: none; box-shadow: 0 0 14px rgba(242,193,78,0.6); }
+.reel.stopped .payline { animation: payflash 0.5s ease-out 2; border-color: #fff; }
+@keyframes payflash { 50% { box-shadow: 0 0 40px #fff; transform: translateX(-50%) scale(1.08); } }

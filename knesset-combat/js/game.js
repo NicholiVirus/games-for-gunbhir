@@ -835,6 +835,7 @@
     },
     tap: function () {
       KC.Audio.init();
+      if (this.spinning) { G.slotSkip(); return; }
       if (this.phase === 'tap') {
         var chance = KC.TAP_UPGRADE[this.taps];
         this.taps++; this.shake = 0.45;
@@ -856,9 +857,16 @@
         r.items.forEach(function (it, i) {
           var note = it.res.recruited ? '<b class="new">RECRUITED!</b>' : it.res.dupeCoins ? 'owned → +' + G.coin(it.res.dupeCoins) : it.res.have + ' / ' + it.res.need + ' shards';
           html += '<div class="chr" style="animation-delay:' + (0.25 + i * 0.25) + 's"><img src="' + por(it.ch) + '" alt=""><div><div>' + G.rarBadge(it.ch) + '</div><div class="chn">' + esc(it.ch.name) + '</div><div>+' + it.n + ' shard' + (it.n > 1 ? 's' : '') + ' · ' + note + '</div></div></div>';
-          if (it.res.recruited) setTimeout(function () { KC.Audio.say(it.ch.name + ' recruited!'); }, 900 + i * 300);
+          if (it.res.recruited) setTimeout(function () { KC.Audio.say(it.ch.name + ' recruited!'); }, 3600 + i * 300);
         });
-        $('chRewards').innerHTML = html;
+        var self = this;
+        this.spinning = true;
+        $('chHint').innerHTML = '<b>SPINNING…</b>';
+        G.slotReels(r, KC.CHESTS[this.tier], function () { self.spinning = false; $('chRewards').innerHTML = html; self.finishReveal(); });
+      }
+    },
+    finishReveal: function () {
+      {
         var self = this, q = Save.data.chestQueue || [], b = '';
         if (q.length) b += '<button type="button" data-a="again">OPEN NEXT CHEST (' + q.length + ')</button>';
         var nxt = Math.min(KC.LEVELS, (Save.data.tour || 0) + 1);
@@ -896,13 +904,68 @@
       }
       if (this.phase !== 'done') { if (Input.menu('ok')) this.tap(); }
       else {
+        if (this.spinning) { if (Input.menu('ok')) G.slotSkip(); return; }
         var n = $('chBtns').querySelectorAll('button').length;
+        if (!n) return;
         if (Input.menu('left') || Input.menu('up')) { this.btn = (this.btn - 1 + n) % n; this.hl(); KC.Audio.play('move'); }
         if (Input.menu('right') || Input.menu('down')) { this.btn = (this.btn + 1) % n; this.hl(); KC.Audio.play('move'); }
         if (Input.menu('ok')) $('chBtns').querySelectorAll('button')[this.btn].click();
       }
       if (Input.menu('back') && this.phase !== 'ready') go('levels');
     }
+  };
+  /* ---------- slot-machine reveal: one reel per reward, stopping one by one ---------- */
+  var slotState = null;
+  G.slotSkip = function () { if (slotState) slotState.skip(); };
+  G.slotReels = function (r, tier, done) {
+    var CELL = 112, VIEW = 3, LEN = 34, STOP = 30;
+    var targets = [{ coin: r.coins }].concat(r.items.map(function (it) { return { ch: it.ch, n: it.n }; }));
+    function cellFor(t) {
+      if (t.coin != null) return '<div class="sc coin-cell"><span class="coin big"></span><b>+' + t.coin + '</b></div>';
+      return '<div class="sc r-' + t.ch.rarity + '"><img src="' + por(t.ch) + '" alt=""><b>' + (t.n ? '+' + t.n + ' ◆' : esc(t.ch.short)) + '</b></div>';
+    }
+    function decoy() {
+      if (Math.random() < 0.3) return { coin: tier.coins[0] + Math.floor(Math.random() * (tier.coins[1] * 2 - tier.coins[0])) };
+      var pool = KC.ROSTER, w = tier.w, ch;
+      for (var k = 0; k < 6; k++) { ch = pool[(Math.random() * pool.length) | 0]; if ((w[ch.rarity] || 0) > 0 || Math.random() < 0.15) break; }
+      return { ch: ch, n: 1 + ((Math.random() * (tier.shards[1] + 2)) | 0) };
+    }
+    var html = '<div class="slot-machine" style="--glow:' + tier.glow + ';--col:' + tier.color + '">';
+    targets.forEach(function (t, i) {
+      var cells = '';
+      for (var c = 0; c < LEN; c++) cells += cellFor(c === STOP ? t : decoy());
+      html += '<div class="reel" style="width:' + (CELL * VIEW) + 'px"><div class="strip" id="strip' + i + '">' + cells + '</div><div class="payline"></div></div>';
+    });
+    html += '</div>';
+    $('chRewards').innerHTML = html;
+    var finalX = -(STOP * CELL - (CELL * VIEW / 2 - CELL / 2));
+    var stopped = 0, timers = [], tickT = null, finished = false;
+    function finishAll() {
+      if (finished) return; finished = true;
+      timers.forEach(clearTimeout); clearInterval(tickT); slotState = null;
+      setTimeout(done, 450);
+    }
+    // ticking that slows down as the reels decelerate
+    var tickGap = 45, tickAt = 0;
+    tickT = setInterval(function () { tickAt += 30; if (tickAt >= tickGap) { tickAt = 0; KC.Audio.play('tick'); tickGap = Math.min(260, tickGap * 1.07); } }, 30);
+    targets.forEach(function (t, i) {
+      var el = $('strip' + i), dur = 1.9 + i * 0.75;
+      el.style.transform = 'translateX(0px)';
+      void el.offsetWidth;
+      el.style.transition = 'transform ' + dur + 's cubic-bezier(0.12, 0.65, 0.18, 1)';
+      el.style.transform = 'translateX(' + finalX + 'px)';
+      timers.push(setTimeout(function () {
+        el.parentNode.classList.add('stopped');
+        var rare = t.ch && (t.ch.rarity === 'mythic' || t.ch.rarity === 'legendary' || t.ch.rarity === 'epic');
+        KC.Audio.play(rare ? 'unlock' : 'select');
+        fx.hit((i - (targets.length - 1) / 2) * 1.2, 1.6, rare ? '#ff4d6d' : tier.glow, rare ? 22 : 10);
+        if (++stopped === targets.length) finishAll();
+      }, dur * 1000));
+    });
+    slotState = { skip: function () {
+      targets.forEach(function (t, i) { var el = $('strip' + i); if (el) { el.style.transition = 'none'; el.style.transform = 'translateX(' + finalX + 'px)'; el.parentNode.classList.add('stopped'); } });
+      KC.Audio.play('select'); finishAll();
+    } };
   };
   G.openChests = function () { if ((Save.data.chestQueue || []).length) go('chest'); };
 
