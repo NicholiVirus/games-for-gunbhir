@@ -487,5 +487,5 @@ KC.CHESTS = [
   { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, epic: 35, mythic: 30, legendary: 55 } }
 ];
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
-KC.chestBase = function (n) { return Math.min(4, Math.floor((n - 1) / 50) + (n % 10 === 0 ? 1 : 0)); };
+KC.chestBase = function (n) { return Math.min(3, Math.floor((n - 1) / 80) + (n % 10 === 0 ? 1 : 0)); };   // lower-tier chests: base rises every 80 levels, max Epic
 KC.TAP_UPGRADE = [0.3, 0.3, 0.3];   // each of the 3 taps has a 30% chance to upgrade the chest

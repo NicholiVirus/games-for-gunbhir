@@ -1098,7 +1098,7 @@
       d.campWins = (d.campWins || 0) + 1;
       var LV2 = KC.level(cfg.levelNo), streak = d.campWins % 10 === 0;
       if (LV2.boss || streak || Math.random() < 0.6) {
-        chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 2 : 0)), streak: streak };
+        chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 1 : 0)), streak: streak };
         d.chestQueue = d.chestQueue || []; d.chestQueue.push(chestDrop.tier);
       }
     }

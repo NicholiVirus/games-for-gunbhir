@@ -43,8 +43,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## Chests and shards
 
-- **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 2 tiers better.
-- **Tiers:** Wooden → Silver → Golden → Epic → Mythic → Legendary. The base tier rises every 50 levels.
+- **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 1 tier better.
+- **Tiers:** Wooden → Silver → Golden → Epic → Mythic → Legendary. The base tier rises every 80 levels, up to Epic. Mythic and Legendary boxes only come from lucky taps.
 - **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
