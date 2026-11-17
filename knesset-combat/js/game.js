@@ -335,6 +335,7 @@
     if (s.enter) s.enter(arg);
   }
   G.go = go;
+  function highlight(ul, i) { ul.querySelectorAll('li').forEach(function (li, k) { li.classList.toggle('sel', k === i); }); }
   function navList(items, sel) {
     if (Input.menu('up')) { sel = (sel - 1 + items) % items; KC.Audio.play('move'); }
     if (Input.menu('down')) { sel = (sel + 1) % items; KC.Audio.play('move'); }
@@ -342,6 +343,7 @@
   }
 
   /* ---------- title ---------- */
+  $('title').addEventListener('click', function () { if (G.screen === 'title') { KC.Audio.init(); KC.Audio.play('gavel'); go('menu'); } });
   screens.title = {
     el: 'title',
     enter: function () { camMode = 'orbit'; stage.setMode('day'); KC.Audio.playMusic('menu'); },
@@ -367,8 +369,8 @@
       var self = this;
       $('menuList').innerHTML = MENU_ITEMS.map(function (it, i) { return '<li class="' + (i === self.sel ? 'sel' : '') + '" data-i="' + i + '">' + it.label + '</li>'; }).join('');
       $('menuList').querySelectorAll('li').forEach(function (li) {
-        li.onmouseenter = function () { self.sel = +li.dataset.i; self.render(); };
-        li.onclick = function () { self.sel = +li.dataset.i; self.choose(); };
+        li.onmouseenter = function () { if (self.sel !== +li.dataset.i) { self.sel = +li.dataset.i; highlight($('menuList'), self.sel); $('menuDesc').textContent = MENU_ITEMS[self.sel].desc; KC.Audio.play('move'); } };
+        li.onclick = function () { KC.Audio.init(); self.sel = +li.dataset.i; self.choose(); };
       });
       $('menuDesc').textContent = MENU_ITEMS[this.sel].desc;
       var d = Save.data, locked = Save.lockedByPrice(), own = d.owned.length;
@@ -425,8 +427,8 @@
       var cur = listCfg.items[this.sel];
       $('listHint').innerHTML = (cur && cur.desc ? '<div style="color:#dfe7ff;margin-bottom:6px">' + esc(cur.desc) + '</div>' : '') + (listCfg.hint || 'W/S or ↑/↓ to move · ENTER / F / K to choose · ESC to go back');
       $('listItems').querySelectorAll('li').forEach(function (li) {
-        li.onmouseenter = function () { self.sel = +li.dataset.i; self.render(); };
-        li.onclick = function () { self.sel = +li.dataset.i; self.activate(0); };
+        li.onmouseenter = function () { if (self.sel !== +li.dataset.i) { self.sel = +li.dataset.i; highlight($('listItems'), self.sel); } };
+        li.onclick = function () { KC.Audio.init(); self.sel = +li.dataset.i; self.activate(0); };
       });
     },
     activate: function (dir) {
@@ -884,7 +886,7 @@
     renderOpts: function () {
       var R = resCfg;
       $('resMenu').innerHTML = R.opts.map(function (o, i) { return '<li class="' + (i === R.sel ? 'sel' : '') + '" data-i="' + i + '">' + o.label + '</li>'; }).join('');
-      $('resMenu').querySelectorAll('li').forEach(function (li) { li.onclick = function () { R.opts[+li.dataset.i].fn(); }; });
+      $('resMenu').querySelectorAll('li').forEach(function (li) { li.onmouseenter = function () { R.sel = +li.dataset.i; highlight($('resMenu'), R.sel); }; li.onclick = function () { R.opts[+li.dataset.i].fn(); }; });
     },
     update: function () {
       var R = resCfg;
