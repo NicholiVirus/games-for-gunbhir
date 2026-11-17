@@ -118,7 +118,7 @@
         if (f.alt && (f.alt.type === 'projectile' || f.alt.type === 'rush') && R() < 0.05) {
           if (f.alt.type === 'rush' ? (dist > 1.4 && dist < 3.6) : !m.hasProjectile(f)) { inp.d = 1; return this.tap(inp, 's'); }
         }
-        if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && !(f.projCD > 0) && R() < 0.12) return this.tap(inp, 's'); }
+        if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && R() < 0.12) return this.tap(inp, 's'); }
         else if (dist > 1.4 && dist < 3.6 && R() < 0.08) return this.tap(inp, 's');
         else if (dist < 1.4) inp[away] = 1;
         else inp[toward] = 1;

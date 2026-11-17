@@ -53,7 +53,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.
   - Shards of leaders you already own become coins.
-- **Projectiles:** each fighter can have 3 on screen at once, +1 per upgrade rank, up to 6. There's a 1-second cooldown after each throw.
+- **Projectile ammo:** 3 shots, +1 per upgrade rank (max 6). Mash them all, then they reload together once you're empty, taking 1 second per shot. The HUD shows ammo pips and the reload bar.
 - **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins plus a Golden chest.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
 - **Shop:** buy shards, upgrade fighters, and buy gold skins with coins.

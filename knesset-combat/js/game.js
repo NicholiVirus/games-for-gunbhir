@@ -239,7 +239,7 @@
       hudEls = {
         hp: [hud.querySelector('.hp.p1'), hud.querySelector('.hp.p2')],
         meter: [hud.querySelector('.meter.p1'), hud.querySelector('.meter.p2')],
-        timer: hud.querySelector('.timer'), combo: [hud.querySelector('.combo.p1'), hud.querySelector('.combo.p2')],
+        timer: hud.querySelector('.timer'), ammo: [hud.querySelector('.ammo.p1'), hud.querySelector('.ammo.p2')], combo: [hud.querySelector('.combo.p1'), hud.querySelector('.combo.p2')],
         callout: [hud.querySelector('.callout.p1'), hud.querySelector('.callout.p2')]
       };
       for (var i = 0; i < 2; i++) {
@@ -288,6 +288,17 @@
         var mt = hudEls.meter[i];
         mt.querySelector('.mfill').style.transform = 'scaleX(' + (f.meter / 100).toFixed(3) + ')';
         mt.classList.toggle('full', f.meter >= 100 && f.hasSuper);
+        var am = hudEls.ammo[i], ap = f.ch.special.type === 'projectile' || (f.alt && f.alt.type === 'projectile');
+        am.style.display = ap ? '' : 'none';
+        if (ap) {
+          var key = f.ammo + '|' + f.projMax + '|' + (f.reload > 0 ? Math.ceil(f.reload / 6) : 0);
+          if (am.dataset.k !== key) {
+            am.dataset.k = key; var h = '';
+            for (var q = 0; q < f.projMax; q++) h += '<span class="ap' + (q < f.ammo ? ' on' : '') + '"></span>';
+            if (f.reload > 0) h += '<span class="rl"><span style="width:' + Math.round((1 - f.reload / (KC.PROJ_COOLDOWN * f.projMax)) * 100) + '%"></span></span><b>' + Math.ceil(f.reload / 60) + 's</b>';
+            am.innerHTML = h;
+          }
+        }
         if (comboT[i] > 0) { comboT[i]--; if (comboT[i] === 0) hudEls.combo[i].classList.remove('on'); }
         if (calloutT[i] > 0) { calloutT[i]--; if (calloutT[i] === 0) hudEls.callout[i].classList.remove('on'); }
       }
@@ -519,7 +530,7 @@
       var k = a.slot === 'special' ? keys.s : a.slot === 'alt' ? '↓+' + keys.s : keys.x;
       out += '<div class="abil"><span class="ak">' + k + '</span>' + (a.slot === 'super' ? '<b>SUPER</b> ' : '') + esc(a.name) + '</div>';
     });
-    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + Math.min(6, 3 + Save.rank(ch.id)) + '</span>Projectiles on screen (3 base, +1 per rank, max 6) · 1 s cooldown each</div>';
+    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + Math.min(6, 3 + Save.rank(ch.id)) + '</span>Projectile ammo (3 base, +1 per rank, max 6) · reloads 1 s per charge when empty</div>';
     if (ch.passive) out += '<div class="abil passive"><span class="ak">★</span><b>' + esc(ch.passive.name) + ':</b> ' + esc(KC.PASSIVES[ch.passive.id]) + '</div>';
     out += '</div><div class="rarline">' + r.abilities + ' abilit' + (r.abilities > 1 ? 'ies' : 'y') + (r.power > 1 ? ' · +' + Math.round((r.power - 1) * 100) + '% damage perk' : '') + (ch.passive ? ' · passive' : '') + '</div>';
     return out;

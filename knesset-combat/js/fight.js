@@ -1,7 +1,7 @@
 /* Knesset Combat 26' — fighters, frame data, hazards (projectiles/supers) and the match/round flow. */
 (function () {
   var T = THREE, M = KC.Models;
-  KC.PROJ_COOLDOWN = 60;      // 1 s cooldown after each projectile
+  KC.PROJ_COOLDOWN = 60;      // reload: 1 s per charge, starts only once every charge is used
   KC.PROJ_MAX = 6;
   KC.GUARD_FRAMES = 150;      // 2.5 s of continuous blocking
   KC.METER_PER_DMG = 0.3;     // ~330 damage dealt fills the super meter
@@ -52,7 +52,7 @@
     this.x = x; this.y = 0; this.vx = 0; this.vy = 0; this.facing = facing;
     this.health = this.maxHealth; this.state = 'idle'; this.st = 0; this.animT = 0;
     this.move = null; this.moveHit = false; this.stun = 0; this.invuln = 0; this.armor = 0;
-    this.blockTime = 0; this.guardBroken = 0; this.projCD = 0;
+    this.blockTime = 0; this.guardBroken = 0; this.ammo = this.projMax; this.reload = 0;
     this.combo = 0; this.comboTimer = 0; this.airUsed = false; this.chainCount = 0;
     this.sup = null; this.jitter = 0; this.lowHit = false; this.dmgTaken = 0; this.blockPose = false;
     this.noHitT = 0; this.curSpec = null; this.rushStop = 0; this.landLag = 0;
@@ -103,7 +103,7 @@
     if (!air && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); return true; }
     if (!air && this.fresh('s')) {
       var sp = (this.input.d && this.alt) ? this.alt : this.ch.special;
-      if (sp.type === 'projectile' && (m.hasProjectile(this) || this.projCD > 0)) { /* max on screen, or 1 s cooldown after each throw */ }
+      if (sp.type === 'projectile' && m.hasProjectile(this)) { /* out of ammo: reloading */ }
       else { this.consume('s'); this.startSpecial(m, sp); return true; }
     }
     if (cancel === 'special') return false;
@@ -157,7 +157,8 @@
     if (this.invuln > 0) this.invuln--;
     if (this.comboTimer > 0) { this.comboTimer--; if (this.comboTimer === 0) this.combo = 0; }
     this.noHitT++;
-    if (this.projCD > 0) this.projCD--;
+    // Projectile ammo: mash all charges, then reload them all (1 s per charge) once you're empty
+    if (this.reload > 0) { this.reload--; if (this.reload === 0) { this.ammo = this.projMax; if (m.phase === 'fight') m.callout(this, 'RELOADED', false); } }
     // Guard limit: holding block for more than 2.5 s (150 frames) breaks your guard
     if (this.guardBroken > 0) this.guardBroken--;
     var blocking = this.state === 'blockstun' || ((this.state === 'idle' || this.state === 'walk' || this.state === 'crouch') && this.blockPose);
@@ -388,11 +389,8 @@
     for (var i = 0; i < this.hazards.length; i++) { var h = this.hazards[i]; if (h.owner === o && Math.abs(h.x - f.x) < 3.5) return true; }
     return false;
   };
-  MP.hasProjectile = function (f) {
-    var n = 0;
-    for (var i = 0; i < this.hazards.length; i++) if (this.hazards[i].owner === f && this.hazards[i].kind === 'proj' && this.hazards[i].alive) n++;
-    return n >= f.projMax;
-  };
+  MP.hasProjectile = function (f) { return f.ammo <= 0; };   // true = can't throw (empty, reloading)
+
 
   /* ---- hit resolution ---- */
   MP.boxHits = function (att, box, def) {
@@ -535,7 +533,8 @@
   /* ---- projectiles + supers ---- */
   MP.addHazard = function (o) { var h = new Hazard(o); if (h.mesh) this.scene.add(h.mesh); this.hazards.push(h); return h; };
   MP.spawnProjectile = function (f, spec) {
-    f.projCD = KC.PROJ_COOLDOWN;
+    f.ammo = Math.max(0, f.ammo - 1);
+    if (f.ammo === 0) f.reload = KC.PROJ_COOLDOWN * f.projMax;
     var sp = spec || f.ch.special, mesh = M.buildProp(sp.proj, f.ch.super ? f.ch.super.color : null);
     var y = 1.22 * f.h;
     mesh.position.set(f.x + f.facing * 0.7, y, 0.05);
