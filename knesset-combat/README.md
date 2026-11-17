@@ -48,7 +48,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
-- **Recruiting with shards:** collect 5 (Common), 10 (Rare), 15 (Epic), 20 (Mythic) or 25 (Legendary) shards to recruit a leader for free.
+- **Recruiting with shards:** collect 5 (Common), 10 (Rare), 12 (Super Rare), 15 (Epic), 20 (Mythic) or 25 (Legendary) shards to recruit a leader for free.
   - You can buy single shards in the Shop with `B`. They cost a premium: about 6× more per shard than recruiting outright.
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.
@@ -56,7 +56,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Projectiles:** each fighter can have 3 on screen at once, +1 per upgrade rank, up to 6.
 - **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins plus a Golden chest.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
-- **Shop:** recruit fighters, upgrade them, and buy gold skins with coins.
+- **Shop:** buy shards, upgrade fighters, and buy gold skins with coins.
+  - Filter tabs: All, Owned, Locked, or any single rarity. Click a tab or press Q/E.
 
 ## Upgrades
 
@@ -71,6 +72,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 |---|---|---|---|
 | Common | 1 · Special | +8% damage | 100 coins |
 | Rare | 2 · Special + Super | +4% damage | 200 coins |
+| Super Rare | 2 · Special + Super | +2% damage | 300 coins |
 | Epic | 3 · Special + Down-Special + Super | — | 400 coins |
 | Mythic | 3 · Special + Down-Special + Super | unique passive | 500 coins |
 | Legendary | 3 · Special + Down-Special + Super | unique passive | 600 coins (The Speaker: 800) |

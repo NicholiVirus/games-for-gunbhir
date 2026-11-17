@@ -403,3 +403,35 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 
 .cell .price.shardp { color: #e6d7ff; }
 .cell .price.shardp .shard { width: 0.7em; height: 0.85em; vertical-align: -0.1em; margin-right: 1px; }
+
+/* ---------- super rare + shop tabs ---------- */
+.rar.r-superrare { background: #2fd4b4; color: #04211b; }
+.cell.r-superrare { border-color: #1fae93; background: linear-gradient(180deg, #14504a, #0a2622); }
+.cell.r-superrare::before { background: #2fd4b4; }
+.shop-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.stab { font-family: var(--display); font-size: 13px; padding: 6px 11px; border-radius: 8px; border: 2px solid var(--line); background: #13224a; color: #cfd9f5; cursor: pointer; }
+.stab:hover { filter: brightness(1.25); }
+.stab.on { background: #fff; color: #0b0f1c; border-color: var(--gold); }
+.stab.r-common.on { background: #a7b1c4; } .stab.r-rare.on { background: #3d8bff; color: #fff; } .stab.r-superrare.on { background: #2fd4b4; }
+.stab.r-epic.on { background: #b46cff; color: #fff; } .stab.r-mythic.on { background: #ff4d6d; color: #fff; } .stab.r-legendary.on { background: #f2c14e; }
+
+/* ---------- bigger icons everywhere ---------- */
+.sel-grid { grid-template-columns: repeat(10, minmax(0, 64px)); gap: 6px; }
+.col-grid { grid-template-columns: repeat(6, minmax(0, 72px)); gap: 7px; }
+.cell .price { font-size: 12px; }
+.cell .grp { font-size: 11px; }
+.cell.locked::after { font-size: 13px; }
+.hp .por { width: clamp(56px, 6.5vw, 86px); height: clamp(56px, 6.5vw, 86px); }
+.lad { width: 140px; } .lad img { width: 124px; height: 124px; }
+.unl img { width: 74px; height: 74px; }
+.chr img { width: 78px; height: 78px; }
+.lv-opp img { width: 92px; height: 92px; }
+.mandate-box .mb-next img { width: 58px; height: 58px; }
+.vs-side img { width: clamp(110px, 14vw, 190px); height: clamp(110px, 14vw, 190px); }
+.coin { width: 1.05em; height: 1.05em; }
+.shard { width: 0.95em; height: 1.15em; }
+.abil .ak { min-width: 36px; font-size: 11px; padding: 3px 6px; }
+.tp { width: 34px; height: 34px; }
+.lv { font-size: clamp(13px, 1.6vw, 17px); }
+@media (max-width: 1100px) { .sel-grid { grid-template-columns: repeat(10, minmax(0, 54px)); } }
+@media (max-width: 700px) { .sel-grid { grid-template-columns: repeat(10, minmax(0, 34px)); gap: 3px; } }

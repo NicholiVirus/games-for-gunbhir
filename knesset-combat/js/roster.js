@@ -13,6 +13,7 @@ window.KC = window.KC || {};
 KC.RARITY = {
   common: { id: 'common', name: 'Common', color: '#a7b1c4', abilities: 1, price: 100, power: 1.08 },
   rare: { id: 'rare', name: 'Rare', color: '#3d8bff', abilities: 2, price: 200, power: 1.04 },
+  superrare: { id: 'superrare', name: 'Super Rare', color: '#2fd4b4', abilities: 2, price: 300, power: 1.02 },
   epic: { id: 'epic', name: 'Epic', color: '#b46cff', abilities: 3, price: 400, power: 1.0 },
   mythic: { id: 'mythic', name: 'Mythic', color: '#ff4d6d', abilities: 3, price: 500, power: 1.0 },
   legendary: { id: 'legendary', name: 'Legendary', color: '#f2c14e', abilities: 3, price: 600, power: 1.0 }
@@ -46,7 +47,7 @@ KC.ROSTER = [
     quote: 'I have expressed my objection in eleven languages.', victory: 'bow'
   },
   {
-    id: 'eshkol', name: 'Levi Eshkol', short: 'ESHKOL', title: 'The Builder', rarity: 'rare',
+    id: 'eshkol', name: 'Levi Eshkol', short: 'ESHKOL', title: 'The Builder', rarity: 'superrare',
     group: 'pm', years: '1963–69',
     bio: 'Third Prime Minister. Built the national water network before he ever led the country.',
     look: { height: 0.96, girth: 1.08, skin: '#e8b996', hair: 'fringe', hairColor: '#bdbdb8', glasses: 'round', glassesColor: '#2a2a2a', outfit: 'suit', top: '#2f3542', pants: '#2a2f3a', shirt: '#f4f4f4', tie: '#3c5a8a', shoes: '#1d1d1d' },
@@ -99,7 +100,7 @@ KC.ROSTER = [
     quote: 'I yield the floor. You may stay on it.', victory: 'point'
   },
   {
-    id: 'shamir', name: 'Yitzhak Shamir', short: 'SHAMIR', title: 'The Stalwart', rarity: 'rare',
+    id: 'shamir', name: 'Yitzhak Shamir', short: 'SHAMIR', title: 'The Stalwart', rarity: 'superrare',
     group: 'pm', years: '1983–84, 1986–92',
     bio: 'Seventh Prime Minister, twice. Small in stature, famously unbending in style.',
     look: { height: 0.86, girth: 1.08, skin: '#e6b38c', hair: 'short', hairColor: '#e8e8e4', mustache: true, mustacheColor: '#e8e8e4', bushy: true, outfit: 'suit', top: '#3a3d44', pants: '#33363c', shirt: '#f2f2f2', tie: '#4b4b4b', shoes: '#1d1d1d' },
@@ -155,7 +156,7 @@ KC.ROSTER = [
     quote: 'Nobody stops the Bulldozer.', victory: 'fist'
   },
   {
-    id: 'olmert', name: 'Ehud Olmert', short: 'OLMERT', title: 'The Mayor', rarity: 'rare',
+    id: 'olmert', name: 'Ehud Olmert', short: 'OLMERT', title: 'The Mayor', rarity: 'superrare',
     group: 'pm', years: '2006–09',
     bio: 'Twelfth Prime Minister and a former Mayor of Jerusalem.',
     look: { height: 0.98, girth: 1.02, skin: '#e7b590', hair: 'fringe', hairColor: '#b5b5b0', glasses: 'thin', glassesColor: '#444444', outfit: 'suit', top: '#3a3f4b', pants: '#343944', shirt: '#f2f2f2', tie: '#8a2c2c', shoes: '#1d1d1d' },
@@ -176,7 +177,7 @@ KC.ROSTER = [
     quote: 'Exit complete. Unicorn achieved.', victory: 'fist'
   },
   {
-    id: 'lapid', name: 'Yair Lapid', short: 'LAPID', title: 'The Anchor', rarity: 'rare',
+    id: 'lapid', name: 'Yair Lapid', short: 'LAPID', title: 'The Anchor', rarity: 'superrare',
     group: 'pm', years: '2022',
     bio: 'Fourteenth Prime Minister. A former TV anchor, columnist and author.',
     look: { height: 1.02, girth: 0.98, skin: '#e7b08a', hair: 'full', hairColor: '#cfcfcb', outfit: 'open', top: '#16171b', pants: '#16171b', shirt: '#1f2026', tie: null, shoes: '#111111' },
@@ -205,7 +206,7 @@ KC.ROSTER = [
     quote: 'Every move was in the briefing.', victory: 'salute'
   },
   {
-    id: 'liberman', name: 'Avigdor Liberman', short: 'LIBERMAN', title: 'The Kingmaker', rarity: 'rare',
+    id: 'liberman', name: 'Avigdor Liberman', short: 'LIBERMAN', title: 'The Kingmaker', rarity: 'superrare',
     group: 'contender', years: 'Contender',
     bio: 'Long-time Yisrael Beiteinu leader, famous for deciding who gets to form a coalition.',
     look: { height: 1.0, girth: 1.25, skin: '#e8b590', hair: 'short', hairColor: '#8a8580', beard: '#9a958f', outfit: 'suit', top: '#2b2d33', pants: '#26282d', shirt: '#f2f2f2', tie: '#3a4f8c', shoes: '#1d1d1d' },
@@ -316,7 +317,7 @@ KC.ROSTER = [
     quote: 'I have dug up older things than you.', victory: 'point'
   },
   {
-    id: 'ezerweizman', name: 'Ezer Weizman', short: 'E. WEIZMAN', title: 'The Pilot', rarity: 'rare',
+    id: 'ezerweizman', name: 'Ezer Weizman', short: 'E. WEIZMAN', title: 'The Pilot', rarity: 'superrare',
     group: 'icon', years: 'President',
     bio: 'Air Force commander, Defense Minister and later President — a fighter pilot to the end.',
     look: { height: 1.08, girth: 0.98, skin: '#e6b28c', hair: 'short', hairColor: '#b9b5ae', mustache: true, mustacheColor: '#b9b5ae', outfit: 'open', top: '#2d4a7a', pants: '#26406a', shirt: '#dfe9f7', tie: null, shoes: '#111111' },
@@ -326,7 +327,7 @@ KC.ROSTER = [
     quote: 'Wheels up. You are grounded.', victory: 'salute'
   },
   {
-    id: 'rivlin', name: 'Reuven Rivlin', short: 'RIVLIN', title: 'The Unifier', rarity: 'rare',
+    id: 'rivlin', name: 'Reuven Rivlin', short: 'RIVLIN', title: 'The Unifier', rarity: 'superrare',
     group: 'icon', years: 'President',
     bio: "Former Knesset Speaker and Israel's tenth President, known for his 'four tribes' speech.",
     look: { height: 0.96, girth: 1.06, skin: '#e9b896', hair: 'short', hairColor: '#e9e9e4', glasses: 'thin', glassesColor: '#333333', outfit: 'suit', top: '#2b3040', pants: '#262a38', shirt: '#f2f2f2', tie: '#8a2c2c', shoes: '#1d1d1d' },
@@ -445,7 +446,7 @@ KC.COINS = { session: 20, round: 15, win: 30, perfect: 20, superKO: 15, campaign
 KC.UPGRADE = {
   max: 5,
   power: 0.05, defense: 0.05, health: 50,           // per rank
-  mult: { common: 1, rare: 1.5, epic: 2, mythic: 2.25, legendary: 2.5 },
+  mult: { common: 1, rare: 1.5, superrare: 1.75, epic: 2, mythic: 2.25, legendary: 2.5 },
   cost: function (ch, toRank) { return Math.round(80 * toRank * KC.UPGRADE.mult[ch.rarity]); },
   describe: function (rank) {
     return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP · ' + Math.min(6, 3 + rank) + ' projectiles' : 'No upgrades yet · 3 projectiles';
@@ -472,19 +473,19 @@ KC.level = function (n) {
 };
 
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
-KC.SHARDS = { common: 5, rare: 10, epic: 15, mythic: 20, legendary: 25 };
+KC.SHARDS = { common: 5, rare: 10, superrare: 12, epic: 15, mythic: 20, legendary: 25 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
 KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 5; };   // shards are a premium shortcut (5x)
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 
 /* ---------- Ballot-box chests ---------- */
 KC.CHESTS = [
-  { id: 'wood',   name: 'Wooden Ballot Box',  color: '#a8743f', glow: '#ffcf8a', coins: [10, 25],   shards: [1, 2],   picks: 1, w: { common: 70, rare: 25, epic: 5, mythic: 2, legendary: 0 } },
-  { id: 'silver', name: 'Silver Ballot Box',  color: '#c9d2df', glow: '#ffffff', coins: [15, 35],   shards: [2, 3],   picks: 1, w: { common: 50, rare: 35, epic: 12, mythic: 5, legendary: 3 } },
-  { id: 'gold',   name: 'Golden Ballot Box',  color: '#f2c14e', glow: '#fff3b0', coins: [25, 50],   shards: [3, 5],   picks: 2, w: { common: 30, rare: 40, epic: 22, mythic: 10, legendary: 8 } },
-  { id: 'epic',   name: 'Epic Ballot Box',    color: '#b46cff', glow: '#e6ccff', coins: [40, 80],   shards: [5, 8],   picks: 2, w: { common: 10, rare: 35, epic: 40, mythic: 18, legendary: 15 } },
-  { id: 'mythic', name: 'Mythic Ballot Box',  color: '#ff4d6d', glow: '#ffc2cf', coins: [60, 120],  shards: [8, 12],  picks: 3, w: { common: 0, rare: 25, epic: 45, mythic: 25, legendary: 30 } },
-  { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, epic: 35, mythic: 30, legendary: 55 } }
+  { id: 'wood',   name: 'Wooden Ballot Box',  color: '#a8743f', glow: '#ffcf8a', coins: [10, 25],   shards: [1, 2],   picks: 1, w: { common: 70, rare: 25, superrare: 12, epic: 5, mythic: 2, legendary: 0 } },
+  { id: 'silver', name: 'Silver Ballot Box',  color: '#c9d2df', glow: '#ffffff', coins: [15, 35],   shards: [2, 3],   picks: 1, w: { common: 50, rare: 35, superrare: 19, epic: 12, mythic: 5, legendary: 3 } },
+  { id: 'gold',   name: 'Golden Ballot Box',  color: '#f2c14e', glow: '#fff3b0', coins: [25, 50],   shards: [3, 5],   picks: 2, w: { common: 30, rare: 40, superrare: 25, epic: 22, mythic: 10, legendary: 8 } },
+  { id: 'epic',   name: 'Epic Ballot Box',    color: '#b46cff', glow: '#e6ccff', coins: [40, 80],   shards: [5, 8],   picks: 2, w: { common: 10, rare: 35, superrare: 30, epic: 40, mythic: 18, legendary: 15 } },
+  { id: 'mythic', name: 'Mythic Ballot Box',  color: '#ff4d6d', glow: '#ffc2cf', coins: [60, 120],  shards: [8, 12],  picks: 3, w: { common: 0, rare: 25, superrare: 28, epic: 45, mythic: 25, legendary: 30 } },
+  { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, superrare: 18, epic: 35, mythic: 30, legendary: 55 } }
 ];
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
 KC.chestBase = function (n) { return Math.min(3, Math.floor((n - 1) / 80) + (n % 10 === 0 ? 1 : 0)); };   // lower-tier chests: base rises every 80 levels, max Epic

@@ -502,7 +502,8 @@
   };
 
   /* ---------- character select ---------- */
-  var COLS = 14;
+  var COLS = 10;
+  G.SHOP_FILTERS = [{ id: 'all', label: 'ALL' }, { id: 'owned', label: 'OWNED' }, { id: 'locked', label: 'LOCKED' }, { id: 'common', label: 'COMMON' }, { id: 'rare', label: 'RARE' }, { id: 'superrare', label: 'SUPER RARE' }, { id: 'epic', label: 'EPIC' }, { id: 'mythic', label: 'MYTHIC' }, { id: 'legendary', label: 'LEGENDARY' }];
   function cellHTML(ch, i, extraCls, tags) {
     var owned = Save.owns(ch.id);
     var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'icon' ? 'MK' : '';
@@ -898,11 +899,26 @@
   screens.shop = {
     el: 'collection', cur: 0, gold: false, confirm: null,
     enter: function () { camMode = 'collection'; stage.setMode('day'); clearPreviews(); this.gold = false; this.confirm = null; this.render(true); },
+    list: function () {
+      var f = this.filter || 'all', out = [];
+      KC.ROSTER.forEach(function (ch, i) {
+        var own = Save.owns(ch.id);
+        if (f === 'all' || f === ch.rarity || (f === 'owned' && own) || (f === 'locked' && !own)) out.push(i);
+      });
+      return out;
+    },
+    setFilter: function (f) { this.filter = f; this.confirm = null; this.gold = false; KC.Audio.play('move'); this.render(true); },
+    cycleFilter: function (d) { var ids = G.SHOP_FILTERS.map(function (x) { return x.id; }), i = ids.indexOf(this.filter || 'all'); this.setFilter(ids[(i + d + ids.length) % ids.length]); },
     refresh: function () { this.render(true); },
     render: function (rebuild) {
       var self = this, d = Save.data;
       $('colSub').innerHTML = 'Wallet: <b class="wallet">' + G.coin(d.coins) + '</b> &nbsp;·&nbsp; ' + d.owned.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins';
-      $('colGrid').innerHTML = KC.ROSTER.map(function (ch, i) { return cellHTML(ch, i, i === self.cur ? 'c1' : ''); }).join('');
+      var FILTERS = G.SHOP_FILTERS, fl = this.filter || 'all';
+      $('shopTabs').innerHTML = FILTERS.map(function (f) { return '<button type="button" class="stab ' + (f.id !== 'all' && f.id !== 'owned' && f.id !== 'locked' ? 'r-' + f.id : '') + (f.id === fl ? ' on' : '') + '" data-f="' + f.id + '">' + f.label + '</button>'; }).join('');
+      $('shopTabs').querySelectorAll('.stab').forEach(function (b) { b.onclick = function () { self.setFilter(b.dataset.f); }; });
+      var list = this.list();
+      if (list.indexOf(this.cur) < 0 && list.length) { this.cur = list[0]; rebuild = true; }
+      $('colGrid').innerHTML = list.length ? list.map(function (i) { return cellHTML(KC.ROSTER[i], i, i === self.cur ? 'c1' : ''); }).join('') : '<div class="next-unlock" style="grid-column:1/-1">No fighters in this group.</div>';
       $('colGrid').querySelectorAll('.cell').forEach(function (c) { c.onclick = function () { if (self.cur === +c.dataset.i) self.buy(); else { self.cur = +c.dataset.i; self.gold = false; self.confirm = null; KC.Audio.play('move'); self.render(true); } }; });
       var ch = KC.ROSTER[this.cur], owned = Save.owns(ch.id), price = G.recruitPrice(ch);
       var wins = d.charWins[ch.id] || 0, goldOk = Save.hasGold(ch.id);
@@ -978,11 +994,16 @@
       } else { KC.Audio.play('deny'); }
     },
     update: function () {
-      var n = KC.ROSTER.length, c = this.cur, cols = 6;
-      if (Input.menu('left')) c = (c - 1 + n) % n;
-      if (Input.menu('right')) c = (c + 1) % n;
-      if (Input.menu('up')) c = (c - cols + n) % n;
-      if (Input.menu('down')) c = (c + cols) % n;
+      var list = this.list(), n = list.length, pos = Math.max(0, list.indexOf(this.cur)), cols = 6;
+      if (Input.hit(['KeyQ', 'BracketLeft'])) this.cycleFilter(-1);
+      if (Input.hit(['KeyE', 'BracketRight', 'Tab'])) this.cycleFilter(1);
+      if (n) {
+        if (Input.menu('left')) pos = (pos - 1 + n) % n;
+        if (Input.menu('right')) pos = (pos + 1) % n;
+        if (Input.menu('up')) pos = (pos - cols + n * cols) % n;
+        if (Input.menu('down')) pos = (pos + cols) % n;
+      }
+      var c = n ? list[pos] : this.cur;
       if (c !== this.cur) { this.cur = c; this.gold = false; this.confirm = null; KC.Audio.play('move'); this.render(true); }
       if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Pad0_a', 'Pad1_a'])) this.buy();
       if (Input.hit(['KeyB', 'Pad0_y', 'Pad1_y'])) this.buy(Save.owns(KC.ROSTER[this.cur].id) ? 'gold' : 'shard');
