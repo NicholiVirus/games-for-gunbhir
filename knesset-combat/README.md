@@ -53,7 +53,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 | Epic Ballot Box | 3 | 1,000 |
 | Jackpot Epic Box | 8 | 1,600 |
 
-Every chest, bought or earned, starts with 3 upgrade taps, and each tap has a 30% chance to upgrade it. Lucky chests get extra taps.
+Every chest starts with 3 upgrade taps. Each tap has a **45%** chance to upgrade a bought chest, or a 30% chance for a campaign chest. Lucky chests get extra taps.
 
 ## Chests and shards
 

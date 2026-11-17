@@ -875,14 +875,14 @@
       $('chTier').textContent = t.name.toUpperCase(); $('chTier').style.color = t.color;
       var pips = ''; for (var i = 0; i < this.maxTaps; i++) pips += '<span class="tp' + (i < this.taps ? ' used' : '') + '"></span>';
       $('chPips').innerHTML = this.phase === 'tap' ? pips : '';
-      $('chHint').innerHTML = this.phase === 'tap' ? 'TAP to shake it — it might <b>upgrade</b>! (' + (this.maxTaps - this.taps) + ' taps left)'
+      $('chHint').innerHTML = this.phase === 'tap' ? 'TAP to shake it — ' + Math.round((this.camp ? KC.TAP_CHANCE : KC.TAP_CHANCE * 1.5) * 100) + '% to <b>upgrade</b>! (' + (this.maxTaps - this.taps) + ' taps left)'
         : this.phase === 'ready' ? '<b>OPENING…</b>' : '';
     },
     tap: function () {
       KC.Audio.init();
       if (this.spinning) { G.slotSkip(); return; }
       if (this.phase === 'tap') {
-        var chance = KC.TAP_CHANCE;
+        var chance = this.camp ? KC.TAP_CHANCE : KC.TAP_CHANCE * 1.5;   // bought chests upgrade 50% more often (45% vs 30%)
         this.taps++; this.shake = 0.45;
         if (this.tier < KC.CHESTS.length - 1 && Math.random() < chance) {
           this.tier++; chestObj.setTier(KC.CHESTS[this.tier]); this.flash = 1;
@@ -1021,7 +1021,7 @@
       return KC.CHEST_STORE.map(function (o) {
         var t = KC.CHESTS[o.tier];
         return { label: o.name.toUpperCase(), value: function () { return (pending === o.id ? 'CONFIRM · ' : '') + o.price + ' coins'; },
-          desc: t.name + ' base · ' + o.desc + ' (30% each) · ' + t.coins[0] + '–' + t.coins[1] + ' coins + ' + t.shards[0] + '–' + t.shards[1] + ' shards',
+          desc: t.name + ' base · ' + o.desc + ' (45% each) · ' + t.coins[0] + '–' + t.coins[1] + ' coins + ' + t.shards[0] + '–' + t.shards[1] + ' shards',
           action: function () {
             if (!Save.canAfford(o.price)) { KC.Audio.play('deny'); G.toast('You need ' + G.coin(o.price - Save.data.coins) + ' more for the ' + o.name + '.'); return; }
             if (pending !== o.id) { pending = o.id; KC.Audio.play('move'); screens.list.render(); return; }
@@ -1033,7 +1033,7 @@
           } };
       });
     }
-    showList({ title: '🎁 CHEST STORE', sub: 'Wallet: ' + G.coin(Save.data.coins) + ' · Fighters only unlock from shards — and shards come from chests. Lucky chests get extra 30% upgrade taps.',
+    showList({ title: '🎁 CHEST STORE', sub: 'Wallet: ' + G.coin(Save.data.coins) + ' · Fighters only unlock from shards — and shards come from chests. Bought chests upgrade at 45% per tap (campaign chests 30%), and Lucky chests get extra taps.',
       items: items().concat([{ label: 'BACK', action: back }]), back: back, hint: 'Choose a chest · ENTER / click twice to buy · ESC back' });
   };
   G.openChests = function () { if ((Save.data.chestQueue || []).length) go('chest'); };
