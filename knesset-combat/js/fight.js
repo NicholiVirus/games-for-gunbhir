@@ -15,7 +15,7 @@
   };
 
   /* ---------- Fighter ---------- */
-  var F = KC.Fighter = function (ch, slot, skin) {
+  var F = KC.Fighter = function (ch, slot, skin, rank, boost) {
     this.ch = ch; this.slot = slot; this.skin = skin;
     this.model = M.buildFighter(ch, { skin: skin });
     this.h = ch.look.height || 1; this.g = ch.look.girth || 1;
@@ -34,6 +34,12 @@
     this.alt = KC.hasAlt(ch) ? ch.special2 : null;
     this.passive = ch.passive ? ch.passive.id : null;
     this.survived = false;
+    // upgrades (coins) and campaign level scaling for CPU opponents
+    this.rank = rank || 0;
+    var U = KC.UPGRADE, bst = boost || 1;
+    this.stats.power *= (1 + this.rank * U.power) * bst;
+    this.stats.defense *= (1 + this.rank * U.defense) * bst;
+    this.maxHealth = 1000 + this.rank * U.health;
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -320,7 +326,8 @@
     this.game = game; this.scene = game.scene; this.camera = game.camera; this.stage = game.stage;
     this.opts = opts;
     this.fx = game.fx;
-    var a = new F(opts.chars[0], 0, opts.skins[0]), b = new F(opts.chars[1], 1, opts.skins[1]);
+    var rk = opts.ranks || [0, 0], bo = opts.boosts || [1, 1];
+    var a = new F(opts.chars[0], 0, opts.skins[0], rk[0], bo[0]), b = new F(opts.chars[1], 1, opts.skins[1], rk[1], bo[1]);
     a.opp = b; b.opp = a;
     this.f = [a, b];
     this.scene.add(a.model.root); this.scene.add(b.model.root);

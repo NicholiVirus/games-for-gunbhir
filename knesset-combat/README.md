@@ -28,10 +28,21 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## Modes
 
-- **Election Campaign:** arcade ladder vs 5 CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins.
+- **Campaign · 100 levels:** fixed CPU rivals that get tougher.
+  - Levels 1–15 are Easy, 16–45 Normal, 46–80 Hard and 81–100 Boss.
+  - Every 10th level is a boss fight.
+  - Opponents also gain strength and upgrade ranks as you climb.
+  - The first clear of a level pays 25 + 3 × level coins (+100 on boss levels); replays pay 30%.
+- **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
-- **Vs CPU:** Easy / Normal / Hard. Harder pays more.
-- **Shop:** recruit fighters and buy gold skins with coins.
+- **Shop:** recruit fighters, upgrade them, and buy gold skins with coins.
+
+## Upgrades
+
+- Every fighter you own can be upgraded from **Rank 0 to Rank 5** in the Shop, with Enter/F or a click.
+- Each rank adds **+5% damage, +5% defense and +50 HP**, in every mode.
+- Rank N costs 80 × N coins × the rarity multiplier: Common ×1, Rare ×1.5, Epic ×2, Legendary ×2.5.
+- Example: a Legendary fighter's Rank 5 costs 1,000 coins.
 
 ## Rarity and abilities
 

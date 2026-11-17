@@ -296,3 +296,28 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .meter.none { opacity: 0.55; border-style: dashed; }
 .meter.none .mfill { display: none; }
 .res-earn h3 { margin-bottom: 6px; }
+
+/* ---------- campaign levels + upgrades ---------- */
+#levels { background: rgba(5,8,18,0.7); }
+.lv-panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(980px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow: auto; }
+.lv-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, 320px); gap: 16px; align-items: start; }
+.lv-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; }
+.lv { aspect-ratio: 1; border-radius: 7px; border: 2px solid #2b3d70; background: #121c3a; color: #6f7fa8; font-family: var(--display); font-size: clamp(11px, 1.4vw, 15px); cursor: pointer; padding: 0; }
+.lv.done { background: #1d3a2a; border-color: #3fae6a; color: #b6f5c2; }
+.lv.open { background: #2a3f7a; border-color: var(--sky); color: #fff; animation: blink 1.2s steps(2) infinite; }
+.lv.boss { box-shadow: inset 0 0 0 2px rgba(242,193,78,0.6); }
+.lv.boss.locked { color: #a8862e; }
+.lv.sel { outline: 3px solid var(--gold); outline-offset: 1px; animation: none; }
+.lv:focus-visible { outline: 3px solid #fff; }
+.lv-opp { display: flex; gap: 10px; align-items: center; margin: 6px 0; }
+.lv-opp img { width: 64px; height: 64px; border-radius: 10px; background: #13224a; flex: none; }
+.lv-reward { margin: 8px 0; font-size: 14px; font-weight: 700; color: #ffe29a; }
+.lv-go { width: 100%; margin-top: 8px; padding: 12px; font-family: var(--display); font-size: 18px; color: #1b1200; background: linear-gradient(90deg, #f2c14e, #fff3b0); border: 0; border-radius: 10px; cursor: pointer; }
+.rank { color: var(--gold); }
+.rankbox { margin: 10px 0; padding: 8px 10px; border-radius: 10px; background: rgba(242,193,78,0.1); border: 1px solid rgba(242,193,78,0.4); font-size: 13px; }
+.rankbox .rk-now { color: #ffe29a; margin-top: 3px; }
+.rpips { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 6px; }
+.rp { width: 14px; height: 6px; border-radius: 3px; background: #2a3550; }
+.rp.on { background: var(--gold); }
+.col-info .buybox { cursor: pointer; }
+@media (max-width: 760px) { .lv-body { grid-template-columns: 1fr; } }

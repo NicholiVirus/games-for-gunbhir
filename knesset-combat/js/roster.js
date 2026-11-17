@@ -278,3 +278,30 @@ KC.ALT_SKIN_PRICE = 150;
 /* Coin payouts per match. */
 KC.COINS = { session: 20, round: 15, win: 30, perfect: 20, superKO: 15, campaignStop: 20, campaignClear: 250,
   difficulty: { easy: 10, normal: 25, hard: 45, boss: 60 } };
+
+/* ---------- Upgrades: every fighter can be ranked up 0 → 5 with coins ---------- */
+KC.UPGRADE = {
+  max: 5,
+  power: 0.05, defense: 0.05, health: 50,           // per rank
+  mult: { common: 1, rare: 1.5, epic: 2, legendary: 2.5 },
+  cost: function (ch, toRank) { return Math.round(80 * toRank * KC.UPGRADE.mult[ch.rarity]); },
+  describe: function (rank) {
+    return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP' : 'No upgrades yet';
+  }
+};
+
+/* ---------- Campaign: 100 levels vs CPU ---------- */
+KC.LEVELS = 100;
+KC.level = function (n) {
+  var pool = KC.ROSTER.filter(function (c) { return c.id !== 'speaker'; });
+  var boss = n % 10 === 0;
+  var ch = boss ? (n === 100 || n % 20 === 0 ? KC.rosterById.speaker : pool.filter(function (c) { return c.rarity === 'legendary'; })[(n / 10) % 3]) : pool[(n * 5 + 3) % pool.length];
+  var ai = n <= 15 ? 'easy' : n <= 45 ? 'normal' : n <= 80 ? 'hard' : 'boss';
+  if (boss && ai !== 'boss') ai = n <= 30 ? 'normal' : 'hard';
+  return {
+    n: n, ch: ch, ai: ai, boss: boss,
+    rank: Math.min(KC.UPGRADE.max, Math.floor((n - 1) / 20) + (boss ? 1 : 0)),
+    boost: 1 + (n - 1) * 0.004,
+    reward: 25 + n * 3 + (boss ? 100 : 0)
+  };
+};
