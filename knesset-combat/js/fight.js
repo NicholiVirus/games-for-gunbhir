@@ -1,6 +1,8 @@
 /* Knesset Combat 26' — fighters, frame data, hazards (projectiles/supers) and the match/round flow. */
 (function () {
   var T = THREE, M = KC.Models;
+  KC.PROJ_COOLDOWN = 60;      // 1 s cooldown after each projectile
+  KC.PROJ_MAX = 6;
   KC.GUARD_FRAMES = 150;      // 2.5 s of continuous blocking
   KC.METER_PER_DMG = 0.3;     // ~330 damage dealt fills the super meter
   var STAGE_BOUND = 8.2, MAX_SEP = 6.4, GRAVITY = 0.0115;
@@ -42,7 +44,7 @@
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
     this.maxHealth = 1000 + this.rank * U.health;
-    this.projMax = Math.min(6, 3 + this.rank);   // 3 on screen by default, +1 per rank, max 6
+    this.projMax = Math.min(KC.PROJ_MAX, 3 + this.rank);   // 3 on screen by default, +1 per rank, max 6
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -50,7 +52,7 @@
     this.x = x; this.y = 0; this.vx = 0; this.vy = 0; this.facing = facing;
     this.health = this.maxHealth; this.state = 'idle'; this.st = 0; this.animT = 0;
     this.move = null; this.moveHit = false; this.stun = 0; this.invuln = 0; this.armor = 0;
-    this.blockTime = 0; this.guardBroken = 0;
+    this.blockTime = 0; this.guardBroken = 0; this.projCD = 0;
     this.combo = 0; this.comboTimer = 0; this.airUsed = false; this.chainCount = 0;
     this.sup = null; this.jitter = 0; this.lowHit = false; this.dmgTaken = 0; this.blockPose = false;
     this.noHitT = 0; this.curSpec = null; this.rushStop = 0; this.landLag = 0;
@@ -101,7 +103,7 @@
     if (!air && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); return true; }
     if (!air && this.fresh('s')) {
       var sp = (this.input.d && this.alt) ? this.alt : this.ch.special;
-      if (sp.type === 'projectile' && m.hasProjectile(this)) { /* one at a time */ }
+      if (sp.type === 'projectile' && (m.hasProjectile(this) || this.projCD > 0)) { /* max on screen, or 1 s cooldown after each throw */ }
       else { this.consume('s'); this.startSpecial(m, sp); return true; }
     }
     if (cancel === 'special') return false;
@@ -155,6 +157,7 @@
     if (this.invuln > 0) this.invuln--;
     if (this.comboTimer > 0) { this.comboTimer--; if (this.comboTimer === 0) this.combo = 0; }
     this.noHitT++;
+    if (this.projCD > 0) this.projCD--;
     // Guard limit: holding block for more than 2.5 s (150 frames) breaks your guard
     if (this.guardBroken > 0) this.guardBroken--;
     var blocking = this.state === 'blockstun' || ((this.state === 'idle' || this.state === 'walk' || this.state === 'crouch') && this.blockPose);
@@ -532,6 +535,7 @@
   /* ---- projectiles + supers ---- */
   MP.addHazard = function (o) { var h = new Hazard(o); if (h.mesh) this.scene.add(h.mesh); this.hazards.push(h); return h; };
   MP.spawnProjectile = function (f, spec) {
+    f.projCD = KC.PROJ_COOLDOWN;
     var sp = spec || f.ch.special, mesh = M.buildProp(sp.proj, f.ch.super ? f.ch.super.color : null);
     var y = 1.22 * f.h;
     mesh.position.set(f.x + f.facing * 0.7, y, 0.05);

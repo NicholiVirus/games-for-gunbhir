@@ -519,7 +519,7 @@
       var k = a.slot === 'special' ? keys.s : a.slot === 'alt' ? '↓+' + keys.s : keys.x;
       out += '<div class="abil"><span class="ak">' + k + '</span>' + (a.slot === 'super' ? '<b>SUPER</b> ' : '') + esc(a.name) + '</div>';
     });
-    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + Math.min(6, 3 + Save.rank(ch.id)) + '</span>Projectiles on screen (3 base, +1 per rank, max 6)</div>';
+    if (ch.special.type === 'projectile' || (ch.special2 && ch.special2.type === 'projectile')) out += '<div class="abil"><span class="ak">×' + Math.min(6, 3 + Save.rank(ch.id)) + '</span>Projectiles on screen (3 base, +1 per rank, max 6) · 1 s cooldown each</div>';
     if (ch.passive) out += '<div class="abil passive"><span class="ak">★</span><b>' + esc(ch.passive.name) + ':</b> ' + esc(KC.PASSIVES[ch.passive.id]) + '</div>';
     out += '</div><div class="rarline">' + r.abilities + ' abilit' + (r.abilities > 1 ? 'ies' : 'y') + (r.power > 1 ? ' · +' + Math.round((r.power - 1) * 100) + '% damage perk' : '') + (ch.passive ? ' · passive' : '') + '</div>';
     return out;
