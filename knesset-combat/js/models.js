@@ -277,6 +277,14 @@
         cap = part(hemi(0.15), c, 0, 0.13, -0.008); cap.scale.set(1.04, 0.92, 1.06); cap.rotation.x = -0.3; head.add(cap);
         head.add(part(sph(0.07, 8, 6), c, 0, 0.17, -0.155));
         break;
+      case 'bob': {
+        cap = part(hemi(0.153), c, 0, 0.13, -0.008); cap.scale.set(1.05, 0.95, 1.07); cap.rotation.x = -0.25; head.add(cap);
+        var bb = sph(0.15, 10, 8); bb.scale(1.1, 0.78, 0.95);
+        head.add(part(bb, c, 0, 0.075, -0.05));
+        var fr = sph(0.06, 8, 6); fr.scale(1.9, 0.6, 1.0);
+        var frm = part(fr, c, 0.03, 0.235, 0.075); frm.rotation.z = -0.2; head.add(frm);
+        break;
+      }
       case 'bald':
       default: {
         var side = sph(0.05, 6, 5); side.scale(0.5, 0.9, 1.4);
@@ -400,6 +408,15 @@
     flurry: function (t) {
       var s = Math.sin(t * 40), c = Math.cos(t * 40);
       return M.mergePose(M.poses.idle(0), { torsoRx: 0.2, torsoRy: s * 0.4, rShRx: -1.0 - 0.6 * Math.max(0, s), rElRx: -1.2 * (1 - Math.max(0, s)), lShRx: -1.0 - 0.6 * Math.max(0, c), lElRx: -1.2 * (1 - Math.max(0, c)), lHipRx: -0.6, lKneeRx: 0.6 });
+    },
+    uppercut: function () {
+      return P({ hipsY: 0, torsoRx: -0.2, torsoRy: -0.35, headRx: -0.3, rShRx: -2.95, rShRz: 0.12, rElRx: -0.15, lShRx: -0.5, lShRz: 0.3, lElRx: -1.6,
+        lHipRx: -1.45, lKneeRx: 1.9, rHipRx: 0.15, rKneeRx: 0.25 });
+    },
+    counterStance: function (t) {
+      var b = Math.sin(t * 18) * 0.04;
+      return P({ hipsY: -0.14, torsoRx: 0.05, torsoRy: 0.45, headRx: 0.08, lShRx: -1.35 + b, lShRz: 0.35, lElRx: -0.35, rShRx: -0.75, rShRz: 0.5, rElRx: -1.3,
+        lHipRx: -0.55, lHipRz: 0.1, lKneeRx: 0.75, rHipRx: 0.45, rHipRz: 0.12, rKneeRx: 0.55 });
     },
     victory: function (kind, t) {
       var base = M.poses.idle(t);
@@ -527,6 +544,38 @@
         var gr = new T.Mesh(new T.TorusGeometry(0.22, 0.03, 6, 18), M.glow('#ffcf6a', 0.85)); gr.rotation.y = Math.PI / 2; g.add(gr);
         var gh = addTo(g, M.part(cyl(0.07, 0.07, 0.22, 8), '#8a5a2b', 0, 0, 0)); gh.rotation.x = Math.PI / 2;
         addTo(g, M.part(cyl(0.02, 0.02, 0.3, 6), '#6b3e1f', 0, -0.15, 0, false));
+        break;
+      }
+      case 'olive': {
+        var br = addTo(g, M.part(cyl(0.015, 0.02, 0.5, 5), '#6b4a2b', 0, 0, 0, false)); br.rotation.z = Math.PI / 2;
+        for (var ol = 0; ol < 7; ol++) {
+          var lf = sph(0.05, 6, 4); lf.scale(1.6, 0.35, 0.6);
+          var leaf = M.part(lf, ol % 2 ? '#6f9a4a' : '#86b35c', -0.2 + ol * 0.065, (ol % 2 ? 0.05 : -0.05), 0, false);
+          leaf.rotation.z = (ol % 2 ? 0.5 : -0.5); g.add(leaf);
+        }
+        addTo(g, M.part(sph(0.035, 6, 5), '#3b4a1f', 0.05, 0.08, 0.02, false));
+        addTo(g, M.part(sph(0.035, 6, 5), '#3b4a1f', -0.08, -0.07, 0.02, false));
+        var oh = new T.Mesh(sph(0.24, 8, 6), M.glow('#d8f5a2', 0.18)); g.add(oh);
+        g.userData.spin = 'x';
+        break;
+      }
+      case 'briefcase': {
+        addTo(g, M.part(box(0.36, 0.26, 0.09), '#4a2f1d', 0, 0, 0));
+        addTo(g, M.part(new T.TorusGeometry(0.06, 0.012, 5, 10, Math.PI), '#2a1a10', 0, 0.13, 0, false));
+        addTo(g, M.part(box(0.04, 0.03, 0.1), '#d4a017', 0.1, 0.09, 0, false));
+        addTo(g, M.part(box(0.04, 0.03, 0.1), '#d4a017', -0.1, 0.09, 0, false));
+        addTo(g, M.part(box(0.37, 0.02, 0.095), '#2a1a10', 0, 0.0, 0, false));
+        g.userData.spin = 'z';
+        break;
+      }
+      case 'seal': {
+        var sd = addTo(g, M.part(cyl(0.18, 0.18, 0.04, 16), '#d4af37', 0, 0, 0)); sd.rotation.z = Math.PI / 2;
+        sd.material = M.toon('#d4af37', '#7a5a00');
+        var si = addTo(g, M.part(cyl(0.12, 0.12, 0.05, 16), '#0038b8', 0, 0, 0, false)); si.rotation.z = Math.PI / 2;
+        var sr = addTo(g, M.part(new T.TorusGeometry(0.15, 0.012, 4, 20), '#fff6c8', 0, 0, 0, false)); sr.rotation.y = Math.PI / 2;
+        addTo(g, M.part(box(0.06, 0.1, 0.02), '#f3d77a', 0.03, 0, 0, false)).rotation.y = Math.PI / 2;
+        var sh2 = new T.Mesh(sph(0.26, 8, 6), M.glow('#ffe48a', 0.18)); g.add(sh2);
+        g.userData.spin = 'x';
         break;
       }
       case 'teacup': {

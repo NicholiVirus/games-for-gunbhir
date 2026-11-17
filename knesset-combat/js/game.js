@@ -8,57 +8,63 @@
   /* =====================================================================
    * SAVE / PROGRESSION
    * ===================================================================== */
-  var SAVE_KEY = 'kc26_save_v1';
+  var SAVE_KEY = 'kc26_save_v2', OLD_KEY = 'kc26_save_v1';
   var memoryStore = null;
   function defaults() {
-    return { mandates: 0, matches: 0, cpuWins: 0, hardWins: 0, supers: 0, perfects: 0, campaign: 0, charWins: {}, unlocked: ['bengurion'], gold: [],
+    return { coins: 0, earned: 0, matches: 0, wins: 0, cpuWins: 0, supers: 0, perfects: 0, campaign: 0, charWins: {}, owned: ['bengurion'], gold: [],
       settings: { rounds: 2, timer: 99, stage: 'random', music: true, sfx: true, voice: true } };
   }
   var Save = KC.Save = {
     load: function () {
-      var d = null;
-      try { var raw = localStorage.getItem(SAVE_KEY); if (raw) d = JSON.parse(raw); } catch (e) { d = memoryStore; }
+      var d = null, old = null;
+      try { var raw = localStorage.getItem(SAVE_KEY); if (raw) d = JSON.parse(raw); else { var o = localStorage.getItem(OLD_KEY); if (o) old = JSON.parse(o); } } catch (e) { d = memoryStore; }
       var base = defaults();
       if (d) { base = Object.assign(base, d); base.settings = Object.assign(defaults().settings, d.settings || {}); }
+      else if (old) { // migrate the v1 "Mandates" save: keep fighters, convert Mandates to coins
+        base.coins = (old.mandates || 0) * 5; base.earned = base.coins;
+        base.owned = (old.unlocked || ['bengurion']).filter(function (id) { return KC.rosterById[id]; });
+        base.gold = (old.gold || []).filter(function (id) { return KC.rosterById[id]; });
+        base.charWins = old.charWins || {}; base.matches = old.matches || 0; base.cpuWins = old.cpuWins || 0;
+        base.settings = Object.assign(defaults().settings, old.settings || {});
+      }
+      if (base.owned.indexOf('bengurion') < 0) base.owned.push('bengurion');
       Save.data = base;
     },
     write: function () { memoryStore = Save.data; try { localStorage.setItem(SAVE_KEY, JSON.stringify(Save.data)); } catch (e) { /* private mode */ } },
-    isUnlocked: function (id) { return Save.data.unlocked.indexOf(id) >= 0; },
+    owns: function (id) { return Save.data.owned.indexOf(id) >= 0; },
+    isUnlocked: function (id) { return Save.owns(id); },
     hasGold: function (id) { return Save.data.gold.indexOf(id) >= 0; },
-    progress: function (ch) {
-      var u = ch.unlock, d = Save.data;
-      switch (u.type) {
-        case 'start': return [1, 1];
-        case 'mandates': return [d.mandates, u.value];
-        case 'cpuWins': return [d.cpuWins, u.value];
-        case 'hardWin': return [d.hardWins, 1];
-        case 'supers': return [d.supers, u.value];
-        case 'perfect': return [d.perfects, 1];
-        case 'campaign': return [d.campaign, 1];
-      }
-      return [0, 1];
+    canAfford: function (n) { return Save.data.coins >= n; },
+    buy: function (ch) {
+      var p = KC.priceOf(ch);
+      if (Save.owns(ch.id) || !Save.canAfford(p)) return false;
+      Save.data.coins -= p; Save.data.owned.push(ch.id); Save.write(); return true;
     },
-    meets: function (ch) { var p = Save.progress(ch); return p[0] >= p[1]; },
-    refresh: function () {
-      var chars = [], golds = [], d = Save.data;
+    buyGold: function (ch) {
+      if (!Save.owns(ch.id) || Save.hasGold(ch.id) || !Save.canAfford(KC.ALT_SKIN_PRICE)) return false;
+      Save.data.coins -= KC.ALT_SKIN_PRICE; Save.data.gold.push(ch.id); Save.write(); return true;
+    },
+    addCoins: function (n) { Save.data.coins += n; Save.data.earned += n; },
+    refreshGold: function () {
+      var golds = [], d = Save.data;
       KC.ROSTER.forEach(function (ch) {
-        if (!Save.isUnlocked(ch.id) && Save.meets(ch)) { d.unlocked.push(ch.id); chars.push(ch); }
-        if (Save.isUnlocked(ch.id) && !Save.hasGold(ch.id) && (d.charWins[ch.id] || 0) >= KC.ALT_SKIN_WINS) { d.gold.push(ch.id); golds.push(ch); }
+        if (Save.owns(ch.id) && !Save.hasGold(ch.id) && (d.charWins[ch.id] || 0) >= KC.ALT_SKIN_WINS) { d.gold.push(ch.id); golds.push(ch); }
       });
       Save.write();
-      return { chars: chars, golds: golds };
+      return golds;
     },
-    nextMandate: function () {
-      for (var i = 0; i < KC.ROSTER.length; i++) { var c = KC.ROSTER[i]; if (c.unlock.type === 'mandates' && !Save.isUnlocked(c.id)) return c; }
-      return null;
+    lockedByPrice: function () {
+      return KC.ROSTER.filter(function (c) { return !Save.owns(c.id); }).sort(function (a, b) { return KC.priceOf(a) - KC.priceOf(b); });
     },
     unlockAll: function () {
-      Save.data.unlocked = KC.ROSTER.map(function (c) { return c.id; });
+      Save.data.owned = KC.ROSTER.map(function (c) { return c.id; });
       Save.data.gold = KC.ROSTER.map(function (c) { return c.id; });
+      Save.addCoins(5000);
       Save.write();
     },
     reset: function () { var s = Save.data.settings; Save.data = defaults(); Save.data.settings = s; Save.write(); }
   };
+  G.coin = function (n) { return '<span class="coin"></span>' + n; };
 
   /* =====================================================================
    * INPUT (keyboard + gamepads mapped to virtual key codes)
@@ -86,7 +92,7 @@
     keys[e.code] = true;
     if (e.key && e.key.length === 1) {
       cheatBuf = (cheatBuf + e.key.toUpperCase()).slice(-7);
-      if (cheatBuf === 'KNESSET' && G.screen !== 'fight') { Save.unlockAll(); G.toast('🗳️ All 120 Mandates secured — every fighter and skin unlocked!'); KC.Audio.play('unlock'); if (screens[G.screen] && screens[G.screen].refresh) screens[G.screen].refresh(); }
+      if (cheatBuf === 'KNESSET' && G.screen !== 'fight') { Save.unlockAll(); G.toast('All 120 seats secured — every fighter and skin unlocked, plus ' + G.coin(5000) + '!'); KC.Audio.play('unlock'); if (screens[G.screen] && screens[G.screen].refresh) screens[G.screen].refresh(); }
     }
   });
   window.addEventListener('keyup', function (e) { keys[e.code] = false; });
@@ -209,6 +215,8 @@
         trails[i] = 1; lastHp[i] = 1; trailDelay[i] = 0; comboT[i] = 0; calloutT[i] = 0;
         hudEls.combo[i].classList.remove('on'); hudEls.callout[i].classList.remove('on');
         hudEls.meter[i].querySelector('.mkey').textContent = G.ai && G.ai[i] ? 'CPU' : (i === 0 ? 'T' : 'P');
+        hudEls.meter[i].classList.toggle('none', !f.hasSuper);
+        hudEls.meter[i].querySelector('.mlabel').textContent = f.hasSuper ? 'SUPER' : 'NO SUPER · ' + KC.RARITY[f.ch.rarity].name.toUpperCase();
       }
       KC.HUD.updatePips(m);
       KC.HUD.show(false);
@@ -245,7 +253,7 @@
         el.querySelector('.trail').style.transform = 'scaleX(' + trails[i].toFixed(4) + ')';
         var mt = hudEls.meter[i];
         mt.querySelector('.mfill').style.transform = 'scaleX(' + (f.meter / 100).toFixed(3) + ')';
-        mt.classList.toggle('full', f.meter >= 100);
+        mt.classList.toggle('full', f.meter >= 100 && f.hasSuper);
         if (comboT[i] > 0) { comboT[i]--; if (comboT[i] === 0) hudEls.combo[i].classList.remove('on'); }
         if (calloutT[i] > 0) { calloutT[i]--; if (calloutT[i] === 0) hudEls.callout[i].classList.remove('on'); }
       }
@@ -342,13 +350,15 @@
 
   /* ---------- main menu ---------- */
   var MENU_ITEMS = [
-    { id: 'campaign', label: 'ELECTION CAMPAIGN', desc: 'Arcade ladder vs CPU: beat five rivals, then face the final boss. Big Mandate payouts.' },
-    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on the arrows + K L O P.' },
-    { id: 'cpu', label: 'VS CPU', desc: 'Pick a difficulty and fight the machine. Every match earns Mandates toward your next unlock.' },
-    { id: 'collection', label: 'CABINET ROOM', desc: 'Browse every fighter, see what it takes to unlock them, and preview skins.' },
-    { id: 'howto', label: 'HOW TO PLAY', desc: 'Controls, blocking, specials, supers and the unlock rules.' },
+    { id: 'campaign', label: 'ELECTION CAMPAIGN', desc: 'Arcade ladder vs CPU: beat five rivals, then face the final boss. The biggest coin payout in the game.' },
+    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on the arrows + K L O P. Both players earn coins for the shared wallet.' },
+    { id: 'cpu', label: 'VS CPU', desc: 'Pick a difficulty and fight the machine. Harder CPUs pay more coins.' },
+    { id: 'shop', label: 'SHOP · RECRUIT FIGHTERS', desc: 'Spend coins to unlock fighters and gold skins. Higher rarity = more abilities.' },
+    { id: 'howto', label: 'HOW TO PLAY', desc: 'Controls, rarity, abilities, blocking and how coins work.' },
     { id: 'settings', label: 'SETTINGS', desc: 'Rounds, round timer, chamber lighting, music, sound and announcer.' }
   ];
+  function rarBadge(ch) { var r = KC.RARITY[ch.rarity]; return '<span class="rar r-' + r.id + '">' + r.name.toUpperCase() + '</span>'; }
+  G.rarBadge = rarBadge;
   screens.menu = {
     el: 'menu', sel: 0,
     enter: function () { camMode = 'menu'; stage.setMode('day'); clearPreviews(); KC.Audio.playMusic('menu'); this.render(); },
@@ -361,13 +371,14 @@
         li.onclick = function () { self.sel = +li.dataset.i; self.choose(); };
       });
       $('menuDesc').textContent = MENU_ITEMS[this.sel].desc;
-      var d = Save.data, nx = Save.nextMandate(), un = d.unlocked.length;
-      var html = '<div class="mb-top"><div><div class="mb-lbl">MANDATES EARNED</div><div class="mb-num">' + d.mandates + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + un + '/' + KC.ROSTER.length + '</div></div></div>';
-      if (nx) {
-        var prev = 0; KC.ROSTER.forEach(function (c) { if (c.unlock.type === 'mandates' && c.unlock.value <= d.mandates && c.unlock.value > prev) prev = c.unlock.value; });
-        var pct = Math.min(100, (d.mandates - prev) / Math.max(1, nx.unlock.value - prev) * 100);
-        html += '<div class="progress"><div style="width:' + pct.toFixed(0) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" alt=""><div>Next Prime Minister unlocks at <b>' + nx.unlock.value + '</b> Mandates<br><span style="color:#9fb0d4">' + (nx.unlock.value - d.mandates) + ' to go — play any mode to earn them</span></div></div>';
-      } else html += '<div class="mb-next" style="margin-top:8px">All Prime Ministers unlocked. Contenders and the boss have their own challenges — see the Cabinet Room.</div>';
+      var d = Save.data, locked = Save.lockedByPrice(), own = d.owned.length;
+      var html = '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
+      if (locked.length) {
+        var nx = locked[0], price = KC.priceOf(nx);
+        var pct = Math.min(100, d.coins / price * 100);
+        html += '<div class="progress"><div style="width:' + pct.toFixed(0) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" class="dim" alt=""><div>Cheapest recruit: <b>' + esc(nx.name) + '</b> ' + rarBadge(nx) + '<br>' +
+          (d.coins >= price ? '<span style="color:#7dff9b;font-weight:800">You can afford it — visit the Shop!</span>' : '<span style="color:#9fb0d4">' + G.coin(price - d.coins) + ' more to go — every match pays coins</span>') + '</div></div>';
+      } else html += '<div class="mb-next" style="margin-top:8px">Full cabinet: all ' + KC.ROSTER.length + ' fighters recruited.</div>';
       $('mandateBox').innerHTML = html;
     },
     choose: function () {
@@ -378,12 +389,12 @@
         case 'versus': go('select', { mode: 'versus' }); break;
         case 'cpu':
           showList({ title: 'VS CPU', sub: 'Choose how tough the opposition is.', items: [
-            { label: 'EASY', desc: '+3 bonus Mandates on a win', action: function () { go('select', { mode: 'cpu', level: 'easy' }); } },
-            { label: 'NORMAL', desc: '+6 bonus Mandates on a win', action: function () { go('select', { mode: 'cpu', level: 'normal' }); } },
-            { label: 'HARD', desc: '+10 bonus — and unlocks a contender', action: function () { go('select', { mode: 'cpu', level: 'hard' }); } }
+            { label: 'EASY', desc: 'Win bonus: ' + KC.COINS.difficulty.easy + ' coins', action: function () { go('select', { mode: 'cpu', level: 'easy' }); } },
+            { label: 'NORMAL', desc: 'Win bonus: ' + KC.COINS.difficulty.normal + ' coins', action: function () { go('select', { mode: 'cpu', level: 'normal' }); } },
+            { label: 'HARD', desc: 'Win bonus: ' + KC.COINS.difficulty.hard + ' coins', action: function () { go('select', { mode: 'cpu', level: 'hard' }); } }
           ], sel: 1, back: function () { go('menu'); } });
           break;
-        case 'collection': go('collection'); break;
+        case 'shop': go('shop'); break;
         case 'howto': go('howto'); break;
         case 'settings': showSettings(); break;
       }
@@ -444,7 +455,7 @@
       { label: 'MUSIC', value: function () { return s.music ? 'ON' : 'OFF'; }, change: function () { s.music = !s.music; apply(); } },
       { label: 'SOUND EFFECTS', value: function () { return s.sfx ? 'ON' : 'OFF'; }, change: function () { s.sfx = !s.sfx; apply(); } },
       { label: 'ANNOUNCER VOICE', value: function () { return s.voice ? 'ON' : 'OFF'; }, change: function () { s.voice = !s.voice; apply(); } },
-      { label: 'RESET PROGRESS', desc: 'Press ENTER three times to wipe Mandates and unlocks.', value: function () { return resetCount ? 'PRESS ' + (3 - resetCount) + ' MORE' : ''; }, action: function () {
+      { label: 'RESET PROGRESS', desc: 'Press ENTER three times to wipe coins and recruited fighters.', value: function () { return resetCount ? 'PRESS ' + (3 - resetCount) + ' MORE' : ''; }, action: function () {
         resetCount++;
         if (resetCount >= 3) { Save.reset(); resetCount = 0; G.toast('Progress reset. Back to 1948.'); }
         screens.list.render();
@@ -461,26 +472,41 @@
   };
 
   /* ---------- character select ---------- */
-  var COLS = 10;
+  var COLS = 11;
   function cellHTML(ch, i, extraCls, tags) {
-    var locked = !Save.isUnlocked(ch.id);
+    var owned = Save.owns(ch.id);
     var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : '';
-    return '<div class="cell ' + (locked ? 'locked ' : '') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + (tags || '') + '</div>';
+    var price = owned ? '' : '<span class="price' + (Save.canAfford(KC.priceOf(ch)) ? ' ok' : '') + '">' + G.coin(KC.priceOf(ch)) + '</span>';
+    return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + price + (tags || '') + '</div>';
   }
+  G.cellHTML = cellHTML;
+  /* keys: {s: 'R', x: 'T'} for P1, {s: 'O', x: 'P'} for P2, or generic words */
+  function abilityHTML(ch, keys) {
+    var r = KC.RARITY[ch.rarity];
+    var out = '<div class="abils">';
+    KC.abilities(ch).forEach(function (a) {
+      var k = a.slot === 'special' ? keys.s : a.slot === 'alt' ? '↓+' + keys.s : keys.x;
+      out += '<div class="abil"><span class="ak">' + k + '</span>' + (a.slot === 'super' ? '<b>SUPER</b> ' : '') + esc(a.name) + '</div>';
+    });
+    if (ch.passive) out += '<div class="abil passive"><span class="ak">★</span><b>' + esc(ch.passive.name) + ':</b> ' + esc(KC.PASSIVES[ch.passive.id]) + '</div>';
+    out += '</div><div class="rarline">' + r.abilities + ' abilit' + (r.abilities > 1 ? 'ies' : 'y') + (r.power > 1 ? ' · +' + Math.round((r.power - 1) * 100) + '% damage perk' : '') + (ch.passive ? ' · passive' : '') + '</div>';
+    return out;
+  }
+  G.abilityHTML = abilityHTML;
   function panelHTML(ch, who, st) {
-    var locked = !Save.isUnlocked(ch.id);
-    if (locked && !st.reveal) {
-      var p = Save.progress(ch);
-      return '<div class="who">' + who + '</div><div class="name">???</div><div class="ttl">' + (ch.group === 'pm' ? 'PRIME MINISTER' : ch.group === 'boss' ? 'SECRET BOSS' : 'CONTENDER') + ' · LOCKED</div>' +
-        '<div class="lockinfo">🔒 ' + KC.unlockText(ch) + '<br><span style="opacity:.8">Progress: ' + Math.min(p[0], p[1]) + ' / ' + p[1] + '</span></div>';
+    var owned = Save.owns(ch.id), s = ch.stats, price = KC.priceOf(ch);
+    var head = '<div class="who">' + who + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + rarBadge(ch) + ' ' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>';
+    var body = '<div class="bio">' + esc(ch.bio) + '</div>' + abilityHTML(ch, st.keys) +
+      '<div class="stats"><span>SPEED</span>' + statBar(s.speed) + '<span>POWER</span>' + statBar(s.power) + '<span>DEFENSE</span>' + statBar(s.defense) + '<span>JUMP</span>' + statBar(s.jump) + '</div>';
+    if (!owned) {
+      var can = Save.canAfford(price);
+      return head + body + '<div class="lockinfo ' + (can ? 'can' : '') + '">' + (can
+        ? (st.confirm ? 'Press <b>' + st.pickKey + '</b> again to recruit for ' + G.coin(price) : 'Locked · press <b>' + st.pickKey + '</b> to recruit for ' + G.coin(price))
+        : 'Locked · costs ' + G.coin(price) + ' — you need ' + G.coin(price - Save.data.coins) + ' more') + '</div>';
     }
-    var s = ch.stats;
     var gold = st.gold, goldOk = Save.hasGold(ch.id);
-    return '<div class="who">' + who + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>' +
-      '<div class="bio">' + esc(ch.bio) + '</div>' +
-      '<div class="moves"><b>Special:</b> ' + esc(ch.special.name) + '<br><b>Super:</b> ' + esc(ch.super.name) + '</div>' +
-      '<div class="stats"><span>SPEED</span>' + statBar(s.speed) + '<span>POWER</span>' + statBar(s.power) + '<span>DEFENSE</span>' + statBar(s.defense) + '<span>JUMP</span>' + statBar(s.jump) + '</div>' +
-      '<div class="skin">SKIN: <b>' + (gold ? KC.ALT_SKIN.name : 'Classic') + '</b> ' + (goldOk ? '<span style="opacity:.7">(' + st.skinKey + ' to switch)</span>' : '<span style="opacity:.6">· Gold: win ' + KC.ALT_SKIN_WINS + ' with them (' + Math.min(KC.ALT_SKIN_WINS, Save.data.charWins[ch.id] || 0) + '/' + KC.ALT_SKIN_WINS + ')</span>') + '</div>' +
+    return head + body +
+      '<div class="skin">SKIN: <b>' + (gold ? KC.ALT_SKIN.name : 'Classic') + '</b> ' + (goldOk ? '<span style="opacity:.7">(' + st.skinKey + ' to switch)</span>' : '<span style="opacity:.6">· Gold: win ' + KC.ALT_SKIN_WINS + ' (' + Math.min(KC.ALT_SKIN_WINS, Save.data.charWins[ch.id] || 0) + '/' + KC.ALT_SKIN_WINS + ') or buy in Shop</span>') + '</div>' +
       (st.locked ? '<div class="ready">READY!</div>' : '');
   }
   var sel = null;
@@ -490,18 +516,17 @@
       camMode = 'select'; stage.setMode('day');
       KC.Audio.playMusic('menu');
       var mode = arg.mode, two = mode === 'versus';
-      var firstUnl = 0;
       var keep = sel && sel.mode === mode ? sel : null;
       sel = { mode: mode, level: arg.level, two: two, t: 0, startT: 0,
-        p: [{ cur: keep ? keep.p[0].cur : firstUnl, locked: false, gold: keep ? keep.p[0].gold : false },
-            { cur: keep ? keep.p[1].cur : firstUnl, locked: false, gold: keep ? keep.p[1].gold : false }] };
+        p: [{ cur: keep ? keep.p[0].cur : 0, locked: false, gold: keep ? keep.p[0].gold : false, confirm: -1, confirmT: 0 },
+            { cur: keep ? keep.p[1].cur : 0, locked: false, gold: keep ? keep.p[1].gold : false, confirm: -1, confirmT: 0 }] };
       $('selTitle').textContent = two ? 'CHOOSE YOUR CANDIDATES' : 'CHOOSE YOUR CANDIDATE';
-      $('selMode').textContent = mode === 'versus' ? 'VERSUS · 2 PLAYERS' : mode === 'campaign' ? 'ELECTION CAMPAIGN' : 'VS CPU · ' + (arg.level || 'normal').toUpperCase();
+      $('selMode').innerHTML = (mode === 'versus' ? 'VERSUS · 2 PLAYERS' : mode === 'campaign' ? 'ELECTION CAMPAIGN' : 'VS CPU · ' + (arg.level || 'normal').toUpperCase()) + ' &nbsp;·&nbsp; ' + G.coin(Save.data.coins);
       var st = Save.data.settings;
       $('selStage').innerHTML = 'Chamber: <b>' + { random: 'Random', day: 'Day Session', night: 'Night Session' }[st.stage] + '</b> · First to <b>' + st.rounds + '</b> round' + (st.rounds > 1 ? 's' : '') + ' · Timer <b>' + (st.timer >= 1000 ? '∞' : st.timer) + '</b> <span style="opacity:.6">(change in Settings)</span>';
       $('selHint').innerHTML = two
-        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>Arrows</kbd> move · <kbd>K</kbd> pick · <kbd>L</kbd> undo · <kbd>O</kbd> skin'
-        : '<kbd>WASD</kbd>/<kbd>Arrows</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
+        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick/buy · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>Arrows</kbd> move · <kbd>K</kbd> pick/buy · <kbd>L</kbd> undo · <kbd>O</kbd> skin'
+        : '<kbd>WASD</kbd>/<kbd>Arrows</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick or buy · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
       this.render(true);
     },
     refresh: function () { this.render(true); },
@@ -513,27 +538,25 @@
         html += cellHTML(ch, i, (c1 ? 'c1 ' : '') + (c2 ? 'c2' : ''), tags);
       });
       $('selGrid').innerHTML = html;
+      $('selMode').innerHTML = $('selMode').innerHTML.replace(/<span class="coin"><\/span>\d+$/, G.coin(Save.data.coins));
       var p1c = KC.ROSTER[sel.p[0].cur];
-      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R' });
+      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'T' }, confirm: sel.p[0].confirm === sel.p[0].cur });
       if (sel.two) {
-        $('selP2').style.visibility = 'visible';
-        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'O' });
-      } else if (sel.mode === 'cpu' || sel.mode === 'campaign') {
-        $('selP2').style.visibility = 'visible';
+        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'O', pickKey: 'K', keys: { s: 'O', x: 'P' }, confirm: sel.p[1].confirm === sel.p[1].cur });
+      } else {
         $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'CAMPAIGN' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
-          (sel.mode === 'campaign' ? 'Win five races in a row, then face the final boss. Losing a stop lets you retry it.' : 'A random rival is drawn from the whole roster — even ones you have not unlocked yet. Beat them to earn Mandates.') + '</div>';
+          (sel.mode === 'campaign' ? 'Win five races in a row, then face the final boss. Losing a stop lets you retry it. Clearing it pays ' + G.coin(KC.COINS.campaignClear) + ' bonus.' : 'A random rival is drawn from the whole roster — even fighters you have not recruited yet. Beat them to earn coins.') + '</div>';
       }
       if (rebuild) this.previews();
     },
     previews: function () {
       for (var i = 0; i < 2; i++) {
         if (i === 1 && !sel.two) { clearPreview(1); continue; }
-        var ch = KC.ROSTER[sel.p[i].cur], unl = Save.isUnlocked(ch.id);
+        var ch = KC.ROSTER[sel.p[i].cur];
         var skin = sel.p[i].gold && Save.hasGold(ch.id) ? KC.ALT_SKIN : null;
         var p0skin = sel.p[0].gold && Save.hasGold(ch.id) ? KC.ALT_SKIN : null;
         if (i === 1 && sel.p[0].cur === sel.p[1].cur && skin === p0skin) skin = KC.MIRROR_SKIN;
-        var x = i === 0 ? -1.55 : 1.55;
-        setPreview(i, ch, skin, !unl, x, i === 0 ? 0.55 : -0.55);
+        setPreview(i, ch, skin, false, i === 0 ? -1.55 : 1.55, i === 0 ? 0.55 : -0.55);
       }
     },
     move: function (i, dx, dy) {
@@ -541,14 +564,24 @@
       var n = KC.ROSTER.length, c = p.cur;
       if (dx) c = (c + dx + n) % n;
       if (dy) { c += dy * COLS; if (c < 0) c += Math.ceil(n / COLS) * COLS; if (c >= n) c = c % COLS; if (c >= n) c = n - 1; }
-      p.cur = c; p.gold = p.gold && Save.hasGold(KC.ROSTER[c].id);
+      p.cur = c; p.gold = p.gold && Save.hasGold(KC.ROSTER[c].id); p.confirm = -1;
       KC.Audio.play('move');
       this.render(true);
     },
     pick: function (i) {
       var p = sel.p[i], ch = KC.ROSTER[p.cur];
       if (p.locked) return;
-      if (!Save.isUnlocked(ch.id)) { KC.Audio.play('deny'); G.toast('🔒 ' + KC.unlockText(ch) + ' to unlock this fighter.'); return; }
+      if (!Save.owns(ch.id)) {
+        var price = KC.priceOf(ch);
+        if (!Save.canAfford(price)) { KC.Audio.play('deny'); G.toast(esc(ch.name) + ' costs ' + G.coin(price) + ' — you have ' + G.coin(Save.data.coins) + '. Play matches to earn more!'); return; }
+        if (p.confirm !== p.cur) { p.confirm = p.cur; KC.Audio.play('move'); this.render(false); return; }
+        Save.buy(ch); p.confirm = -1;
+        KC.Audio.play('unlock'); G.toast('Recruited ' + esc(ch.name) + '! ' + rarBadge(ch));
+        KC.Audio.say(ch.name + ' recruited!');
+        if (previews[i]) previews[i].cheer = 2;
+        this.render(false);
+        return;
+      }
       p.locked = true; KC.Audio.play('select');
       KC.Audio.say(ch.name, { interrupt: true });
       if (previews[i]) previews[i].cheer = 1.6;
@@ -558,13 +591,12 @@
     unpick: function (i) { var p = sel.p[i]; if (!p.locked) return false; p.locked = false; sel.startT = 0; KC.Audio.play('back'); this.render(false); return true; },
     skin: function (i) {
       var p = sel.p[i], ch = KC.ROSTER[p.cur];
-      if (!Save.hasGold(ch.id)) { KC.Audio.play('deny'); G.toast('Win ' + KC.ALT_SKIN_WINS + ' matches as ' + ch.short + ' to unlock ' + KC.ALT_SKIN.name + '.'); return; }
+      if (!Save.hasGold(ch.id)) { KC.Audio.play('deny'); G.toast('Win ' + KC.ALT_SKIN_WINS + ' matches as ' + esc(ch.short) + ' or buy ' + KC.ALT_SKIN.name + ' in the Shop for ' + G.coin(KC.ALT_SKIN_PRICE) + '.'); return; }
       p.gold = !p.gold; KC.Audio.play('select'); this.render(true);
     },
     update: function (dt) {
       if (sel.startT > 0) { sel.startT -= dt; if (sel.startT <= 0) { this.launch(); return; } }
       var one = !sel.two;
-      // P1
       if (Input.pp(0, 'l') || (one && Input.pp(1, 'l'))) this.move(0, -1, 0);
       if (Input.pp(0, 'r') || (one && Input.pp(1, 'r'))) this.move(0, 1, 0);
       if (Input.pp(0, 'u') || (one && Input.pp(1, 'u'))) this.move(0, 0, -1);
@@ -594,7 +626,7 @@
         if (c0 === c1 && s0 === s1) s1 = KC.MIRROR_SKIN;
         startMatch({ mode: 'versus', chars: [c0, c1], skins: [s0, s1], ai: [null, null] });
       } else if (sel.mode === 'cpu') {
-        var pool = KC.ROSTER.filter(function (c) { return c.id !== c0.id && (c.id !== 'speaker' || Save.isUnlocked('speaker')); });
+        var pool = KC.ROSTER.filter(function (c) { return c.id !== c0.id && (c.id !== 'speaker' || Save.owns('speaker')); });
         var opp = pool[(Math.random() * pool.length) | 0];
         startMatch({ mode: 'cpu', chars: [c0, opp], skins: [s0, null], ai: [null, sel.level || 'normal'] });
       } else if (sel.mode === 'campaign') {
@@ -606,8 +638,7 @@
         G.campaign = { player: c0, skin: s0, stops: stops, idx: 0 };
         go('ladder');
       }
-    },
-    exit: function () { }
+    }
   };
 
   /* ---------- campaign ladder ---------- */
@@ -645,41 +676,69 @@
     }
   };
 
-  /* ---------- collection (cabinet room) ---------- */
-  screens.collection = {
-    el: 'collection', cur: 0, gold: false,
-    enter: function () { camMode = 'collection'; stage.setMode('day'); clearPreviews(); this.gold = false; this.render(true); },
+  /* ---------- shop (recruit fighters + gold skins) ---------- */
+  screens.shop = {
+    el: 'collection', cur: 0, gold: false, confirm: null,
+    enter: function () { camMode = 'collection'; stage.setMode('day'); clearPreviews(); this.gold = false; this.confirm = null; this.render(true); },
     refresh: function () { this.render(true); },
     render: function (rebuild) {
       var self = this, d = Save.data;
-      $('colSub').textContent = d.unlocked.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins · ' + d.mandates + ' Mandates';
+      $('colSub').innerHTML = 'Wallet: <b class="wallet">' + G.coin(d.coins) + '</b> &nbsp;·&nbsp; ' + d.owned.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins';
       $('colGrid').innerHTML = KC.ROSTER.map(function (ch, i) { return cellHTML(ch, i, i === self.cur ? 'c1' : ''); }).join('');
-      $('colGrid').querySelectorAll('.cell').forEach(function (c) { c.onclick = function () { self.cur = +c.dataset.i; self.gold = false; self.render(true); }; });
-      var ch = KC.ROSTER[this.cur], unl = Save.isUnlocked(ch.id), p = Save.progress(ch);
+      $('colGrid').querySelectorAll('.cell').forEach(function (c) { c.onclick = function () { if (self.cur === +c.dataset.i) self.buy(); else { self.cur = +c.dataset.i; self.gold = false; self.confirm = null; KC.Audio.play('move'); self.render(true); } }; });
+      var ch = KC.ROSTER[this.cur], owned = Save.owns(ch.id), price = KC.priceOf(ch);
       var wins = d.charWins[ch.id] || 0, goldOk = Save.hasGold(ch.id);
-      var html = '<div class="name">' + (unl ? esc(ch.name) : '???') + '</div><div class="ttl">' + (unl ? esc(ch.title) + ' · ' + esc(ch.years) : (ch.group === 'pm' ? 'Prime Minister' : ch.group === 'boss' ? 'Secret boss' : 'Contender')) + '</div>';
-      html += '<div class="req ' + (unl ? 'ok' : 'no') + '">' + (unl ? '✔ Unlocked' : '🔒 ' + KC.unlockText(ch) + ' — ' + Math.min(p[0], p[1]) + ' / ' + p[1]) + '</div>';
-      html += '<div class="req ' + (goldOk ? 'ok' : 'no') + '">' + (goldOk ? '✔ ' : '🔒 ') + KC.ALT_SKIN.name + ' skin — wins with fighter: ' + Math.min(wins, KC.ALT_SKIN_WINS) + ' / ' + KC.ALT_SKIN_WINS + '</div>';
-      if (unl) html += '<p>' + esc(ch.bio) + '</p><p><b style="color:#f2c14e">Special:</b> ' + esc(ch.special.name) + '<br><b style="color:#f2c14e">Super:</b> ' + esc(ch.super.name) + '</p><p style="font-style:italic">“' + esc(ch.quote) + '”</p>';
-      else html += '<p>Keep playing to reveal this fighter. Every match earns Mandates.</p>';
+      var html = '<div class="ttl">' + rarBadge(ch) + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
+      html += '<p>' + esc(ch.bio) + '</p>' + abilityHTML(ch, { s: 'Special', x: 'Super' });
+      if (!owned) {
+        var can = Save.canAfford(price);
+        html += '<div class="buybox ' + (can ? 'can' : '') + '"><div class="bb-price">' + G.coin(price) + '</div><div>' + (can
+          ? (this.confirm === 'fighter' ? '<b>Press ENTER / F again to confirm</b>' : 'Press <b>ENTER / F</b> to recruit')
+          : 'You need ' + G.coin(price - d.coins) + ' more. Every match pays coins.') + '</div></div>';
+      } else {
+        html += '<div class="req ok">✔ Recruited</div>';
+        if (goldOk) html += '<div class="req ok">✔ ' + KC.ALT_SKIN.name + ' skin owned</div>';
+        else {
+          var canG = Save.canAfford(KC.ALT_SKIN_PRICE);
+          html += '<div class="buybox small ' + (canG ? 'can' : '') + '"><div class="bb-price">' + G.coin(KC.ALT_SKIN_PRICE) + '</div><div>' + KC.ALT_SKIN.name + ' skin — ' +
+            (canG ? (this.confirm === 'gold' ? '<b>press ENTER / F again to confirm</b>' : 'press <b>ENTER / F</b> to buy') : 'or win ' + KC.ALT_SKIN_WINS + ' matches with them (' + Math.min(wins, KC.ALT_SKIN_WINS) + '/' + KC.ALT_SKIN_WINS + ')') + '</div></div>';
+        }
+      }
+      html += '<p style="font-style:italic;opacity:.85">“' + esc(ch.quote) + '”</p>';
       $('colInfo').innerHTML = html;
       if (rebuild) {
-        var pv = setPreview(0, ch, this.gold && goldOk ? KC.ALT_SKIN : null, !unl, 0.15, 0.3);
+        var pv = setPreview(0, ch, this.gold ? KC.ALT_SKIN : null, false, 0.15, 0.3);
         pv.spin = true;
       }
     },
+    buy: function () {
+      var ch = KC.ROSTER[this.cur];
+      if (!Save.owns(ch.id)) {
+        if (!Save.canAfford(KC.priceOf(ch))) { KC.Audio.play('deny'); G.toast('Not enough coins yet — you have ' + G.coin(Save.data.coins) + '.'); return; }
+        if (this.confirm !== 'fighter') { this.confirm = 'fighter'; KC.Audio.play('move'); this.render(false); return; }
+        Save.buy(ch); this.confirm = null;
+        KC.Audio.play('unlock'); KC.Audio.say(ch.name + ' recruited!');
+        G.toast('Recruited ' + esc(ch.name) + '! ' + rarBadge(ch));
+        if (previews[0]) previews[0].cheer = 2.2;
+        this.render(false);
+      } else if (!Save.hasGold(ch.id)) {
+        if (!Save.canAfford(KC.ALT_SKIN_PRICE)) { KC.Audio.play('deny'); G.toast('Gold skin costs ' + G.coin(KC.ALT_SKIN_PRICE) + '.'); return; }
+        if (this.confirm !== 'gold') { this.confirm = 'gold'; KC.Audio.play('move'); this.render(false); return; }
+        Save.buyGold(ch); this.confirm = null; this.gold = true;
+        KC.Audio.play('unlock'); G.toast(KC.ALT_SKIN.name + ' unlocked for ' + esc(ch.short) + '!');
+        this.render(true);
+        if (previews[0]) previews[0].cheer = 2.2;
+      } else { KC.Audio.play('deny'); }
+    },
     update: function () {
-      var n = KC.ROSTER.length, c = this.cur;
+      var n = KC.ROSTER.length, c = this.cur, cols = 6;
       if (Input.menu('left')) c = (c - 1 + n) % n;
       if (Input.menu('right')) c = (c + 1) % n;
-      if (Input.menu('up')) c = (c - 5 + n) % n;
-      if (Input.menu('down')) c = (c + 5) % n;
-      if (c !== this.cur) { this.cur = c; this.gold = false; KC.Audio.play('move'); this.render(true); }
-      if (Input.hit(['KeyR', 'KeyO', 'Pad0_x', 'Pad1_x'])) {
-        var ch = KC.ROSTER[this.cur];
-        if (Save.hasGold(ch.id)) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
-        else { KC.Audio.play('deny'); G.toast('Win ' + KC.ALT_SKIN_WINS + ' matches with this fighter to unlock ' + KC.ALT_SKIN.name + '.'); }
-      }
+      if (Input.menu('up')) c = (c - cols + n) % n;
+      if (Input.menu('down')) c = (c + cols) % n;
+      if (c !== this.cur) { this.cur = c; this.gold = false; this.confirm = null; KC.Audio.play('move'); this.render(true); }
+      if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyK', 'Pad0_a', 'Pad1_a'])) this.buy();
+      if (Input.hit(['KeyR', 'KeyO', 'Pad0_x', 'Pad1_x'])) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
       if (Input.hit(['Escape', 'Backspace', 'KeyG', 'KeyL', 'Pad0_b', 'Pad1_b'])) { KC.Audio.play('back'); go('menu'); }
     }
   };
@@ -738,37 +797,39 @@
     stage.setVotes('—', 1, '—', 1, "KNESSET COMBAT 26'");
     if (where === 'select') go('select', { mode: G.matchCfg.mode, level: G.ai[1] ? G.ai[1].level : null });
     else if (where === 'ladder' && G.campaign) go('ladder');
+    else if (where === 'shop') go('shop');
     else go('menu');
   }
 
-  /* ---------- match end → rewards ---------- */
+  /* ---------- match end → coins ---------- */
   G.onMatchEnd = function (m) {
-    var cfg = G.matchCfg, d = Save.data;
+    var cfg = G.matchCfg, d = Save.data, C = KC.COINS;
     var human = [!cfg.ai[0], !cfg.ai[1]];
     var r = m.result, lines = [], total = 0, demo = !human[0] && !human[1];
     function add(label, v) { if (v > 0 && !demo) { lines.push([label, v]); total += v; } }
-    add('Session attended', 3);
+    add('Session attended', C.session);
     var roundsH = r.roundWinners.filter(function (w) { return w >= 0 && human[w]; }).length;
-    add('Rounds won × ' + roundsH, 2 * roundsH);
+    add('Rounds won × ' + roundsH, C.round * roundsH);
     var w = m.winner, humanWon = w >= 0 && human[w];
     var lvl = cfg.ai[1];
-    if (humanWon) add(cfg.mode === 'versus' ? 'Motion passed (match won)' : 'Victory', 5);
+    if (humanWon) add(cfg.mode === 'versus' ? 'Motion passed (match won)' : 'Victory', C.win);
     var perf = (human[0] ? r.perfects[0] : 0) + (human[1] ? r.perfects[1] : 0);
-    add('Perfect rounds × ' + perf, 3 * perf);
-    if (r.superKO && humanWon) add('Super finish', 2);
-    if (humanWon && cfg.mode !== 'versus') add('Opposition: ' + lvl.toUpperCase(), { easy: 3, normal: 6, hard: 10, boss: 12 }[lvl] || 0);
+    add('Perfect rounds × ' + perf, C.perfect * perf);
+    if (r.superKO && humanWon) add('Super finish', C.superKO);
+    if (humanWon && cfg.mode !== 'versus') add('Opposition: ' + lvl.toUpperCase(), C.difficulty[lvl] || 0);
     var finalStop = cfg.mode === 'campaign' && G.campaign && G.campaign.idx === G.campaign.stops.length - 1;
-    if (cfg.mode === 'campaign' && humanWon) add('Campaign stop cleared', 4);
-    if (finalStop && humanWon) add('CAMPAIGN COMPLETE', 25);
-    // stats
-    if (demo) { showResults(m, cfg, { lines: [], total: 0, unl: { chars: [], golds: [] }, humanWon: false, finalStop: false }); return; }
-    d.mandates += total; d.matches++;
-    if (cfg.mode !== 'versus' && humanWon) { d.cpuWins++; if (lvl === 'hard' || lvl === 'boss') d.hardWins++; }
+    if (cfg.mode === 'campaign' && humanWon) add('Campaign stop cleared', C.campaignStop);
+    if (finalStop && humanWon) add('CAMPAIGN COMPLETE', C.campaignClear);
+    if (demo) { showResults(m, cfg, { lines: [], total: 0, golds: [], humanWon: false, finalStop: false, before: d.coins }); return; }
+    var before = d.coins;
+    Save.addCoins(total); d.matches++;
+    if (humanWon) d.wins++;
+    if (cfg.mode !== 'versus' && humanWon) d.cpuWins++;
     for (var i = 0; i < 2; i++) if (human[i]) { d.supers += r.supers[i]; d.perfects += r.perfects[i]; }
     if (humanWon) { var wid = m.f[w].ch.id; d.charWins[wid] = (d.charWins[wid] || 0) + 1; }
     if (finalStop && humanWon) d.campaign++;
-    var unl = Save.refresh();
-    showResults(m, cfg, { lines: lines, total: total, unl: unl, humanWon: humanWon, finalStop: finalStop });
+    var golds = Save.refreshGold();
+    showResults(m, cfg, { lines: lines, total: total, golds: golds, humanWon: humanWon, finalStop: finalStop, before: before });
   };
 
   var resCfg = null;
@@ -787,36 +848,33 @@
       else if (info.humanWon) { title = info.finalStop ? 'CAMPAIGN WON!' : 'VICTORY'; sub = m.f[w].ch.name + ' carries the vote.'; }
       else { title = 'DEFEAT'; sub = m.f[w].ch.name + ' wins this session.'; }
       $('resTitle').textContent = title; $('resSub').textContent = sub;
-      var earn = info.lines.map(function (l) { return '<div class="row"><span>' + esc(l[0]) + '</span><b>+' + l[1] + '</b></div>'; }).join('');
-      earn += '<div class="total"><span>MANDATES</span><b>+' + info.total + '</b></div><div class="next-unlock" style="margin-top:6px">Total: <b style="color:#fff">' + d.mandates + '</b> Mandates</div>';
-      var nx = Save.nextMandate();
-      if (nx) earn += '<div class="next-unlock">Next Prime Minister at ' + nx.unlock.value + ' (' + (nx.unlock.value - d.mandates) + ' to go)</div>';
+      var earn = '<h3>COINS EARNED</h3>' + info.lines.map(function (l) { return '<div class="row"><span>' + esc(l[0]) + '</span><b>+' + G.coin(l[1]) + '</b></div>'; }).join('');
+      earn += '<div class="total"><span>TOTAL</span><b>+' + G.coin(info.total) + '</b></div><div class="next-unlock" style="margin-top:6px">Wallet: <b class="wallet" style="color:#fff">' + G.coin(info.before) + ' → ' + G.coin(d.coins) + '</b></div>';
       $('resEarn').innerHTML = earn;
       var u = '';
-      if (info.unl.chars.length || info.unl.golds.length) {
-        u += '<h3>UNLOCKED!</h3>';
-        info.unl.chars.forEach(function (ch, i) { u += '<div class="unl" style="animation-delay:' + (0.2 + i * 0.15) + 's"><img src="' + por(ch) + '" alt=""><div><div class="u1">NEW FIGHTER</div><div class="u2">' + esc(ch.name) + '</div><div style="font-size:12px;color:#9fb0d4">' + esc(ch.title) + '</div></div></div>'; });
-        info.unl.golds.forEach(function (ch, i) { u += '<div class="unl" style="animation-delay:' + (0.3 + i * 0.15) + 's"><img src="' + por(ch, true) + '" alt=""><div><div class="u1">NEW SKIN</div><div class="u2">' + esc(ch.short) + ' — ' + KC.ALT_SKIN.name + '</div></div></div>'; });
-        setTimeout(function () { KC.Audio.play('unlock'); }, 300);
-        if (info.unl.chars.length) setTimeout(function () { KC.Audio.say('New fighter unlocked: ' + info.unl.chars.map(function (c) { return c.name; }).join(', ')); }, 900);
-      } else {
-        // show the closest locked challenge
-        var locked = KC.ROSTER.filter(function (c) { return !Save.isUnlocked(c.id); });
-        if (locked.length) {
-          u += '<h3>NEXT UP</h3>';
-          locked.slice(0, 3).forEach(function (c) { var p = Save.progress(c); u += '<div class="unl" style="filter:saturate(.4)"><img src="' + por(c) + '" style="filter:brightness(0) drop-shadow(0 0 2px #7fb2ff)" alt=""><div><div class="u1">LOCKED</div><div style="font-size:13px">' + KC.unlockText(c) + '</div><div style="font-size:12px;color:#9fb0d4">' + Math.min(p[0], p[1]) + ' / ' + p[1] + '</div></div></div>'; });
-        } else u += '<h3>FULL HOUSE</h3><div class="next-unlock">Every fighter unlocked. All 120 seats are yours.</div>';
-      }
+      info.golds.forEach(function (ch, i) { u += '<div class="unl" style="animation-delay:' + (0.3 + i * 0.15) + 's"><img src="' + por(ch, true) + '" alt=""><div><div class="u1">NEW SKIN</div><div class="u2">' + esc(ch.short) + ' — ' + KC.ALT_SKIN.name + '</div></div></div>'; });
+      var locked = Save.lockedByPrice();
+      var newly = locked.filter(function (c) { var p = KC.priceOf(c); return p <= d.coins && p > info.before; });
+      if (newly.length) KC.Audio.say('New recruits available in the shop!');
+      if (locked.length) {
+        u += '<h3>' + (newly.length ? 'NOW AFFORDABLE!' : 'SHOP PICKS') + '</h3>';
+        (newly.length ? newly : locked).slice(0, 3).forEach(function (c, i) {
+          var p = KC.priceOf(c), can = p <= d.coins;
+          u += '<div class="unl' + (can ? '' : ' far') + '" style="animation-delay:' + (0.2 + i * 0.15) + 's"><img src="' + por(c) + '" alt=""><div><div class="u1">' + G.rarBadge(c) + '</div><div class="u2">' + esc(c.name) + '</div><div style="font-size:12px;color:' + (can ? '#7dff9b' : '#9fb0d4') + '">' + G.coin(p) + (can ? ' — you can recruit now!' : ' — ' + (p - d.coins) + ' to go') + '</div></div></div>';
+        });
+      } else u += '<h3>FULL CABINET</h3><div class="next-unlock">Every fighter recruited. All 120 seats are yours.</div>';
+      if (info.golds.length || newly.length) setTimeout(function () { KC.Audio.play('unlock'); }, 300);
       $('resUnlocks').innerHTML = u;
-      // options
       var opts = [];
       if (cfg.mode === 'campaign') {
         if (info.humanWon && !info.finalStop) opts.push({ label: 'NEXT STOP', fn: function () { G.campaign.idx++; endMatchTo('ladder'); } });
         else if (!info.humanWon) opts.push({ label: 'RETRY STOP', fn: function () { endMatchTo('ladder'); } });
         opts.push({ label: info.finalStop && info.humanWon ? 'MAIN MENU' : 'WITHDRAW', fn: function () { G.campaign = null; endMatchTo('menu'); } });
+        if (info.finalStop && info.humanWon) opts.push({ label: 'SHOP', fn: function () { G.campaign = null; endMatchTo('shop'); } });
       } else {
         opts.push({ label: 'REMATCH', fn: function () { startMatch(cfg); } });
         opts.push({ label: 'CHARACTER SELECT', fn: function () { endMatchTo('select'); } });
+        opts.push({ label: 'SHOP', fn: function () { endMatchTo('shop'); } });
         opts.push({ label: 'MAIN MENU', fn: function () { endMatchTo('menu'); } });
       }
       R.opts = opts; R.sel = 0;
@@ -909,7 +967,7 @@
     $('loadText').textContent = 'Seating 120 Members of Knesset…';
     setTimeout(function () {
       makePortraits();
-      Save.refresh();
+      Save.refreshGold();
       document.fonts && document.fonts.ready && document.fonts.ready.then(function () { stage.setVotes('—', 1, '—', 1, "KNESSET COMBAT 26'"); });
       $('loading').classList.remove('show');
       go('title');

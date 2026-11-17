@@ -36,9 +36,11 @@
     if (this.threatT > 0) this.threatT--;
     if (this.threatT === 0) {
       this.threatT = -2; // decided
-      if (projThreat && f.actionable() && R() < L.jumpProj && dist > 2.2) { this.jumpPlan = 1; }
+      if (f.alt && f.alt.type === 'counter' && f.actionable() && !projThreat && dist < 2.2 && R() < L.block * 0.45) { this.altNow = 1; }
+      else if (projThreat && f.actionable() && R() < L.jumpProj && dist > 2.2) { this.jumpPlan = 1; }
       else if (R() < L.block) { this.defend = 26; this.defendLow = lowThreat || (R() < 0.3 && o.state !== 'super'); }
     }
+    if (this.altNow) { this.altNow = 0; inp.d = 1; return this.tap(inp, 's'); }
     if (this.jumpPlan) { this.jumpPlan = 0; inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; return inp; }
     if (this.defend > 0) {
       this.defend--;
@@ -52,7 +54,7 @@
     /* ---- combos: cancel after a connecting normal ---- */
     if (f.state === 'attack' && f.moveHit && f.move && !f.move.air) {
       if (R() < L.combo * 0.25) {
-        if (f.meter >= 100 && R() < L.superUse) return this.tap(inp, 'x');
+        if (f.meter >= 100 && f.hasSuper && R() < L.superUse) return this.tap(inp, 'x');
         if (f.move.id === 'LP' || f.move.id === 'CP') return this.tap(inp, R() < 0.5 ? 'p' : (R() < 0.5 ? 'k' : 's'));
         return this.tap(inp, 's');
       }
@@ -62,10 +64,13 @@
     if (!f.actionable()) return inp;
 
     /* ---- anti-air ---- */
-    if (!o.grounded() && dist < 1.9 && o.vy < 0.08 && R() < L.anti * 0.3) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
+    if (!o.grounded() && dist < 1.9 && o.vy < 0.08 && R() < L.anti * 0.3) {
+      if (f.alt && f.alt.type === 'rising' && R() < 0.65) { inp.d = 1; return this.tap(inp, 's'); }
+      return this.tap(inp, R() < 0.6 ? 'k' : 'p');
+    }
 
     /* ---- super ---- */
-    if (f.meter >= 100 && R() < 0.02 * L.superUse) {
+    if (f.meter >= 100 && f.hasSuper && R() < 0.02 * L.superUse) {
       var t = f.ch.super.type;
       var good = (t === 'beam' || t === 'wave' || t === 'vehicle' || t === 'drop' || t === 'rain') ? dist < 7 : dist < 3.2;
       if (good && o.state !== 'knockdown' && o.state !== 'getup') return this.tap(inp, 'x');
@@ -88,6 +93,9 @@
         if (R() < 0.35) { if (R() < 0.45) inp.d = 1; return this.tap(inp, 'k'); }
         break;
       case 'zone':
+        if (f.alt && (f.alt.type === 'projectile' || f.alt.type === 'rush') && R() < 0.05) {
+          if (f.alt.type === 'rush' ? (dist > 1.4 && dist < 3.6) : !m.hasProjectile(f)) { inp.d = 1; return this.tap(inp, 's'); }
+        }
         if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && R() < 0.12) return this.tap(inp, 's'); }
         else if (dist > 1.4 && dist < 3.6 && R() < 0.08) return this.tap(inp, 's');
         else if (dist < 1.4) inp[away] = 1;

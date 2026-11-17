@@ -80,10 +80,10 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .sel-mode { display: block; font-family: var(--ui); font-size: 14px; font-weight: 800; color: var(--gold); letter-spacing: 2px; text-shadow: none; margin-top: 4px; }
 .sel-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: grid; grid-template-columns: minmax(200px, 300px) 1fr minmax(200px, 300px); gap: 12px; align-items: end; }
 .sel-center { display: flex; flex-direction: column; align-items: center; }
-.sel-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 64px)); gap: 6px; justify-content: center; }
+.sel-grid { display: grid; grid-template-columns: repeat(11, minmax(0, 60px)); gap: 6px; justify-content: center; }
 .cell { position: relative; aspect-ratio: 1; border-radius: 9px; background: linear-gradient(180deg, #24376b, #121c3a); border: 2px solid #2b3d70; overflow: hidden; }
 .cell img { width: 100%; height: 100%; display: block; }
-.cell.locked img { filter: brightness(0) drop-shadow(0 0 1px #6f93ff); opacity: 0.85; }
+.cell.locked img { filter: grayscale(0.85) brightness(0.45); }
 .cell.locked::after { content: '🔒'; position: absolute; right: 2px; bottom: 0; font-size: 13px; }
 .cell .grp { position: absolute; left: 0; top: 0; font-size: 9px; font-weight: 900; padding: 1px 4px; background: rgba(0,0,0,0.6); color: var(--gold); border-bottom-right-radius: 6px; letter-spacing: 0.5px; }
 .cell.c1 { border-color: var(--sky); box-shadow: 0 0 0 2px var(--sky), 0 0 18px rgba(127,178,255,0.7); }
@@ -127,7 +127,7 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 /* ---------- collection ---------- */
 #collection { background: linear-gradient(90deg, rgba(5,8,18,0.85) 0%, rgba(5,8,18,0.35) 45%, rgba(5,8,18,0.35) 62%, rgba(5,8,18,0.85) 100%); }
 .col-left { position: absolute; left: 14px; top: 14px; bottom: 14px; width: min(420px, calc(100% - 28px)); overflow: auto; }
-.col-grid { grid-template-columns: repeat(5, minmax(0, 68px)); justify-content: start; }
+.col-grid { grid-template-columns: repeat(6, minmax(0, 60px)); justify-content: start; }
 .col-info { position: absolute; right: 14px; top: 14px; width: min(360px, calc(100% - 28px)); max-height: calc(100% - 28px); overflow: auto; }
 .col-info .name { font-family: var(--display); font-size: 24px; color: #fff; }
 .col-info .ttl { color: var(--gold); font-weight: 800; margin-bottom: 6px; }
@@ -251,7 +251,7 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
   .sel-center { grid-column: 1 / -1; grid-row: 1; }
   .sel-panel { min-height: 0; }
   .sel-panel .bio { display: none; }
-  .sel-grid { grid-template-columns: repeat(10, minmax(0, 52px)); gap: 4px; }
+  .sel-grid { grid-template-columns: repeat(11, minmax(0, 50px)); gap: 4px; }
   .res-cols { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
@@ -260,3 +260,39 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
   .meter { width: 40vw; }
   .sel-panel .moves, .sel-panel .stats { display: none; }
 }
+
+/* ---------- coins + rarity ---------- */
+.coin { display: inline-block; width: 0.95em; height: 0.95em; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c2, #f2c14e 45%, #b8860b 100%); border: 2px solid #8a5a00; vertical-align: -0.14em; margin: 0 0.2em 0 0.05em; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25); }
+.rar { display: inline-block; font-family: var(--display); font-size: 10px; letter-spacing: 1px; padding: 2px 7px; border-radius: 5px; color: #0b0f1c; vertical-align: 1px; margin-right: 4px; }
+.rar.r-common { background: #a7b1c4; }
+.rar.r-rare { background: #3d8bff; color: #fff; }
+.rar.r-epic { background: #b46cff; color: #fff; }
+.rar.r-legendary { background: linear-gradient(90deg, #f2c14e, #fff3b0, #f2c14e); }
+.rar-key { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+.cell.r-common { border-color: #6d7891; }
+.cell.r-rare { border-color: #2f6fe0; }
+.cell.r-epic { border-color: #8f4ae6; background: linear-gradient(180deg, #3a2a6b, #1a1240); }
+.cell.r-legendary { border-color: #c99a2e; background: linear-gradient(180deg, #5a4416, #241a08); }
+.cell::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; z-index: 1; }
+.cell.r-common::before { background: #a7b1c4; } .cell.r-rare::before { background: #3d8bff; } .cell.r-epic::before { background: #b46cff; } .cell.r-legendary::before { background: #f2c14e; }
+.cell.locked::after { content: '🔒'; position: absolute; right: 2px; bottom: 15px; top: auto; font-size: 10px; }
+.cell .price { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: 10px; font-weight: 900; color: #ffd27a; text-shadow: 0 1px 2px #000, 0 0 3px #000; }
+.cell .price.ok { color: #7dff9b; }
+.cell .price .coin { width: 0.9em; height: 0.9em; border-width: 1px; }
+.abils { margin: 6px 0 2px; }
+.abil { font-size: 12.5px; color: #e6edff; padding: 3px 0; display: flex; gap: 6px; align-items: baseline; }
+.abil b { color: var(--gold); font-weight: 800; }
+.abil .ak { flex: none; min-width: 30px; text-align: center; font-family: var(--display); font-size: 10px; padding: 2px 5px; border-radius: 5px; background: #1d2b52; border: 1px solid #3c5aa8; color: #fff; }
+.abil.passive .ak { background: #5a4416; border-color: #f2c14e; color: #f2c14e; }
+.rarline { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.sel-panel .lockinfo.can, .col-info .buybox.can { background: rgba(76, 217, 100, 0.16); color: #c4ffd0; border: 1px solid rgba(125,255,155,0.5); }
+.col-info .buybox { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 10px; margin: 10px 0; background: rgba(229,72,77,0.15); color: #ffc9cb; font-size: 14px; border: 1px solid rgba(229,72,77,0.4); }
+.col-info .buybox .bb-price { font-family: var(--display); font-size: 24px; color: #ffd27a; white-space: nowrap; }
+.col-info .buybox.small .bb-price { font-size: 18px; }
+.col-info .name { line-height: 1.1; margin-top: 4px; }
+.wallet { color: var(--gold); font-weight: 900; }
+.mb-next img.dim { filter: grayscale(0.6) brightness(0.7); }
+.unl.far { filter: saturate(0.5); border-color: rgba(127,178,255,0.35); background: rgba(127,178,255,0.06); }
+.meter.none { opacity: 0.55; border-style: dashed; }
+.meter.none .mfill { display: none; }
+.res-earn h3 { margin-bottom: 6px; }

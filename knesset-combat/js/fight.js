@@ -27,6 +27,13 @@
     this.maxHealth = 1000;
     this.meter = 0;
     this.yaw = 0;
+    // rarity: number of abilities + small damage perk for lower tiers
+    this.rar = KC.RARITY[ch.rarity] || KC.RARITY.rare;
+    this.stats.power *= this.rar.power;
+    this.hasSuper = KC.hasSuper(ch);
+    this.alt = KC.hasAlt(ch) ? ch.special2 : null;
+    this.passive = ch.passive ? ch.passive.id : null;
+    this.survived = false;
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -36,6 +43,7 @@
     this.move = null; this.moveHit = false; this.stun = 0; this.invuln = 0; this.armor = 0;
     this.combo = 0; this.comboTimer = 0; this.airUsed = false; this.chainCount = 0;
     this.sup = null; this.jitter = 0; this.lowHit = false; this.dmgTaken = 0; this.blockPose = false;
+    this.noHitT = 0; this.curSpec = null; this.rushStop = 0; this.landLag = 0;
     this.yaw = facing > 0 ? 1 : -1;
     this.model.root.position.set(x, 0, 0);
   };
@@ -80,11 +88,11 @@
 
   FP.tryAttack = function (m, cancel) {
     var air = !this.grounded();
-    if (!air && this.fresh('x') && this.meter >= 100) { this.consume('x'); this.startSuper(m); return true; }
+    if (!air && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); return true; }
     if (!air && this.fresh('s')) {
-      var sp = this.ch.special;
+      var sp = (this.input.d && this.alt) ? this.alt : this.ch.special;
       if (sp.type === 'projectile' && m.hasProjectile(this)) { /* one at a time */ }
-      else { this.consume('s'); this.startSpecial(m); return true; }
+      else { this.consume('s'); this.startSpecial(m, sp); return true; }
     }
     if (cancel === 'special') return false;
     var crouch = this.input.d;
@@ -103,10 +111,12 @@
     return false;
   };
 
-  FP.startSpecial = function (m) {
-    var sp = this.ch.special;
-    this.moveHit = false;
+  FP.startSpecial = function (m, sp) {
+    sp = sp || this.ch.special;
+    this.curSpec = sp; this.moveHit = false;
     if (sp.type === 'rush') { this.setState('rush'); this.rushStop = 0; this.armor = sp.armor ? 1 : 0; KC.Audio.play('rush'); }
+    else if (sp.type === 'rising') { this.setState('rising'); this.vx = 0; this.invuln = Math.max(this.invuln, 10); KC.Audio.play('whiff'); }
+    else if (sp.type === 'counter') { this.setState('counter'); this.vx = 0; KC.Audio.play('select'); }
     else this.setState('special');
     m.callout(this, sp.name, false);
   };
@@ -134,6 +144,10 @@
     this.st++; this.animT += 1 / 60;
     if (this.invuln > 0) this.invuln--;
     if (this.comboTimer > 0) { this.comboTimer--; if (this.comboTimer === 0) this.combo = 0; }
+    this.noHitT++;
+    if (this.passive === 'regen' && this.noHitT > 120 && this.health > 0 && this.health < this.maxHealth * 0.6 && m.phase === 'fight') {
+      this.health = Math.min(this.maxHealth * 0.6, this.health + 0.2);
+    }
     var ground = this.grounded();
 
     switch (this.state) {
@@ -157,7 +171,24 @@
         if (this.tryAttack(m)) break;
         break;
       }
-      case 'land': if (this.st >= 4) this.setState('idle'); this.vx *= 0.6; break;
+      case 'land': if (this.st >= (this.landLag || 4)) { this.landLag = 0; this.setState('idle'); } this.vx *= 0.6; break;
+      case 'rising': {
+        if (this.st === 4) {
+          this.vy = 0.2 * Math.min(1.1, this.stats.jump); this.vx = 0.035 * this.facing; this.y = 0.001;
+          m.fx.ring(this.x, 0.1, (this.curSpec && this.curSpec.color) || '#ffffff', 0.8, false); KC.Audio.play('rush');
+        }
+        if (this.st >= 4 && this.st <= 18) m.boxCheck(this, [-0.1, 0.85, 0.5, 2.1], { dmg: 92, knockdown: true, launch: true, chip: 8, bstun: 14, push: 0.06, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 });
+        if (this.st > 6 && this.st % 3 === 0 && this.y > 0.2) m.fx.hit(this.x + this.facing * 0.3, this.y + 1.9 * this.h, (this.curSpec && this.curSpec.color) || '#ffffff', 2, 0);
+        if (this.st > 5 && this.grounded()) { this.setState('land'); this.landLag = 14; }
+        break;
+      }
+      case 'counter': {
+        this.vx *= 0.6;
+        if (this.st % 6 === 0 && this.st < 27) m.fx.ring(this.x + this.facing * 0.35, 1.2 * this.h, '#9ad1ff', 0.35, true);
+        if (this.st >= 27 + 16) this.setState('idle');
+        break;
+      }
+      case 'counterHit': this.vx *= 0.7; if (this.st >= 24) this.setState('idle'); break;
       case 'attack': {
         var mv = this.move, total = mv.startup + mv.active + mv.recovery;
         if (!mv.air) this.vx *= 0.7;
@@ -172,7 +203,7 @@
       }
       case 'special': {
         this.vx *= 0.6;
-        if (this.st === 13) m.spawnProjectile(this);
+        if (this.st === 13) m.spawnProjectile(this, this.curSpec);
         if (this.st >= 38) this.setState('idle');
         break;
       }
@@ -240,6 +271,9 @@
         break;
       }
       case 'special': target = this.st < 13 ? P.throwWind() : P.throw(); k = this.st < 13 ? 0.35 : 0.6; break;
+      case 'rising': target = this.st < 4 ? P.crouch(0) : P.uppercut(); k = this.st < 4 ? 0.6 : 0.5; break;
+      case 'counter': target = P.counterStance(t); k = 0.5; break;
+      case 'counterHit': target = this.st < 12 ? P.punch() : P.idle(t); k = 0.6; break;
       case 'rush': target = this.st < 9 ? P.crouch(0) : (this.st < 30 && !this.moveHit ? P.rush(t) : P.idle(t)); k = 0.4; break;
       case 'super': target = this.superPose(m, t); k = 0.45; break;
       case 'recover': target = P.idle(t); k = 0.15; break;
@@ -323,7 +357,7 @@
   MP.shake = function (a) { this.shakeAmt = Math.max(this.shakeAmt, a); };
   MP.threatTo = function (f) {
     var o = f.opp, d = Math.abs(o.x - f.x);
-    if ((o.state === 'attack' || o.state === 'rush' || o.state === 'super') && d < 2.6) return true;
+    if ((o.state === 'attack' || o.state === 'rush' || o.state === 'super' || o.state === 'rising') && d < 2.6) return true;
     for (var i = 0; i < this.hazards.length; i++) { var h = this.hazards[i]; if (h.owner === o && Math.abs(h.x - f.x) < 3.5) return true; }
     return false;
   };
@@ -373,6 +407,18 @@
     var dir = srcX <= def.x ? 1 : -1;
     if (Math.abs(srcX - def.x) < 0.01) dir = att.facing;
     var cx = def.x - dir * def.hw() * 0.8, cy = Math.min(def.y + 1.3 * def.h, def.y + ((hit.hb ? (hit.hb[2] + hit.hb[3]) / 2 : 1.2) * att.h));
+    def.noHitT = 0;
+    // counter stance (Down + Special for some Epic/Legendary fighters)
+    if (def.state === 'counter' && def.st >= 3 && def.st <= 26) {
+      def.setState('counterHit'); def.invuln = 22; def.facing = att.x >= def.x ? 1 : -1;
+      this.hitstop = 10;
+      this.fx.ring(def.x, 1.2 * def.h, '#9ad1ff', 1.4, true); this.fx.hit(cx, cy, '#9ad1ff', 18, -dir);
+      KC.Audio.play('gavel'); this.shake(0.15);
+      this.callout(def, 'COUNTER!', true);
+      this.addMeter(def, 15);
+      if (melee && Math.abs(att.x - def.x) < 2.8) this.resolveHit(def, att, { dmg: 110, knockdown: true, hitstop: 12, sfx: 'hitS', meter: 8, level: 'mid' }, def.x, true);
+      return 'countered';
+    }
     // armor (rush specials)
     if (def.armor > 0 && def.state === 'rush' && def.st < 30) {
       def.armor--;
@@ -384,13 +430,14 @@
       return 'armor';
     }
     if (this.canBlock(def, hit, srcX)) {
-      var chip = Math.round((hit.chip || 0) * att.stats.power / def.stats.defense);
+      var chip = Math.round((hit.chip || 0) * att.stats.power / def.stats.defense * (def.passive === 'thickskin' ? 0.88 : 1));
       def.health -= chip;
+      this.survive(def);
       def.setState('blockstun'); def.stun = hit.bstun || 10; def.lowBlock = !!def.input.d;
       def.vx = (hit.push || 0.06) * dir * 1.1;
       if (melee && Math.abs(def.x) > STAGE_BOUND - 0.15) att.vx = -(hit.push || 0.06) * dir * 0.9;
-      att.meter = Math.min(100, att.meter + (hit.meter || 4) * 0.5);
-      def.meter = Math.min(100, def.meter + 2);
+      this.addMeter(att, (hit.meter || 4) * 0.5);
+      this.addMeter(def, 2);
       this.hitstop = Math.max(this.hitstop, 4);
       this.fx.hit(cx, cy, '#7fc4ff', 6, dir);
       KC.Audio.play('block');
@@ -401,10 +448,11 @@
     var comboing = def.state === 'hitstun' || def.state === 'airhit';
     def.combo = comboing ? def.combo + 1 : 1; def.comboTimer = 50;
     var scale = Math.max(hit.superHit ? 0.6 : 0.4, 1 - 0.1 * (def.combo - 1));
-    var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale));
+    var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale * (def.passive === 'thickskin' ? 0.88 : 1)));
     def.health -= dmg; def.dmgTaken += dmg;
-    att.meter = Math.min(100, att.meter + (hit.meter || 6));
-    def.meter = Math.min(100, def.meter + dmg * 0.05);
+    this.survive(def);
+    this.addMeter(att, hit.meter || 6);
+    this.addMeter(def, dmg * 0.05);
     if (hit.superHit && att.sup) att.sup.landed = true;
     def.move = null; def.armor = 0;
     var heavy = (hit.hitstop || 5) >= 8;
@@ -430,6 +478,19 @@
     if (heavy || def.combo >= 3) { this.stage.cheer(heavy ? 0.25 : 0.15, def.x); }
     return 'hit';
   };
+  MP.addMeter = function (f, v) {
+    if (!f.hasSuper) { f.meter = 0; return; }
+    if (f.passive === 'momentum') v *= 1.35;
+    f.meter = Math.min(100, f.meter + v);
+  };
+  MP.survive = function (def) {
+    if (def.health <= 0 && def.passive === 'survivor' && !def.survived && this.phase === 'fight') {
+      def.health = 1; def.survived = true;
+      this.callout(def, 'SURVIVOR!', true);
+      this.fx.ring(def.x, 1.2 * def.h, '#f2c14e', 1.6, true);
+      KC.Audio.say('Survivor!');
+    }
+  };
   MP.koFighter = function (att, def, dir, hit) {
     def.setState('airhit'); def.vy = 0.17; def.vx = 0.07 * dir; def.y = Math.max(def.y, 0.01);
     def.health = 0;
@@ -445,8 +506,8 @@
 
   /* ---- projectiles + supers ---- */
   MP.addHazard = function (o) { var h = new Hazard(o); if (h.mesh) this.scene.add(h.mesh); this.hazards.push(h); return h; };
-  MP.spawnProjectile = function (f) {
-    var sp = f.ch.special, mesh = M.buildProp(sp.proj, f.ch.super.color);
+  MP.spawnProjectile = function (f, spec) {
+    var sp = spec || f.ch.special, mesh = M.buildProp(sp.proj, f.ch.super ? f.ch.super.color : null);
     var y = 1.22 * f.h;
     mesh.position.set(f.x + f.facing * 0.7, y, 0.05);
     if (f.facing < 0) mesh.rotation.y += Math.PI;

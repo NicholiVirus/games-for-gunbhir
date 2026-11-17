@@ -25,7 +25,7 @@
   <div class="logo"><span class="k">KNESSET</span><span class="c">COMBAT</span><span class="y">26'</span></div>
   <div class="heb">קרב הכנסת</div>
   <div class="press">PRESS <b>ENTER</b> TO CALL THE SESSION TO ORDER</div>
-  <div class="foot">P1: WASD + F G R T &nbsp;·&nbsp; P2: ARROWS + K L O P &nbsp;·&nbsp; Gamepads supported</div>
+  <div class="foot">22 fighters · earn coins, recruit them all &nbsp;·&nbsp; P1: WASD + F G R T &nbsp;·&nbsp; P2: ARROWS + K L O P</div>
 </div>
 
 <!-- main menu -->
@@ -76,10 +76,11 @@
 <!-- collection -->
 <div id="collection" class="screen">
   <div class="col-left panel">
-    <h2>CABINET ROOM</h2>
+    <h2>SHOP · RECRUIT</h2>
     <div class="sub" id="colSub"></div>
+    <div class="rar-key"><span class="rar r-common">COMMON · 1 ability</span><span class="rar r-rare">RARE · 2</span><span class="rar r-epic">EPIC · 3</span><span class="rar r-legendary">LEGENDARY · 3 + passive</span></div>
     <div class="sel-grid col-grid" id="colGrid"></div>
-    <div class="hint">Arrows/WASD to browse · R / O to preview skin · ESC to go back</div>
+    <div class="hint">Arrows/WASD browse · ENTER/F buy · R/O preview gold skin · ESC back</div>
   </div>
   <div class="col-info panel" id="colInfo"></div>
 </div>
@@ -95,8 +96,9 @@
           <tr><td>Move / Jump / Crouch</td><td><kbd>A</kbd><kbd>D</kbd> <kbd>W</kbd> <kbd>S</kbd></td></tr>
           <tr><td>Punch</td><td><kbd>F</kbd></td></tr>
           <tr><td>Kick</td><td><kbd>G</kbd></td></tr>
-          <tr><td>Special</td><td><kbd>R</kbd></td></tr>
-          <tr><td>Super (meter full)</td><td><kbd>T</kbd></td></tr>
+          <tr><td>Ability 1 · Special</td><td><kbd>R</kbd></td></tr>
+          <tr><td>Ability 2 · Down-Special <small>(Epic+)</small></td><td><kbd>S</kbd> + <kbd>R</kbd></td></tr>
+          <tr><td>Super <small>(Rare+, meter full)</small></td><td><kbd>T</kbd></td></tr>
         </table>
       </div>
       <div class="ctl p2c">
@@ -105,19 +107,32 @@
           <tr><td>Move / Jump / Crouch</td><td><kbd>←</kbd><kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd></td></tr>
           <tr><td>Punch</td><td><kbd>K</kbd> or <kbd>Num1</kbd></td></tr>
           <tr><td>Kick</td><td><kbd>L</kbd> or <kbd>Num2</kbd></td></tr>
-          <tr><td>Special</td><td><kbd>O</kbd> or <kbd>Num4</kbd></td></tr>
-          <tr><td>Super (meter full)</td><td><kbd>P</kbd> or <kbd>Num5</kbd></td></tr>
+          <tr><td>Ability 1 · Special</td><td><kbd>O</kbd> or <kbd>Num4</kbd></td></tr>
+          <tr><td>Ability 2 · Down-Special <small>(Epic+)</small></td><td><kbd>↓</kbd> + <kbd>O</kbd></td></tr>
+          <tr><td>Super <small>(Rare+, meter full)</small></td><td><kbd>P</kbd> or <kbd>Num5</kbd></td></tr>
         </table>
       </div>
       <div class="rules">
-        <h3>THE RULES OF ORDER</h3>
+        <h3>RARITY &amp; ABILITIES</h3>
+        <ul>
+          <li><span class="rar r-common">COMMON</span> 1 ability (Special) and a +8% damage perk · costs <span class="coin"></span>100</li>
+          <li><span class="rar r-rare">RARE</span> 2 abilities (Special + Super) and a +4% damage perk · <span class="coin"></span>200</li>
+          <li><span class="rar r-epic">EPIC</span> 3 abilities (Special + Down-Special + Super) · <span class="coin"></span>400</li>
+          <li><span class="rar r-legendary">LEGENDARY</span> 3 abilities plus a unique passive (Survivor, Iron Will, Momentum, Filibuster) · <span class="coin"></span>600+</li>
+        </ul>
+        <h3 style="margin-top:12px">COINS</h3>
+        <ul>
+          <li>Every match pays <b>coins</b>: showing up, rounds won, wins, perfect rounds, super finishes and a CPU difficulty bonus. Clearing the Election Campaign pays a big bonus.</li>
+          <li>Spend coins in the <b>Shop</b>, or buy a locked fighter straight from the select screen (press pick twice to confirm).</li>
+          <li>You start with <b>David Ben-Gurion</b> (Rare). There are 22 fighters to recruit in total.</li>
+          <li><b>Election Night Gold</b> skin: win 3 matches with a fighter, or buy it for <span class="coin"></span>150.</li>
+        </ul>
+        <h3 style="margin-top:12px">THE RULES OF ORDER</h3>
         <ul>
           <li><b>Block</b> by holding <b>away</b> from your opponent. Crouch-block (<b>down + away</b>) stops sweeps; jump attacks must be blocked <b>standing</b>.</li>
           <li><b>Crouch + Kick</b> is a sweep that knocks down. <b>Punch</b> chains into more punches, a kick, or your Special.</li>
-          <li>Every hit fills your <b>MANDATE</b> meter. At 100% press <b>Super</b> for a cinematic finisher.</li>
-          <li>Win rounds to earn <b>Mandates</b> — they unlock every Prime Minister in order. Contenders and the secret boss have their own challenges.</li>
-          <li>Win 3 matches with a fighter to unlock their <b>Election Night Gold</b> skin. Toggle skins on the select screen with <kbd>R</kbd> / <kbd>O</kbd>.</li>
-          <li>Gamepads: D-pad/stick to move, <b>A</b> punch, <b>B</b> kick, <b>X</b> special, <b>Y</b> super. Pad 1 = P1, Pad 2 = P2.</li>
+          <li>Ability 2 types: <b>Uppercut</b> (rising anti-air), <b>Counter</b> (parry stance — strikes back if hit), or a second projectile/charge.</li>
+          <li>Gamepads: D-pad/stick to move, <b>A</b> punch, <b>B</b> kick, <b>X</b> special (hold down for Ability 2), <b>Y</b> super.</li>
           <li><kbd>ESC</kbd> pauses. <kbd>M</kbd> toggles music.</li>
         </ul>
       </div>
@@ -148,8 +163,8 @@
     </div>
   </div>
   <div class="hud-bottom">
-    <div class="meter p1"><div class="mfill"></div><span class="mlabel">MANDATE</span><span class="mkey">T</span></div>
-    <div class="meter p2"><div class="mfill"></div><span class="mlabel">MANDATE</span><span class="mkey">P</span></div>
+    <div class="meter p1"><div class="mfill"></div><span class="mlabel">SUPER</span><span class="mkey">T</span></div>
+    <div class="meter p2"><div class="mfill"></div><span class="mlabel">SUPER</span><span class="mkey">P</span></div>
   </div>
   <div class="combo p1"></div><div class="combo p2"></div>
   <div class="callout p1"></div><div class="callout p2"></div>
