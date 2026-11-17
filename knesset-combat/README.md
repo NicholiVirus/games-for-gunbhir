@@ -28,11 +28,23 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## Modes
 
-- **Campaign · 100 levels:** fixed CPU rivals that get tougher.
-  - Levels 1–15 are Easy, 16–45 Normal, 46–80 Hard and 81–100 Boss.
+- **Campaign · 250 levels:** fixed CPU rivals that get tougher.
+  - Levels 1–30 are Easy, 31–100 Normal, 101–180 Hard and 181–250 Boss.
   - Every 10th level is a boss fight.
   - Opponents also gain strength and upgrade ranks as you climb.
-  - The first clear of a level pays 25 + 3 × level coins (+100 on boss levels); replays pay 30%.
+  - The first clear of a level pays 25 + 2 × level coins (+100 on boss levels); replays pay 30%.
+
+## Chests and shards
+
+- **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 2 tiers better.
+- **Tiers:** Wooden → Silver → Golden → Epic → Mythic → Legendary. The base tier rises every 50 levels.
+- **Tap to upgrade:** tap a chest 3 times before opening it. The taps have a 45%, 30% and 18% chance to upgrade it one tier.
+- **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
+- **Recruiting with shards:** collect 5 (Common), 10 (Rare), 15 (Epic) or 25 (Legendary) shards to recruit a leader for free.
+  - Each shard also lowers that leader's coin price.
+  - You can buy single shards in the Shop with `B`.
+  - Shards of leaders you already own become coins.
+- **Projectiles:** each fighter can have 2 on screen at once, +1 per upgrade rank.
 - **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
 - **Shop:** recruit fighters, upgrade them, and buy gold skins with coins.
@@ -84,7 +96,10 @@ You start with **David Ben-Gurion**, Israel's first Prime Minister (Rare). Every
 
 Progress saves in your browser (`localStorage`). Settings → Reset Progress wipes it.
 
-## The roster (22)
+## The roster (28)
+
+New icons: Chaim Weizmann (Rare), Moshe Dayan (Legendary, Battle Rhythm passive), Abba Eban (Common), Yuli Edelstein (Epic), Gideon Sa'ar (Rare), Ayelet Shaked (Common).
+
 
 | Fighter | Rarity | Special | Down-Special | Super | Passive |
 |---|---|---|---|---|---|

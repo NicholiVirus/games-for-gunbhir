@@ -40,6 +40,7 @@
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
     this.maxHealth = 1000 + this.rank * U.health;
+    this.projMax = 2 + this.rank;
     this.reset(0, 1);
   };
   var FP = F.prototype;
@@ -369,8 +370,9 @@
     return false;
   };
   MP.hasProjectile = function (f) {
-    for (var i = 0; i < this.hazards.length; i++) if (this.hazards[i].owner === f && this.hazards[i].kind === 'proj' && this.hazards[i].alive) return true;
-    return false;
+    var n = 0;
+    for (var i = 0; i < this.hazards.length; i++) if (this.hazards[i].owner === f && this.hazards[i].kind === 'proj' && this.hazards[i].alive) n++;
+    return n >= f.projMax;   // 2 projectiles on screen by default, +1 per upgrade rank
   };
 
   /* ---- hit resolution ---- */

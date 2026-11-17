@@ -241,6 +241,67 @@ KC.ROSTER = [
     quote: 'I call for unity. And a rematch.', victory: 'bow'
   },
   {
+    id: 'weizmann', name: 'Chaim Weizmann', short: 'WEIZMANN', title: 'The Chemist', rarity: 'rare',
+    group: 'icon', years: 'First President',
+    bio: "Israel's first President and a celebrated chemist whose wartime research made him world-famous.",
+    look: { height: 0.98, girth: 1.0, skin: '#e6b48e', hair: 'bald', hairColor: '#8a8580', beard: '#6f6a64', glasses: 'round', glassesColor: '#2a2a2a', outfit: 'suit', top: '#2f3138', pants: '#2a2c32', shirt: '#f2f2f2', tie: '#6b2f2f', shoes: '#1d1d1d' },
+    stats: { speed: 0.98, power: 1.02, defense: 1.02, jump: 0.98 },
+    special: { type: 'projectile', name: 'Acetone Flask', proj: 'water' },
+    super: { type: 'wave', name: 'Chain Reaction', color: '#7dffb0' },
+    quote: 'The experiment was a success. You were the control group.', victory: 'bow'
+  },
+  {
+    id: 'dayan', name: 'Moshe Dayan', short: 'DAYAN', title: 'The Eyepatch', rarity: 'legendary',
+    group: 'icon', years: 'Minister & MK',
+    bio: 'Former IDF Chief of Staff, later Defense and Foreign Minister — instantly recognisable by his eyepatch.',
+    look: { height: 0.98, girth: 1.02, skin: '#ddA27a', hair: 'fringe', hairColor: '#3a2f26', eyepatch: true, outfit: 'shirt', top: '#9a9468', pants: '#4e4a36', shirt: '#9a9468', tie: null, shoes: '#2a2018' },
+    stats: { speed: 1.08, power: 1.08, defense: 1.0, jump: 1.05 },
+    special: { type: 'rush', name: 'Desert Raid' },
+    special2: { type: 'rising', name: 'Hawk Dive', color: '#ffb347' },
+    super: { type: 'spin', name: 'Sandstorm Spin', color: '#e8c27a' },
+    passive: { id: 'momentum', name: 'Battle Rhythm' },
+    quote: 'I only needed one eye for that.', victory: 'salute'
+  },
+  {
+    id: 'eban', name: 'Abba Eban', short: 'EBAN', title: 'The Silver Tongue', rarity: 'common',
+    group: 'icon', years: 'Foreign Minister',
+    bio: 'Foreign Minister and legendary orator, famous for speeches delivered in flawless English.',
+    look: { height: 0.97, girth: 1.08, skin: '#ebbd9a', hair: 'short', hairColor: '#8a8a86', glasses: 'thick', glassesColor: '#1d1d1d', outfit: 'suit', top: '#353a46', pants: '#2f343f', shirt: '#f2f2f2', tie: '#2a4a7a', shoes: '#1d1d1d' },
+    stats: { speed: 1.0, power: 1.0, defense: 1.02, jump: 1.0, projSpeed: 1.15 },
+    special: { type: 'projectile', name: 'Silver Tongue', proj: 'soundring' },
+    quote: 'Eloquently defeated.', victory: 'bow'
+  },
+  {
+    id: 'edelstein', name: 'Yuli Edelstein', short: 'EDELSTEIN', title: 'The Former Speaker', rarity: 'epic',
+    group: 'icon', years: 'Knesset Speaker',
+    bio: 'Long-serving Speaker of the Knesset who once ran this very chamber.',
+    look: { height: 1.0, girth: 1.06, skin: '#e8b693', hair: 'fringe', hairColor: '#9a9590', beard: '#aaa59f', glasses: 'thin', glassesColor: '#333333', outfit: 'suit', top: '#23262e', pants: '#1f222a', shirt: '#f2f2f2', tie: '#7a6a3a', shoes: '#111111' },
+    stats: { speed: 0.98, power: 1.04, defense: 1.06, jump: 0.98 },
+    special: { type: 'projectile', name: 'Out of Order', proj: 'gavelwave' },
+    special2: { type: 'counter', name: "Speaker's Ruling" },
+    super: { type: 'drop', name: 'Gavel Down', color: '#8a5a2b', obj: 'gavel' },
+    quote: 'The Member is out of order. And out of health.', victory: 'point'
+  },
+  {
+    id: 'saar', name: "Gideon Sa'ar", short: "SA'AR", title: 'The Challenger', rarity: 'rare',
+    group: 'contender', years: 'Contender',
+    bio: 'Veteran minister who founded his own party to run for Prime Minister in 2021.',
+    look: { height: 1.0, girth: 0.98, skin: '#e2ae88', hair: 'short', hairColor: '#4a4540', outfit: 'suit', top: '#2a3348', pants: '#252d40', shirt: '#f2f2f2', tie: '#3a6ab0', shoes: '#1d1d1d' },
+    stats: { speed: 1.05, power: 1.0, defense: 1.0, jump: 1.02 },
+    special: { type: 'projectile', name: 'New Hope Banner', proj: 'banner' },
+    super: { type: 'beam', name: 'Breakaway Beam', color: '#8fd0ff' },
+    quote: 'I always have a new plan.', victory: 'fist'
+  },
+  {
+    id: 'shaked', name: 'Ayelet Shaked', short: 'SHAKED', title: 'The Justice', rarity: 'common',
+    group: 'icon', years: 'Former Minister',
+    bio: 'Former Justice Minister and Interior Minister, and a former software engineer.',
+    look: { height: 0.96, girth: 0.9, skin: '#ebbd9a', hair: 'bob', hairColor: '#3a2a20', outfit: 'open', top: '#1f2b45', pants: '#1c2740', shirt: '#f4f4f4', tie: null, shoes: '#111111' },
+    stats: { speed: 1.1, power: 0.98, defense: 0.98, jump: 1.06 },
+    special: { type: 'projectile', name: 'Judicial Memo', proj: 'folder' },
+    quote: 'Case closed.', victory: 'wave'
+  },
+  {
     id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'legendary', price: 800,
     group: 'boss', years: 'Final Boss (fictional)',
     bio: 'The fictional keeper of order in the plenum. Final boss of the Election Campaign.',
@@ -286,22 +347,43 @@ KC.UPGRADE = {
   mult: { common: 1, rare: 1.5, epic: 2, legendary: 2.5 },
   cost: function (ch, toRank) { return Math.round(80 * toRank * KC.UPGRADE.mult[ch.rarity]); },
   describe: function (rank) {
-    return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP' : 'No upgrades yet';
+    return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP · ' + (2 + rank) + ' projectiles' : 'No upgrades yet · 2 projectiles';
   }
 };
 
 /* ---------- Campaign: 100 levels vs CPU ---------- */
-KC.LEVELS = 100;
+KC.LEVELS = 250;
 KC.level = function (n) {
   var pool = KC.ROSTER.filter(function (c) { return c.id !== 'speaker'; });
+  var legends = pool.filter(function (c) { return c.rarity === 'legendary'; });
   var boss = n % 10 === 0;
-  var ch = boss ? (n === 100 || n % 20 === 0 ? KC.rosterById.speaker : pool.filter(function (c) { return c.rarity === 'legendary'; })[(n / 10) % 3]) : pool[(n * 5 + 3) % pool.length];
-  var ai = n <= 15 ? 'easy' : n <= 45 ? 'normal' : n <= 80 ? 'hard' : 'boss';
-  if (boss && ai !== 'boss') ai = n <= 30 ? 'normal' : 'hard';
+  var ch = boss ? (n % 50 === 0 ? KC.rosterById.speaker : legends[(n / 10) % legends.length]) : pool[(n * 5 + 3) % pool.length];
+  var ai = n <= 30 ? 'easy' : n <= 100 ? 'normal' : n <= 180 ? 'hard' : 'boss';
+  if (boss && ai !== 'boss') ai = n <= 40 ? 'normal' : 'hard';
   return {
     n: n, ch: ch, ai: ai, boss: boss,
-    rank: Math.min(KC.UPGRADE.max, Math.floor((n - 1) / 20) + (boss ? 1 : 0)),
-    boost: 1 + (n - 1) * 0.004,
-    reward: 25 + n * 3 + (boss ? 100 : 0)
+    rank: Math.min(KC.UPGRADE.max, Math.floor((n - 1) / 45) + (boss ? 1 : 0)),
+    boost: 1 + (n - 1) * 0.0025,
+    reward: 25 + n * 2 + (boss ? 100 : 0),
+    chestTier: KC.chestBase(n)
   };
 };
+
+/* ---------- Shards: collect fragments of a leader to recruit them ---------- */
+KC.SHARDS = { common: 5, rare: 10, epic: 15, legendary: 25 };
+KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
+KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)); };
+KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
+
+/* ---------- Ballot-box chests ---------- */
+KC.CHESTS = [
+  { id: 'wood',   name: 'Wooden Ballot Box',  color: '#a8743f', glow: '#ffcf8a', coins: [10, 25],   shards: [1, 2],   picks: 1, w: { common: 70, rare: 25, epic: 5, legendary: 0 } },
+  { id: 'silver', name: 'Silver Ballot Box',  color: '#c9d2df', glow: '#ffffff', coins: [15, 35],   shards: [2, 3],   picks: 1, w: { common: 50, rare: 35, epic: 12, legendary: 3 } },
+  { id: 'gold',   name: 'Golden Ballot Box',  color: '#f2c14e', glow: '#fff3b0', coins: [25, 50],   shards: [3, 5],   picks: 2, w: { common: 30, rare: 40, epic: 22, legendary: 8 } },
+  { id: 'epic',   name: 'Epic Ballot Box',    color: '#b46cff', glow: '#e6ccff', coins: [40, 80],   shards: [5, 8],   picks: 2, w: { common: 10, rare: 35, epic: 40, legendary: 15 } },
+  { id: 'mythic', name: 'Mythic Ballot Box',  color: '#ff4d6d', glow: '#ffc2cf', coins: [60, 120],  shards: [8, 12],  picks: 3, w: { common: 0, rare: 25, epic: 45, legendary: 30 } },
+  { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, epic: 35, legendary: 55 } }
+];
+/* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
+KC.chestBase = function (n) { return Math.min(4, Math.floor((n - 1) / 50) + (n % 10 === 0 ? 1 : 0)); };
+KC.TAP_UPGRADE = [0.45, 0.3, 0.18];   // chance each of the 3 taps upgrades the chest

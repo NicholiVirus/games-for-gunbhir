@@ -171,6 +171,12 @@
     if (L.mustache) {
       head.add(part(box(L.bushy ? 0.1 : 0.075, L.bushy ? 0.035 : 0.022, 0.03), L.mustacheColor, 0, 0.083, 0.138, false));
     }
+    if (L.eyepatch) {
+      var ep = sph(0.032, 8, 6); ep.scale(1, 0.85, 0.4);
+      head.add(part(ep, '#0d0d0d', 0.047, 0.142, 0.135, false));
+      var strap = new T.TorusGeometry(0.142, 0.006, 4, 24); strap.rotateX(Math.PI / 2); strap.rotateZ(-0.35);
+      head.add(part(strap, '#0d0d0d', 0, 0.16, 0.0, false));
+    }
     if (L.glasses) {
       var gr = L.glasses === 'round' ? 0.034 : 0.03, tube = L.glasses === 'thick' ? 0.011 : 0.006;
       var ring = new T.TorusGeometry(gr, tube, 6, 14);
@@ -433,6 +439,30 @@
     defeated: function (t) {
       return P({ hipsY: -0.45, torsoRx: 0.7, headRx: 0.5, lShRx: -0.3, lShRz: 0.1, lElRx: -0.2, rShRx: -0.3, rShRz: 0.1, rElRx: -0.2, lHipRx: -1.3, lKneeRx: 2.4, rHipRx: -0.2, rKneeRx: 2.5 });
     }
+  };
+
+  /* ---------- ballot-box chest ---------- */
+  M.buildChest = function () {
+    var g = new T.Group(), body = new T.Group(); g.add(body);
+    var mats = { main: new T.MeshToonMaterial({ color: new T.Color('#a8743f'), gradientMap: gradientMap() }),
+      trim: new T.MeshToonMaterial({ color: new T.Color('#3a2a1a'), gradientMap: gradientMap() }),
+      glow: new T.MeshBasicMaterial({ color: new T.Color('#ffcf8a'), transparent: true, opacity: 0.35, blending: T.AdditiveBlending, depthWrite: false }) };
+    function mk(geo, mat, x, y, z) { var m = new T.Mesh(flat(geo), mat); m.position.set(x, y, z); m.castShadow = true; var o = new T.Mesh(geo, M.outlineMat); m.add(o); return m; }
+    body.add(mk(box(1.3, 0.85, 0.9), mats.main, 0, 0.425, 0));
+    body.add(mk(box(1.36, 0.12, 0.96), mats.trim, 0, 0.06, 0));
+    [-0.55, 0.55].forEach(function (x) { body.add(mk(box(0.12, 0.88, 0.96), mats.trim, x, 0.43, 0)); });
+    // ballot slip sticking out + star emblem
+    var star = new T.Shape(); for (var i = 0; i < 12; i++) { var a = i / 12 * Math.PI * 2 - Math.PI / 2, r = i % 2 ? 0.07 : 0.16; if (i) star.lineTo(Math.cos(a) * r, Math.sin(a) * r); else star.moveTo(Math.cos(a) * r, Math.sin(a) * r); }
+    var em = new T.Mesh(new T.ExtrudeGeometry(star, { depth: 0.03, bevelEnabled: false }), mats.trim); em.position.set(0, 0.45, 0.455); body.add(em);
+    var lid = new T.Group(); lid.position.set(0, 0.85, -0.45); body.add(lid);
+    lid.add(mk(box(1.38, 0.16, 0.98), mats.trim, 0, 0.08, 0.45));
+    var slot = new T.Mesh(box(0.6, 0.02, 0.08), new T.MeshBasicMaterial({ color: '#000' })); slot.position.set(0, 0.17, 0.45); lid.add(slot);
+    var paper = new T.Mesh(box(0.4, 0.28, 0.01), new T.MeshLambertMaterial({ color: '#fbfaf3' })); paper.position.set(0, 0.28, 0.45); lid.add(paper);
+    var glow = new T.Mesh(new T.SphereGeometry(1.1, 18, 12), mats.glow); glow.position.y = 0.5; g.add(glow);
+    var inner = new T.Mesh(new T.SphereGeometry(0.4, 12, 8), new T.MeshBasicMaterial({ color: '#fff6c8', transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }));
+    inner.position.y = 0.9; g.add(inner);
+    return { g: g, body: body, lid: lid, glow: glow, inner: inner, mats: mats,
+      setTier: function (t) { mats.main.color.set(t.color); mats.glow.color.set(t.glow); mats.trim.color.set(t.id === 'wood' ? '#3a2a1a' : t.id === 'legend' ? '#ffffff' : '#1b1f2e'); } };
   };
 
   /* ---------- projectile + super object meshes ---------- */
