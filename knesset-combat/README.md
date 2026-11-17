@@ -22,6 +22,9 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 | Super (Rare and up, meter full) | `T` | `;` or `Num5` |
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
+- **Guard break:** you can hold block for only 2.5 seconds at a time. Past that, your guard breaks and you're stunned.
+- **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.
+- **CPU skill:** in the campaign it climbs every level, from 8% at level 1 to about 97% at level 250. Boss levels add a little extra. Smarter CPUs react faster, block better, punish missed attacks and let go of block before their guard breaks.
 - **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super.
 - `Esc` or the ❚❚ button pauses, and `M` toggles music.
 - **Mouse:** everything is clickable.

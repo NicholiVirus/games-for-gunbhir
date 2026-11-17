@@ -723,7 +723,7 @@
     var d = Save.data, cleared = L.n <= (d.tour || 0);
     return '<div class="who">' + (L.boss ? 'BOSS LEVEL ' : 'LEVEL ') + L.n + ' / ' + KC.LEVELS + '</div>' +
       '<div class="lv-opp"><img src="' + por(L.ch) + '" alt=""><div><div class="name">' + esc(L.ch.name) + '</div><div class="ttl">' + rarBadge(L.ch) + ' CPU ' + L.ai.toUpperCase() + (L.rank ? ' · ★' + L.rank : '') + '</div></div></div>' +
-      '<div class="bio">Opponent strength +' + Math.round((L.boost - 1) * 100) + '%' + (L.rank ? ', upgraded to Rank ' + L.rank : '') + '.</div>' +
+      '<div class="bio">CPU skill <b>' + Math.round(L.skill * 100) + '%</b> · opponent strength +' + Math.round((L.boost - 1) * 100) + '%' + (L.rank ? ', upgraded to Rank ' + L.rank : '') + '.</div>' +
       '<div class="lv-reward">' + (cleared ? 'Cleared ✔ · replay pays ' + G.coin(Math.round(L.reward * 0.3)) : 'First clear pays ' + G.coin(L.reward)) + ' <span style="opacity:.7">+ normal match coins</span></div>';
   }
   screens.levels = {
@@ -1004,7 +1004,7 @@
     G.ai = cfg.ai.map(function (lvl) { return lvl ? lvl : null; });
     var ranks = cfg.ranks || cfg.chars.map(function (c, i) { return cfg.ai[i] ? 0 : Save.rank(c.id); });
     var m = new KC.Match(G, { chars: cfg.chars, skins: cfg.skins, roundsToWin: st.rounds, timer: st.timer, stageMode: mode, ranks: ranks, boosts: cfg.boosts });
-    G.ai = cfg.ai.map(function (lvl, i) { return lvl ? new KC.AI(m.f[i], lvl) : null; });
+    G.ai = cfg.ai.map(function (lvl, i) { return lvl ? new KC.AI(m.f[i], lvl, i === 1 && cfg.skill != null ? cfg.skill : null) : null; });
     KC.HUD.setup(m);
     G.match = m;
     G.screen = 'fight';
@@ -1017,7 +1017,7 @@
     var L = KC.level(n);
     G.tourPick = { ch: ch, skin: skin };
     startMatch({ mode: 'tour', levelNo: n, chars: [ch, L.ch], skins: [skin, ch === L.ch ? KC.MIRROR_SKIN : null], ai: [null, L.ai],
-      ranks: [Save.rank(ch.id), L.rank], boosts: [1, L.boost] });
+      ranks: [Save.rank(ch.id), L.rank], boosts: [1, L.boost], skill: L.skill });
   };
   G.getInput = function (i, m) {
     if (G.ai[i]) return G.ai[i].input(m);

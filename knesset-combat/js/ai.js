@@ -6,8 +6,20 @@
     hard: { react: 7, block: 0.75, aggro: 0.72, think: 9, combo: 0.8, anti: 0.65, superUse: 0.95, jumpProj: 0.6 },
     boss: { react: 5, block: 0.82, aggro: 0.8, think: 7, combo: 0.9, anti: 0.75, superUse: 1, jumpProj: 0.65 }
   };
-  var AI = KC.AI = function (fighter, level) {
-    this.f = fighter; this.L = LEVELS[level] || LEVELS.normal; this.level = level;
+  /* skill 0..1 blends from a clumsy rookie to a near-perfect boss (used by the 250-level campaign) */
+  function blend(skill) {
+    var a = { react: 26, block: 0.12, aggro: 0.3, think: 28, combo: 0.1, anti: 0.08, superUse: 0.25, jumpProj: 0.2, punish: 0.05, guardSense: 0.1 };
+    var b = { react: 3, block: 0.92, aggro: 0.85, think: 5, combo: 0.97, anti: 0.9, superUse: 1, jumpProj: 0.75, punish: 0.9, guardSense: 0.95 };
+    var o = {}; for (var k in a) o[k] = a[k] + (b[k] - a[k]) * skill;
+    o.react = Math.round(o.react); o.think = Math.round(o.think);
+    return o;
+  }
+  KC.aiBlend = blend;
+  var SKILL = { easy: 0.15, normal: 0.42, hard: 0.7, boss: 0.85 };
+  var AI = KC.AI = function (fighter, level, skill) {
+    this.f = fighter; this.level = level;
+    this.skill = skill != null ? skill : (SKILL[level] != null ? SKILL[level] : 0.42);
+    this.L = blend(this.skill);
     this.intent = 'approach'; this.intentT = 0; this.hold = {}; this.threatT = -1; this.defend = 0; this.defendLow = false;
     this.press = null; this.pressT = 0; this.jumpPlan = 0;
   };
@@ -42,6 +54,8 @@
     }
     if (this.altNow) { this.altNow = 0; inp.d = 1; return this.tap(inp, 's'); }
     if (this.jumpPlan) { this.jumpPlan = 0; inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; return inp; }
+    var guardNearBreak = (f.blockTime || 0) > KC.GUARD_FRAMES * (0.55 + 0.3 * (1 - L.guardSense));
+    if (guardNearBreak && R() < L.guardSense) { this.defend = 0; if (dist < 1.3 && f.actionable()) return this.tap(inp, R() < 0.5 ? 'p' : 'k'); inp[away] = 0; return inp; }
     if (this.defend > 0) {
       this.defend--;
       if (o.move && o.state === 'attack') this.defendLow = o.move.level === 'low';
@@ -63,6 +77,14 @@
     if (f.state === 'jump' && !f.airUsed && f.vy < 0.05 && dist < 1.6) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
     if (!f.actionable()) return inp;
 
+    /* ---- punish: opponent whiffed, is recovering, landing or guard-broken ---- */
+    var recovering = (o.state === 'attack' && o.move && !o.moveHit && o.st > o.move.startup + o.move.active) || (o.state === 'land' && (o.landLag || 0) > 4) ||
+      (o.state === 'rush' && o.rushStop) || o.state === 'counter' && o.st > 26 || o.guardBroken > 0 || (o.state === 'hitstun' && o.stun > 25);
+    if (recovering && f.actionable() && R() < L.punish * 0.6) {
+      if (f.meter >= 100 && f.hasSuper && dist < 3.2 && R() < L.superUse * 0.7) return this.tap(inp, 'x');
+      if (dist < 1.25) return this.tap(inp, R() < 0.55 ? 'k' : 'p');
+      if (dist < 2.6) { inp[toward] = 1; return inp; }
+    }
     /* ---- anti-air ---- */
     if (!o.grounded() && dist < 1.9 && o.vy < 0.08 && R() < L.anti * 0.3) {
       if (f.alt && f.alt.type === 'rising' && R() < 0.65) { inp.d = 1; return this.tap(inp, 's'); }

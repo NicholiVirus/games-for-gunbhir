@@ -1,6 +1,8 @@
 /* Knesset Combat 26' — fighters, frame data, hazards (projectiles/supers) and the match/round flow. */
 (function () {
   var T = THREE, M = KC.Models;
+  KC.GUARD_FRAMES = 150;      // 2.5 s of continuous blocking
+  KC.METER_PER_DMG = 0.3;     // ~330 damage dealt fills the super meter
   var STAGE_BOUND = 8.2, MAX_SEP = 6.4, GRAVITY = 0.0115;
   KC.STAGE_BOUND = STAGE_BOUND;
 
@@ -48,6 +50,7 @@
     this.x = x; this.y = 0; this.vx = 0; this.vy = 0; this.facing = facing;
     this.health = this.maxHealth; this.state = 'idle'; this.st = 0; this.animT = 0;
     this.move = null; this.moveHit = false; this.stun = 0; this.invuln = 0; this.armor = 0;
+    this.blockTime = 0; this.guardBroken = 0;
     this.combo = 0; this.comboTimer = 0; this.airUsed = false; this.chainCount = 0;
     this.sup = null; this.jitter = 0; this.lowHit = false; this.dmgTaken = 0; this.blockPose = false;
     this.noHitT = 0; this.curSpec = null; this.rushStop = 0; this.landLag = 0;
@@ -152,6 +155,18 @@
     if (this.invuln > 0) this.invuln--;
     if (this.comboTimer > 0) { this.comboTimer--; if (this.comboTimer === 0) this.combo = 0; }
     this.noHitT++;
+    // Guard limit: holding block for more than 2.5 s (150 frames) breaks your guard
+    if (this.guardBroken > 0) this.guardBroken--;
+    var blocking = this.state === 'blockstun' || ((this.state === 'idle' || this.state === 'walk' || this.state === 'crouch') && this.blockPose);
+    if (blocking) {
+      this.blockTime = (this.blockTime || 0) + 1;
+      if (this.blockTime >= KC.GUARD_FRAMES) {
+        this.blockTime = 0; this.guardBroken = 60; this.blockPose = false;
+        this.setState('hitstun'); this.stun = 36; this.lowHit = false; this.vx = -0.06 * this.facing;
+        m.callout(this, 'GUARD BREAK!', true); m.fx.ring(this.x, 1.2 * this.h, '#ff5a5a', 1.4, true); m.fx.hit(this.x, 1.3 * this.h, '#ff8a8a', 18);
+        KC.Audio.play('hitH'); m.shake(0.12);
+      }
+    } else if (!(this.backHeld() && this.grounded() && (this.state === 'idle' || this.state === 'walk' || this.state === 'crouch'))) this.blockTime = Math.max(0, (this.blockTime || 0) - 2);   // only recovers once you let go of block
     if (this.passive === 'regen' && this.noHitT > 120 && this.health > 0 && this.health < this.maxHealth * 0.6 && m.phase === 'fight') {
       this.health = Math.min(this.maxHealth * 0.6, this.health + 0.2);
     }
@@ -406,6 +421,7 @@
     if (!okState) return false;
     var awayHeld = srcX > def.x ? def.input.l : def.input.r;
     if (!awayHeld) return false;
+    if (def.guardBroken > 0) return false;   // guard break cooldown
     var crouching = !!def.input.d;
     if (hit.level === 'low' && !crouching) return false;
     if (hit.level === 'high' && crouching) return false;
@@ -446,8 +462,7 @@
       def.setState('blockstun'); def.stun = hit.bstun || 10; def.lowBlock = !!def.input.d;
       def.vx = (hit.push || 0.06) * dir * 1.1;
       if (melee && Math.abs(def.x) > STAGE_BOUND - 0.15) att.vx = -(hit.push || 0.06) * dir * 0.9;
-      if (!hit.superHit) this.addMeter(att, (hit.meter || 4) * 0.5);   // supers never charge the super meter
-      this.addMeter(def, 2);
+      // blocked: the attacker's super does not charge
       this.hitstop = Math.max(this.hitstop, 4);
       this.fx.hit(cx, cy, '#7fc4ff', 6, dir);
       KC.Audio.play('block');
@@ -461,8 +476,8 @@
     var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale * (def.passive === 'thickskin' ? 0.88 : 1)));
     def.health -= dmg; def.dmgTaken += dmg;
     this.survive(def);
-    if (!hit.superHit) this.addMeter(att, hit.meter || 6);   // supers never charge the super meter
-    this.addMeter(def, dmg * 0.05);
+    if (!hit.superHit) this.addMeter(att, dmg * KC.METER_PER_DMG);   // super charges by damage dealt (supers never charge it)
+    this.addMeter(def, dmg * 0.04);
     if (hit.superHit && att.sup) att.sup.landed = true;
     def.move = null; def.armor = 0;
     var heavy = (hit.hitstop || 5) >= 8;

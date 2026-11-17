@@ -466,7 +466,8 @@ KC.level = function (n) {
     rank: Math.min(KC.UPGRADE.max, Math.floor((n - 1) / 45) + (boss ? 1 : 0)),
     boost: 1 + (n - 1) * 0.0025,
     reward: 25 + n * 2 + (boss ? 100 : 0),
-    chestTier: KC.chestBase(n)
+    chestTier: KC.chestBase(n),
+    skill: Math.min(0.97, 0.08 + (n - 1) / 249 * 0.85 + (boss ? 0.06 : 0))   // CPU gets smarter every level
   };
 };
 
