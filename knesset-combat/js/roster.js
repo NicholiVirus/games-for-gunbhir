@@ -14,6 +14,7 @@ KC.RARITY = {
   common: { id: 'common', name: 'Common', color: '#a7b1c4', abilities: 1, price: 100, power: 1.08 },
   rare: { id: 'rare', name: 'Rare', color: '#3d8bff', abilities: 2, price: 200, power: 1.04 },
   epic: { id: 'epic', name: 'Epic', color: '#b46cff', abilities: 3, price: 400, power: 1.0 },
+  mythic: { id: 'mythic', name: 'Mythic', color: '#ff4d6d', abilities: 3, price: 500, power: 1.0 },
   legendary: { id: 'legendary', name: 'Legendary', color: '#f2c14e', abilities: 3, price: 600, power: 1.0 }
 };
 
@@ -119,7 +120,7 @@ KC.ROSTER = [
     quote: 'The future belongs to the bold — and the quick.', victory: 'wave'
   },
   {
-    id: 'netanyahu', name: 'Benjamin Netanyahu', short: 'NETANYAHU', title: 'The Survivor', rarity: 'legendary',
+    id: 'netanyahu', name: 'Benjamin Netanyahu', short: 'NETANYAHU', title: 'The Survivor', rarity: 'mythic',
     group: 'pm', years: '1996–99, 2009–21, 2022–',
     bio: 'Israel\'s longest-serving Prime Minister. Drew a red line on a cartoon bomb at the UN in 2012.',
     look: { height: 1.0, girth: 1.04, skin: '#e9b48e', hair: 'combed', hairColor: '#d9d9d6', outfit: 'suit', top: '#1e2a44', pants: '#1b263d', shirt: '#f6f6f6', tie: '#2b6cd0', shoes: '#111111' },
@@ -303,6 +304,105 @@ KC.ROSTER = [
     quote: 'Case closed.', victory: 'wave'
   },
   {
+    id: 'yadin', name: 'Yigael Yadin', short: 'YADIN', title: 'The Archaeologist', rarity: 'mythic',
+    group: 'icon', years: 'Deputy PM',
+    bio: 'IDF Chief of Staff turned world-famous archaeologist who dug at Masada and studied the Dead Sea Scrolls, later Deputy Prime Minister.',
+    look: { height: 1.0, girth: 0.98, skin: '#e2ad86', hair: 'bald', hairColor: '#4a3f36', glasses: 'thin', glassesColor: '#2a2a2a', outfit: 'shirt', top: '#c2b282', pants: '#5d5240', shirt: '#c2b282', tie: null, shoes: '#3b2a1a' },
+    stats: { speed: 1.04, power: 1.06, defense: 1.04, jump: 1.02 },
+    special: { type: 'projectile', name: 'Dead Sea Scroll', proj: 'scroll' },
+    special2: { type: 'rising', name: 'Masada Leap', color: '#e8c27a' },
+    super: { type: 'rain', name: 'Excavation Storm', color: '#e8c27a', obj: 'scroll' },
+    passive: { id: 'thickskin', name: 'Bedrock' },
+    quote: 'I have dug up older things than you.', victory: 'point'
+  },
+  {
+    id: 'ezerweizman', name: 'Ezer Weizman', short: 'E. WEIZMAN', title: 'The Pilot', rarity: 'rare',
+    group: 'icon', years: 'President',
+    bio: 'Air Force commander, Defense Minister and later President — a fighter pilot to the end.',
+    look: { height: 1.08, girth: 0.98, skin: '#e6b28c', hair: 'short', hairColor: '#b9b5ae', mustache: true, mustacheColor: '#b9b5ae', outfit: 'open', top: '#2d4a7a', pants: '#26406a', shirt: '#dfe9f7', tie: null, shoes: '#111111' },
+    stats: { speed: 1.12, power: 1.0, defense: 0.96, jump: 1.1 },
+    special: { type: 'rush', name: 'Fighter Pilot Dive' },
+    super: { type: 'beam', name: 'Afterburner', color: '#ff9a3d' },
+    quote: 'Wheels up. You are grounded.', victory: 'salute'
+  },
+  {
+    id: 'rivlin', name: 'Reuven Rivlin', short: 'RIVLIN', title: 'The Unifier', rarity: 'rare',
+    group: 'icon', years: 'President',
+    bio: "Former Knesset Speaker and Israel's tenth President, known for his 'four tribes' speech.",
+    look: { height: 0.96, girth: 1.06, skin: '#e9b896', hair: 'short', hairColor: '#e9e9e4', glasses: 'thin', glassesColor: '#333333', outfit: 'suit', top: '#2b3040', pants: '#262a38', shirt: '#f2f2f2', tie: '#8a2c2c', shoes: '#1d1d1d' },
+    stats: { speed: 0.98, power: 1.0, defense: 1.06, jump: 0.98 },
+    special: { type: 'projectile', name: 'Unity Seal', proj: 'seal' },
+    super: { type: 'wave', name: 'Four Tribes Wave', color: '#7fd3ff' },
+    quote: 'We are all in this chamber together.', victory: 'wave'
+  },
+  {
+    id: 'navon', name: 'Yitzhak Navon', short: 'NAVON', title: 'The Playwright', rarity: 'common',
+    group: 'icon', years: 'President',
+    bio: "Israel's fifth President, an educator and a playwright.",
+    look: { height: 0.98, girth: 1.0, skin: '#e2ad86', hair: 'combed', hairColor: '#6b6660', outfit: 'suit', top: '#353a46', pants: '#2f343f', shirt: '#f2f2f2', tie: '#2a4a7a', shoes: '#1d1d1d' },
+    stats: { speed: 1.02, power: 1.0, defense: 1.0, jump: 1.0 },
+    special: { type: 'projectile', name: 'Script Toss', proj: 'folder' },
+    quote: 'And... scene.', victory: 'bow'
+  },
+  {
+    id: 'aloni', name: 'Shulamit Aloni', short: 'ALONI', title: 'The Advocate', rarity: 'common',
+    group: 'icon', years: 'Minister & MK',
+    bio: 'Founder of the Ratz party and a lifelong civil-rights campaigner who served as a minister.',
+    look: { height: 0.92, girth: 0.98, skin: '#ebbd9a', hair: 'bob', hairColor: '#b8b5b0', glasses: 'round', glassesColor: '#3a3a3a', outfit: 'open', top: '#4a3a5e', pants: '#3a2f4a', shirt: '#f4f0f7', tie: null, shoes: '#1d1d1d' },
+    stats: { speed: 1.04, power: 1.0, defense: 1.02, jump: 1.0 },
+    special: { type: 'projectile', name: 'Rights Banner', proj: 'flag' },
+    quote: 'Rights are not up for a vote.', victory: 'fist'
+  },
+  {
+    id: 'peretz', name: 'Amir Peretz', short: 'PERETZ', title: 'The Iron Dome', rarity: 'epic',
+    group: 'icon', years: 'Minister & MK',
+    bio: 'Former union leader, Labor leader and Defense Minister who backed the Iron Dome program.',
+    look: { height: 0.98, girth: 1.06, skin: '#d9a37c', hair: 'short', hairColor: '#8a8580', mustache: true, mustacheColor: '#1d1612', bushy: true, outfit: 'open', top: '#2b2f3a', pants: '#262a34', shirt: '#f4f4f4', tie: null, shoes: '#1d1d1d' },
+    stats: { speed: 1.0, power: 1.04, defense: 1.08, jump: 0.98 },
+    special: { type: 'projectile', name: 'Union Megaphone', proj: 'mic' },
+    special2: { type: 'counter', name: 'Interceptor' },
+    super: { type: 'reflect', name: 'Iron Dome', color: '#8fd0ff' },
+    quote: 'Intercepted.', victory: 'fist'
+  },
+  {
+    id: 'michaeli', name: 'Merav Michaeli', short: 'MICHAELI', title: 'The Broadcaster', rarity: 'common',
+    group: 'contender', years: 'Contender',
+    bio: 'Former broadcaster and journalist who led the Labor Party.',
+    look: { height: 1.0, girth: 0.9, skin: '#ebbd9a', hair: 'bob', hairColor: '#141210', outfit: 'open', top: '#141418', pants: '#141418', shirt: '#1d1d22', tie: null, shoes: '#111111' },
+    stats: { speed: 1.08, power: 1.0, defense: 0.98, jump: 1.05 },
+    special: { type: 'projectile', name: 'On Air', proj: 'mic' },
+    quote: 'We are back after the break. You are not.', victory: 'wave'
+  },
+  {
+    id: 'kahlon', name: 'Moshe Kahlon', short: 'KAHLON', title: 'The Price Cutter', rarity: 'common',
+    group: 'icon', years: 'Minister & MK',
+    bio: 'Former Finance Minister, famous for cutting mobile phone prices as Communications Minister.',
+    look: { height: 0.98, girth: 1.04, skin: '#d9a37c', hair: 'short', hairColor: '#2a2420', outfit: 'suit', top: '#2a2d36', pants: '#24272f', shirt: '#f2f2f2', tie: '#3a6ab0', shoes: '#1d1d1d' },
+    stats: { speed: 1.02, power: 1.02, defense: 1.0, jump: 1.0 },
+    special: { type: 'projectile', name: 'Price Cut Briefcase', proj: 'briefcase' },
+    quote: 'Discount applied. To your health bar.', victory: 'point'
+  },
+  {
+    id: 'abbas', name: 'Mansour Abbas', short: 'ABBAS', title: 'The Coalition Builder', rarity: 'rare',
+    group: 'icon', years: 'MK',
+    bio: "Leader of Ra'am, whose party in 2021 became the first independent Arab party to join a governing coalition.",
+    look: { height: 0.98, girth: 1.04, skin: '#c99068', hair: 'short', hairColor: '#3a3430', beard: '#5a524a', outfit: 'suit', top: '#2f3442', pants: '#2a2e3b', shirt: '#f2f2f2', tie: '#2f6b4a', shoes: '#1d1d1d' },
+    stats: { speed: 1.0, power: 1.0, defense: 1.06, jump: 1.0 },
+    special: { type: 'projectile', name: 'Olive Branch Offer', proj: 'olive' },
+    super: { type: 'wave', name: 'Bridge Builder', color: '#7dff9b' },
+    quote: 'Every coalition needs the right partner.', victory: 'bow'
+  },
+  {
+    id: 'arens', name: 'Moshe Arens', short: 'ARENS', title: 'The Engineer', rarity: 'rare',
+    group: 'icon', years: 'Minister & MK',
+    bio: 'Aeronautical engineer, three-time Defense Minister and champion of the Lavi jet project.',
+    look: { height: 1.02, girth: 0.98, skin: '#e9b896', hair: 'fringe', hairColor: '#a8a49e', glasses: 'thick', glassesColor: '#222222', outfit: 'suit', top: '#3a3f4b', pants: '#343944', shirt: '#f2f2f2', tie: '#4b4b4b', shoes: '#1d1d1d' },
+    stats: { speed: 1.02, power: 1.02, defense: 1.02, jump: 1.02 },
+    special: { type: 'rush', name: 'Lavi Sortie' },
+    super: { type: 'beam', name: 'Jet Stream', color: '#9fd8ff' },
+    quote: 'Calculated. Engineered. Done.', victory: 'salute'
+  },
+  {
     id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'legendary', price: 800,
     group: 'boss', years: 'Final Boss (fictional)',
     bio: 'The fictional keeper of order in the plenum. Final boss of the Election Campaign.',
@@ -345,7 +445,7 @@ KC.COINS = { session: 20, round: 15, win: 30, perfect: 20, superKO: 15, campaign
 KC.UPGRADE = {
   max: 5,
   power: 0.05, defense: 0.05, health: 50,           // per rank
-  mult: { common: 1, rare: 1.5, epic: 2, legendary: 2.5 },
+  mult: { common: 1, rare: 1.5, epic: 2, mythic: 2.25, legendary: 2.5 },
   cost: function (ch, toRank) { return Math.round(80 * toRank * KC.UPGRADE.mult[ch.rarity]); },
   describe: function (rank) {
     return rank ? '+' + Math.round(rank * KC.UPGRADE.power * 100) + '% damage · +' + Math.round(rank * KC.UPGRADE.defense * 100) + '% defense · +' + rank * KC.UPGRADE.health + ' HP · ' + Math.min(6, 3 + rank) + ' projectiles' : 'No upgrades yet · 3 projectiles';
@@ -356,7 +456,7 @@ KC.UPGRADE = {
 KC.LEVELS = 250;
 KC.level = function (n) {
   var pool = KC.ROSTER.filter(function (c) { return c.id !== 'speaker'; });
-  var legends = pool.filter(function (c) { return c.rarity === 'legendary'; });
+  var legends = pool.filter(function (c) { return c.rarity === 'legendary' || c.rarity === 'mythic'; });
   var boss = n % 10 === 0;
   var ch = boss ? (n % 50 === 0 ? KC.rosterById.speaker : legends[(n / 10) % legends.length]) : pool[(n * 5 + 3) % pool.length];
   var ai = n <= 30 ? 'easy' : n <= 100 ? 'normal' : n <= 180 ? 'hard' : 'boss';
@@ -371,19 +471,19 @@ KC.level = function (n) {
 };
 
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
-KC.SHARDS = { common: 5, rare: 10, epic: 15, legendary: 25 };
+KC.SHARDS = { common: 5, rare: 10, epic: 15, mythic: 20, legendary: 25 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
 KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 5; };   // shards are a premium shortcut (5x)
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 
 /* ---------- Ballot-box chests ---------- */
 KC.CHESTS = [
-  { id: 'wood',   name: 'Wooden Ballot Box',  color: '#a8743f', glow: '#ffcf8a', coins: [10, 25],   shards: [1, 2],   picks: 1, w: { common: 70, rare: 25, epic: 5, legendary: 0 } },
-  { id: 'silver', name: 'Silver Ballot Box',  color: '#c9d2df', glow: '#ffffff', coins: [15, 35],   shards: [2, 3],   picks: 1, w: { common: 50, rare: 35, epic: 12, legendary: 3 } },
-  { id: 'gold',   name: 'Golden Ballot Box',  color: '#f2c14e', glow: '#fff3b0', coins: [25, 50],   shards: [3, 5],   picks: 2, w: { common: 30, rare: 40, epic: 22, legendary: 8 } },
-  { id: 'epic',   name: 'Epic Ballot Box',    color: '#b46cff', glow: '#e6ccff', coins: [40, 80],   shards: [5, 8],   picks: 2, w: { common: 10, rare: 35, epic: 40, legendary: 15 } },
-  { id: 'mythic', name: 'Mythic Ballot Box',  color: '#ff4d6d', glow: '#ffc2cf', coins: [60, 120],  shards: [8, 12],  picks: 3, w: { common: 0, rare: 25, epic: 45, legendary: 30 } },
-  { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, epic: 35, legendary: 55 } }
+  { id: 'wood',   name: 'Wooden Ballot Box',  color: '#a8743f', glow: '#ffcf8a', coins: [10, 25],   shards: [1, 2],   picks: 1, w: { common: 70, rare: 25, epic: 5, mythic: 2, legendary: 0 } },
+  { id: 'silver', name: 'Silver Ballot Box',  color: '#c9d2df', glow: '#ffffff', coins: [15, 35],   shards: [2, 3],   picks: 1, w: { common: 50, rare: 35, epic: 12, mythic: 5, legendary: 3 } },
+  { id: 'gold',   name: 'Golden Ballot Box',  color: '#f2c14e', glow: '#fff3b0', coins: [25, 50],   shards: [3, 5],   picks: 2, w: { common: 30, rare: 40, epic: 22, mythic: 10, legendary: 8 } },
+  { id: 'epic',   name: 'Epic Ballot Box',    color: '#b46cff', glow: '#e6ccff', coins: [40, 80],   shards: [5, 8],   picks: 2, w: { common: 10, rare: 35, epic: 40, mythic: 18, legendary: 15 } },
+  { id: 'mythic', name: 'Mythic Ballot Box',  color: '#ff4d6d', glow: '#ffc2cf', coins: [60, 120],  shards: [8, 12],  picks: 3, w: { common: 0, rare: 25, epic: 45, mythic: 25, legendary: 30 } },
+  { id: 'legend', name: 'Legendary Ballot Box', color: '#7ef0ff', glow: '#ffffff', coins: [100, 200], shards: [12, 20], picks: 3, w: { common: 0, rare: 10, epic: 35, mythic: 30, legendary: 55 } }
 ];
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
 KC.chestBase = function (n) { return Math.min(4, Math.floor((n - 1) / 50) + (n % 10 === 0 ? 1 : 0)); };
