@@ -445,7 +445,7 @@
       def.setState('blockstun'); def.stun = hit.bstun || 10; def.lowBlock = !!def.input.d;
       def.vx = (hit.push || 0.06) * dir * 1.1;
       if (melee && Math.abs(def.x) > STAGE_BOUND - 0.15) att.vx = -(hit.push || 0.06) * dir * 0.9;
-      this.addMeter(att, (hit.meter || 4) * 0.5);
+      if (!hit.superHit) this.addMeter(att, (hit.meter || 4) * 0.5);   // supers never charge the super meter
       this.addMeter(def, 2);
       this.hitstop = Math.max(this.hitstop, 4);
       this.fx.hit(cx, cy, '#7fc4ff', 6, dir);
@@ -460,7 +460,7 @@
     var dmg = Math.max(1, Math.round(hit.dmg * att.stats.power / def.stats.defense * scale * (def.passive === 'thickskin' ? 0.88 : 1)));
     def.health -= dmg; def.dmgTaken += dmg;
     this.survive(def);
-    this.addMeter(att, hit.meter || 6);
+    if (!hit.superHit) this.addMeter(att, hit.meter || 6);   // supers never charge the super meter
     this.addMeter(def, dmg * 0.05);
     if (hit.superHit && att.sup) att.sup.landed = true;
     def.move = null; def.armor = 0;
