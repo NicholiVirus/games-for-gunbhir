@@ -400,6 +400,7 @@
     { id: 'tour', label: 'CAMPAIGN · 250 LEVELS', desc: 'Fight through 250 levels of CPU rivals. Every 10th level is a boss. Wins drop tap-to-upgrade chests full of coins and leader shards.' },
     { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on IJKL + U O P ;. Both players earn coins for the shared wallet.' },
     { id: 'campaign', label: 'ELECTION ARCADE', desc: 'Quick arcade ladder: beat five random rivals, then face the final boss in one run.' },
+    { id: 'store', label: '🎁 CHEST STORE', desc: 'Buy chests with coins. Each spins on the slot machine for coins and shards — the way to unlock fighters. Lucky chests get extra upgrade taps.' },
     { id: 'shop', label: 'SHOP · SHARDS & UPGRADES', desc: 'Buy shards toward locked fighters, upgrade your fighters to Rank 5, and buy gold skins.' },
     { id: 'howto', label: 'HOW TO PLAY', desc: 'Controls, rarity, abilities, blocking and how coins work.' },
     { id: 'settings', label: 'SETTINGS', desc: 'Rounds, round timer, chamber lighting, music, sound and announcer.' }
@@ -434,6 +435,7 @@
         case 'campaign': go('select', { mode: 'campaign' }); break;
         case 'versus': go('select', { mode: 'versus' }); break;
         case 'tour': go('levels'); break;
+        case 'store': G.chestStore('menu'); break;
         case 'shop': go('shop'); break;
         case 'howto': go('howto'); break;
         case 'settings': showSettings(); break;
@@ -856,7 +858,8 @@
     enter: function () {
       camMode = 'chest'; stage.setMode('night'); clearPreviews(); KC.Audio.playMusic('menu');
       var q = Save.data.chestQueue || [];
-      this.tier = q.length ? q[0] : 0;
+      var item = KC.chestItem(q.length ? q[0] : 0);
+      this.tier = item.tier; this.maxTaps = item.taps || KC.BASE_TAPS;
       this.taps = 0; this.phase = 'tap'; this.shake = 0; this.t = 0; this.open = 0; this.flash = 0;
       if (chestObj) scene.remove(chestObj.g);
       chestObj = M.buildChest(); chestObj.g.position.set(0, 0, 2.2); scene.add(chestObj.g);
@@ -869,24 +872,24 @@
     ui: function () {
       var t = KC.CHESTS[this.tier];
       $('chTier').textContent = t.name.toUpperCase(); $('chTier').style.color = t.color;
-      var pips = ''; for (var i = 0; i < KC.TAP_UPGRADE.length; i++) pips += '<span class="tp' + (i < this.taps ? ' used' : '') + '"></span>';
+      var pips = ''; for (var i = 0; i < this.maxTaps; i++) pips += '<span class="tp' + (i < this.taps ? ' used' : '') + '"></span>';
       $('chPips').innerHTML = this.phase === 'tap' ? pips : '';
-      $('chHint').innerHTML = this.phase === 'tap' ? 'TAP to shake it — it might <b>upgrade</b>! (' + (KC.TAP_UPGRADE.length - this.taps) + ' taps left)'
+      $('chHint').innerHTML = this.phase === 'tap' ? 'TAP to shake it — it might <b>upgrade</b>! (' + (this.maxTaps - this.taps) + ' taps left)'
         : this.phase === 'ready' ? '<b>OPENING…</b>' : '';
     },
     tap: function () {
       KC.Audio.init();
       if (this.spinning) { G.slotSkip(); return; }
       if (this.phase === 'tap') {
-        var chance = KC.TAP_UPGRADE[this.taps];
+        var chance = KC.TAP_CHANCE;
         this.taps++; this.shake = 0.45;
         if (this.tier < KC.CHESTS.length - 1 && Math.random() < chance) {
           this.tier++; chestObj.setTier(KC.CHESTS[this.tier]); this.flash = 1;
           KC.Audio.play('unlock'); fx.ring(0, 0.6, KC.CHESTS[this.tier].glow, 2.4, true); fx.hit(0, 0.8, KC.CHESTS[this.tier].glow, 26);
           if (this.tier >= 3) KC.Audio.say(KC.CHESTS[this.tier].id === 'legend' ? 'Legendary!' : KC.CHESTS[this.tier].id === 'mythic' ? 'Mythic!' : 'Epic!');
-          var sq = Save.data.chestQueue; if (sq && sq.length) { sq[0] = this.tier; Save.write(); }
+          var sq = Save.data.chestQueue; if (sq && sq.length) { sq[0] = { tier: this.tier, taps: this.maxTaps }; Save.write(); }
         } else { KC.Audio.play('hitL'); fx.hit(0, 0.5, '#ffffff', 6); }
-        if (this.taps >= KC.TAP_UPGRADE.length) { this.phase = 'ready'; this.autoOpen = 0.7; }
+        if (this.taps >= this.maxTaps) { this.phase = 'ready'; this.autoOpen = 0.7; }
         this.ui();
       } else if (this.phase === 'ready') {
         this.phase = 'done'; this.open = 0.001;
@@ -912,7 +915,7 @@
         if (q.length) b += '<button type="button" data-a="again">OPEN NEXT CHEST (' + q.length + ')</button>';
         var nxt = Math.min(KC.LEVELS, (Save.data.tour || 0) + 1);
         if (G.tourPick) b += '<button type="button" data-a="next">PLAY LEVEL ' + nxt + '</button>';
-        b += '<button type="button" data-a="map">LEVEL MAP</button><button type="button" data-a="shop">SHOP</button>';
+        b += '<button type="button" data-a="store">CHEST STORE</button><button type="button" data-a="map">LEVEL MAP</button><button type="button" data-a="shop">SHOP</button>';
         $('chBtns').innerHTML = b; this.btn = 0;
         $('chBtns').querySelectorAll('button').forEach(function (bt, i) { bt.onmouseenter = function () { self.btn = i; self.hl(); }; bt.onclick = function () { self.act(bt.dataset.a); }; });
         this.hl();
@@ -925,6 +928,7 @@
       if (a === 'again') { go('chest'); return; }
       if (a === 'next' && G.tourPick) { this.exit(); G.startLevel(Math.min(KC.LEVELS, (Save.data.tour || 0) + 1), G.tourPick.ch, G.tourPick.skin); return; }
       if (a === 'shop') { go('shop'); return; }
+      if (a === 'store') { G.chestStore('menu'); return; }
       go('levels');
     },
     exit: function () { if (chestObj) { scene.remove(chestObj.g); chestObj = null; } stage.setMode('day'); },
@@ -1008,6 +1012,29 @@
       KC.Audio.play('select'); finishAll();
     } };
   };
+  /* ---------- Chest Store: buy chests with coins (the way to get shards and unlock fighters) ---------- */
+  G.chestStore = function (from) {
+    var back = function () { go(from || 'menu'); };
+    var pending = null;
+    function items() {
+      return KC.CHEST_STORE.map(function (o) {
+        var t = KC.CHESTS[o.tier];
+        return { label: o.name.toUpperCase(), value: function () { return (pending === o.id ? 'CONFIRM · ' : '') + o.price + ' coins'; },
+          desc: t.name + ' base · ' + o.desc + ' (30% each) · ' + t.coins[0] + '–' + t.coins[1] + ' coins + ' + t.shards[0] + '–' + t.shards[1] + ' shards',
+          action: function () {
+            if (!Save.canAfford(o.price)) { KC.Audio.play('deny'); G.toast('You need ' + G.coin(o.price - Save.data.coins) + ' more for the ' + o.name + '.'); return; }
+            if (pending !== o.id) { pending = o.id; KC.Audio.play('move'); screens.list.render(); return; }
+            Save.data.coins -= o.price;
+            Save.data.chestQueue = Save.data.chestQueue || [];
+            Save.data.chestQueue.unshift({ tier: o.tier, taps: o.taps });
+            Save.write(); KC.Audio.play('unlock');
+            go('chest');
+          } };
+      });
+    }
+    showList({ title: '🎁 CHEST STORE', sub: 'Wallet: ' + G.coin(Save.data.coins) + ' · Fighters only unlock from shards — and shards come from chests. Lucky chests get extra 30% upgrade taps.',
+      items: items().concat([{ label: 'BACK', action: back }]), back: back, hint: 'Choose a chest · ENTER / click twice to buy · ESC back' });
+  };
   G.openChests = function () { if ((Save.data.chestQueue || []).length) go('chest'); };
 
   /* ---------- shop (recruit fighters + gold skins) ---------- */
@@ -1029,6 +1056,8 @@
     render: function (rebuild) {
       var self = this, d = Save.data;
       $('colSub').innerHTML = 'Wallet: <b class="wallet">' + G.coin(d.coins) + '</b> &nbsp;·&nbsp; ' + d.owned.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins';
+      $('colSub').insertAdjacentHTML('beforeend', ' <button type="button" class="lv-chest" id="shopStore">🎁 CHEST STORE</button>');
+      $('shopStore').onclick = function () { KC.Audio.play('select'); G.chestStore('shop'); };
       var FILTERS = G.SHOP_FILTERS, fl = this.filter || 'all';
       $('shopTabs').innerHTML = FILTERS.map(function (f) { return '<button type="button" class="stab ' + (f.id !== 'all' && f.id !== 'owned' && f.id !== 'locked' ? 'r-' + f.id : '') + (f.id === fl ? ' on' : '') + '" data-f="' + f.id + '">' + f.label + '</button>'; }).join('');
       $('shopTabs').querySelectorAll('.stab').forEach(function (b) { b.onclick = function () { self.setFilter(b.dataset.f); }; });
@@ -1052,7 +1081,7 @@
       html += '<p>' + esc(ch.bio) + '</p>' + abilityHTML(ch, { s: 'Special', x: 'Super' });
       if (!owned) {
         var sp = KC.shardPrice(ch), canS = Save.canAfford(sp);
-        html += G.shardBar(ch) + '<div class="req no">🔒 Can\'t be bought outright. Collect ' + KC.shardsNeeded(ch) + ' shards to recruit — they drop from campaign chests.</div>';
+        html += G.shardBar(ch) + '<div class="req no">🔒 Can\'t be bought outright. Collect ' + KC.shardsNeeded(ch) + ' shards — open chests (campaign or 🎁 Chest Store).</div>';
         html += '<div class="buybox ' + (canS ? 'can' : '') + '" data-act="shard"><div class="bb-price">' + G.coin(sp) + '</div><div>' + (this.confirm === 'shard' ? '<b>Press ENTER / click again to confirm</b>' : 'Buy <b>1 shard</b> — press <b>ENTER / B</b> or click') + '</div></div>';
       } else {
         var rk = Save.rank(ch.id), pips = '';
@@ -1227,7 +1256,7 @@
     if (humanWon && cfg.mode !== 'versus') add('Opposition: ' + lvl.toUpperCase(), C.difficulty[lvl] || 0);
     var finalStop = cfg.mode === 'campaign' && G.campaign && G.campaign.idx === G.campaign.stops.length - 1;
     if (cfg.mode === 'campaign' && humanWon) add('Arcade stop cleared', C.campaignStop);
-    if (finalStop && humanWon) { add('ARCADE COMPLETE', C.campaignClear); d.chestQueue = d.chestQueue || []; d.chestQueue.push(2); }
+    if (finalStop && humanWon) { add('ARCADE COMPLETE', C.campaignClear); d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: 2, taps: KC.BASE_TAPS }); }
     var firstClear = false;
     if (cfg.mode === 'tour' && humanWon) {
       var LV = KC.level(cfg.levelNo); firstClear = cfg.levelNo > (d.tour || 0);
@@ -1248,7 +1277,7 @@
       var LV2 = KC.level(cfg.levelNo), streak = d.campWins % 10 === 0;
       if (LV2.boss || streak || Math.random() < 0.6) {
         chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 1 : 0)), streak: streak };
-        d.chestQueue = d.chestQueue || []; d.chestQueue.push(chestDrop.tier);
+        d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: chestDrop.tier, taps: KC.BASE_TAPS });
       }
     }
     var golds = Save.refreshGold();

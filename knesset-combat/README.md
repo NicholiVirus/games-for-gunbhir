@@ -41,6 +41,20 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
   - Opponents also gain strength and upgrade ranks as you climb.
   - The first clear of a level pays 25 + 2 × level coins (+100 on boss levels); replays pay 30%.
 
+## Chest Store
+
+| Chest | Upgrade taps | Price (coins) |
+|---|---|---|
+| Wooden Ballot Box | 3 | 150 |
+| Silver Ballot Box | 3 | 300 |
+| Lucky Silver Box | 5 | 450 |
+| Golden Ballot Box | 3 | 550 |
+| Super Lucky Golden Box | 6 | 850 |
+| Epic Ballot Box | 3 | 1,000 |
+| Jackpot Epic Box | 8 | 1,600 |
+
+Every chest, bought or earned, starts with 3 upgrade taps, and each tap has a 30% chance to upgrade it. Lucky chests get extra taps.
+
 ## Chests and shards
 
 - **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 1 tier better.
@@ -56,7 +70,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Projectile ammo:** 3 shots, +1 per upgrade rank (max 6). Mash them all, then they reload together once you're empty, taking 1 second per shot. The HUD shows ammo pips and the reload bar.
 - **Election Arcade:** quick ladder vs 5 random CPU rivals, then the fictional final boss. Clearing it pays 250 bonus coins plus a Golden chest.
 - **Versus:** 2 players, one keyboard. Coins go to the shared wallet.
-- **Shop:** buy shards, upgrade fighters, and buy gold skins with coins.
+- **🎁 Chest Store:** buy chests with coins. Each one spins for coins and shards, and it's the main way to unlock fighters.
+- **Shop:** buy single shards (expensive), upgrade fighters, and buy gold skins with coins.
   - Filter tabs: All, Owned, Locked, or any single rarity. Click a tab or press Q/E.
 
 ## Upgrades

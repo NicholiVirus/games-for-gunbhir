@@ -475,7 +475,7 @@ KC.level = function (n) {
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
 KC.SHARDS = { common: 5, rare: 10, superrare: 12, epic: 15, mythic: 20, legendary: 25 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
-KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 5; };   // shards are a premium shortcut (5x)
+KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 10; };   // single shards are a premium shortcut (10x base)
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 
 /* ---------- Ballot-box chests ---------- */
@@ -489,4 +489,17 @@ KC.CHESTS = [
 ];
 /* base chest tier climbs every 50 levels; boss levels (every 10th) add +1 */
 KC.chestBase = function (n) { return Math.min(3, Math.floor((n - 1) / 80) + (n % 10 === 0 ? 1 : 0)); };   // lower-tier chests: base rises every 80 levels, max Epic
-KC.TAP_UPGRADE = [0.3, 0.3, 0.3];   // each of the 3 taps has a 30% chance to upgrade the chest
+KC.TAP_CHANCE = 0.3;     // every tap has a 30% chance to upgrade the chest one tier
+KC.BASE_TAPS = 3;        // every chest starts with 3 upgrade taps
+KC.TAP_UPGRADE = [0.3, 0.3, 0.3];
+/* Chest Store: buy chests with coins; lucky chests come with extra upgrade taps */
+KC.CHEST_STORE = [
+  { id: 'wood',    tier: 0, taps: 3, price: 150,  name: 'Wooden Ballot Box',        desc: '3 upgrade taps' },
+  { id: 'silver',  tier: 1, taps: 3, price: 300,  name: 'Silver Ballot Box',        desc: '3 upgrade taps' },
+  { id: 'luckys',  tier: 1, taps: 5, price: 450,  name: 'Lucky Silver Box',         desc: '5 upgrade taps' },
+  { id: 'gold',    tier: 2, taps: 3, price: 550,  name: 'Golden Ballot Box',        desc: '3 upgrade taps' },
+  { id: 'luckyg',  tier: 2, taps: 6, price: 850,  name: 'Super Lucky Golden Box',   desc: '6 upgrade taps' },
+  { id: 'epic',    tier: 3, taps: 3, price: 1000, name: 'Epic Ballot Box',          desc: '3 upgrade taps' },
+  { id: 'jackpot', tier: 3, taps: 8, price: 1600, name: 'Jackpot Epic Box',         desc: '8 upgrade taps' }
+];
+KC.chestItem = function (x) { return typeof x === 'number' ? { tier: x, taps: KC.BASE_TAPS } : x; };
