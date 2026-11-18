@@ -1010,7 +1010,8 @@
   var slotState = null;
   G.slotSkip = function () { if (slotState) slotState.skip(); };
   G.slotReels = function (r, tier, done) {
-    var CELL = 112, VIEW = 3, LEN = 34, STOP = 30;
+    // ROLL: the reels spin for this many seconds (the last reel lands at exactly ROLL; earlier ones stop 0.5 s apart)
+    var CELL = 112, VIEW = 3, LEN = 84, STOP = 80, ROLL = 5;
     var targets = [{ coin: r.coins }].concat(r.items.map(function (it) { return { ch: it.ch, n: it.n }; }));
     if (r.wild) targets.push({ wild: r.wild });
     function cellFor(t) {
@@ -1044,7 +1045,7 @@
     var tickGap = 45, tickAt = 0;
     tickT = setInterval(function () { tickAt += 30; if (tickAt >= tickGap) { tickAt = 0; KC.Audio.play('tick'); tickGap = Math.min(260, tickGap * 1.07); } }, 30);
     targets.forEach(function (t, i) {
-      var el = $('strip' + i), dur = 1.9 + i * 0.75;
+      var el = $('strip' + i), dur = Math.max(3, ROLL - (targets.length - 1 - i) * 0.5);
       el.style.transform = 'translateY(0px)';
       void el.offsetWidth;
       el.style.transition = 'transform ' + dur + 's cubic-bezier(0.12, 0.65, 0.18, 1)';
