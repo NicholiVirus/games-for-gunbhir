@@ -604,7 +604,7 @@ KC.level = function (n) {
 };
 
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
-KC.SHARDS = { common: 3, rare: 15, superrare: 17, epic: 20, elite: 22, mythic: 25, legendary: 30 };
+KC.SHARDS = { common: 10, rare: 15, superrare: 17, epic: 20, elite: 22, mythic: 25, legendary: 30 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
 KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 15; };   // single shards are a premium shortcut
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
