@@ -529,7 +529,7 @@ KC.ROSTER = [
     stats: { speed: 0.95, power: 1.1, defense: 1.08, jump: 0.92 },
     special: { type: 'projectile', name: 'Executive Order', proj: 'order' },
     special2: { type: 'counter', name: 'The Art of the Deal' },
-    super: { type: 'vehicle', name: 'The Beast', color: '#111111', obj: 'limo' },
+    super: { type: 'rain', name: '$4 Billion to Israel', color: '#2e8b57', obj: 'moneybag' },
     passive: { id: 'momentum', name: 'Rally Energy' },
     quote: 'Tremendous win. Maybe the best win in the history of the Knesset.', victory: 'point'
   },

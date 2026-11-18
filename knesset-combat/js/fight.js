@@ -622,7 +622,8 @@
         f.vx = 0;
         if (s.t >= 8 && s.t <= 78 && (s.t - 8) % 9 === 0) {
           var n = (s.t - 8) / 9, tx = o.x + (Math.random() - 0.5) * 1.1;
-          var obj = M.buildProp(f.ch.super.obj, col); obj.scale.multiplyScalar(1.5);
+          var cash = f.ch.super.obj === 'moneybag';
+          var obj = M.buildProp(f.ch.super.obj, col, cash ? { cash: n % 2 === 1 && n < 7 } : null); obj.scale.multiplyScalar(cash && n >= 7 ? 2.4 : 1.5);
           obj.position.set(tx, 7.5, 0);
           this.addHazard({ kind: 'fall', owner: f, x: tx, y: 7.5, vy: -0.24, y0: -0.25, y1: 0.25, hw: 0.32, mesh: obj, hits: 1,
             hit: n >= 7 ? this.superHit(f, { dmg: 50, knockdown: true, chip: 8, hitstop: 10, level: 'high', sfx: 'hitS' }) : this.superHit(f, { dmg: 32, chip: 6, hitstop: 4, level: 'high' }), life: 80, spin: true });
@@ -681,7 +682,7 @@
           var sx = f.x - f.facing * 6;
           vm.position.set(sx, 0, 0.45);
           if (f.facing < 0) vm.rotation.y = Math.PI;
-          var vhw = f.ch.super.obj === 'tram' ? 2.1 : f.ch.super.obj === 'limo' ? 2.2 : f.ch.super.obj === 'bulldozer' ? 1.15 : 0.85;
+          var vhw = f.ch.super.obj === 'tram' ? 2.1 : f.ch.super.obj === 'bulldozer' ? 1.15 : 0.85;
           this.addHazard({ kind: 'vehicle', owner: f, x: sx, y: 0, y0: 0, y1: 2.2, hw: vhw, vx: 0.3 * f.facing, mesh: vm, hits: 1,
             hit: this.superHit(f, { dmg: 250, knockdown: true, chip: 40, hitstop: 12, sfx: 'hitS' }), life: 80, pierce: true });
           KC.Audio.play('rush');

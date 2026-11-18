@@ -477,7 +477,7 @@
 
   /* ---------- projectile + super object meshes ---------- */
   function addTo(g, m) { g.add(m); return m; }
-  M.buildProp = function (type, color) {
+  M.buildProp = function (type, color, opts) {
     var g = new T.Group();
     switch (type) {
       case 'scroll': {
@@ -692,18 +692,29 @@
         g.rotation.y = Math.PI / 2; g.userData.spin = 'y';
         break;
       }
-      case 'limo': {
-        addTo(g, M.part(box(4.4, 0.75, 1.35), '#111111', 0, 0.75, 0));
-        addTo(g, M.part(box(3.0, 0.55, 1.25), '#141414', -0.3, 1.4, 0));
-        addTo(g, M.part(box(2.9, 0.4, 1.27), '#1e2b3a', -0.3, 1.42, 0, false)).material = M.toon('#1e2b3a', '#0a1420');
-        [[1.4, 0.62], [1.4, -0.62], [-1.5, 0.62], [-1.5, -0.62]].forEach(function (wp) { var wh = addTo(g, M.part(cyl(0.34, 0.34, 0.2, 12), '#0a0a0a', wp[0], 0.34, wp[1])); wh.rotation.x = Math.PI / 2; });
-        addTo(g, M.part(box(0.1, 0.25, 1.0), '#c0c0c0', 2.22, 0.75, 0, false));
-        addTo(g, M.part(sph(0.09, 6, 5), '#fff6a0', 2.22, 0.9, 0.5, false)).material = M.toon('#fff6a0', '#ffd23f');
-        addTo(g, M.part(sph(0.09, 6, 5), '#fff6a0', 2.22, 0.9, -0.5, false)).material = M.toon('#fff6a0', '#ffd23f');
-        [-0.5, 0.5].forEach(function (z) {
-          var pole = addTo(g, M.part(cyl(0.012, 0.012, 0.35, 4), '#c0c0c0', 1.9, 1.3, z * 1.1, false));
-          addTo(g, M.part(box(0.28, 0.18, 0.01), z > 0 ? '#3c3b6e' : '#ffffff', 2.03, 1.42, z * 1.1, false));
-        });
+      case 'moneybag': {
+        if (!M._dollarTex) {
+          var dc = document.createElement('canvas'); dc.width = dc.height = 64;
+          var dx = dc.getContext('2d'); dx.fillStyle = '#ffd23f'; dx.font = 'bold 54px Arial'; dx.textAlign = 'center'; dx.textBaseline = 'middle'; dx.lineWidth = 6; dx.strokeStyle = '#1d4d2a'; dx.strokeText('$', 32, 35); dx.fillText('$', 32, 35);
+          M._dollarTex = new T.CanvasTexture(dc); M._dollarTex.encoding = T.sRGBEncoding;
+        }
+        var decal = function (w, x, y, z) { var dm = new T.Mesh(new T.PlaneGeometry(w, w), new T.MeshBasicMaterial({ map: M._dollarTex, transparent: true, depthWrite: false })); dm.position.set(x, y, z); return addTo(g, dm); };
+        if (opts && opts.cash) {
+          addTo(g, M.part(box(0.42, 0.14, 0.22), '#3f8f4f', 0, 0, 0));
+          addTo(g, M.part(box(0.1, 0.15, 0.23), '#f4f1e4', 0, 0, 0, false));
+          decal(0.12, 0.15, 0.072, 0).rotation.x = -Math.PI / 2;
+          decal(0.12, -0.15, 0.072, 0).rotation.x = -Math.PI / 2;
+          g.userData.spin = 'y';
+        } else {
+          var sack = sph(0.22, 12, 10); sack.scale(1, 0.92, 0.9);
+          addTo(g, M.part(sack, '#3f8f4f', 0, 0, 0));
+          addTo(g, M.part(cyl(0.06, 0.11, 0.12, 10), '#3f8f4f', 0, 0.22, 0));
+          addTo(g, M.part(new T.TorusGeometry(0.07, 0.018, 5, 12), '#d4af37', 0, 0.2, 0, false)).rotation.x = Math.PI / 2;
+          addTo(g, M.part(sph(0.08, 8, 6), '#3f8f4f', 0, 0.3, 0));
+          decal(0.26, 0, 0, 0.205);
+          decal(0.26, 0, 0, -0.205).rotation.y = Math.PI;
+          g.userData.spin = 'y';
+        }
         break;
       }
       case 'tram': {

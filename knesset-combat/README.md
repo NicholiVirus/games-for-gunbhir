@@ -188,7 +188,7 @@ New icons: Chaim Weizmann (Rare), Moshe Dayan (Legendary, Battle Rhythm passive)
 | Yair Golan | Common | Rally Flag | — | — | — |
 | Tzipi Livni (starter) | Common | Negotiation Briefcase | — | — | — |
 | Isaac Herzog | Common | Presidential Seal | — | — | — |
-| Donald Trump (special guest) | Mythic | Executive Order | The Art of the Deal (counter) | The Beast (limo) | Rally Energy (faster meter) |
+| Donald Trump (special guest) | Mythic | Executive Order | The Art of the Deal (counter) | $4 Billion to Israel (money-bag rain) | Rally Energy (faster meter) |
 | The Speaker (fictional boss) | Legendary | Order! Order! | Gavel Uppercut | Session Adjourned | Filibuster |
 
 ## Tech
