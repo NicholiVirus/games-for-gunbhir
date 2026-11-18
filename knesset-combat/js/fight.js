@@ -7,6 +7,12 @@
   KC.METER_PER_DMG = 0.3;     // ~330 damage dealt fills the super meter
   var STAGE_BOUND = 8.2, MAX_SEP = 6.4, GRAVITY = 0.0115;
   KC.STAGE_BOUND = STAGE_BOUND;
+  // Dashing: double-tap forward/back (or hold a direction + the dash key). Frames at 60 fps.
+  KC.DASH_TAP = 14;          // max gap between the two taps
+  KC.DASH_FRAMES = 16;       // forward dash length (attacks can cancel it from frame 5)
+  KC.BACKDASH_FRAMES = 18;   // backdash length
+  KC.BACKDASH_INVULN = 7;    // backdash is invincible for its first 7 frames
+  KC.DASH_CD = 12;           // short cooldown so dashes can't be chained endlessly
 
   /* ---------- frame data (60 fps). hb = [x0, x1, y0, y1] relative to fighter, scaled by height ---------- */
   var MOVES = KC.MOVES = {
@@ -25,9 +31,10 @@
     this.h = ch.look.height || 1; this.g = ch.look.girth || 1;
     this.stats = Object.assign({ speed: 1, power: 1, defense: 1, jump: 1, projSpeed: 1 }, ch.stats);
     this.pose = M.poses.idle(0);
-    this.input = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0 };
+    this.input = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0, e: 0 };
     this.prevInput = Object.assign({}, this.input);
-    this.buf = { p: 99, k: 99, s: 99, x: 99, u: 99 };
+    this.buf = { p: 99, k: 99, s: 99, x: 99, u: 99, e: 99 };
+    this.lastTap = {}; this.inT = 0;
     this.maxHealth = 1000;
     this.meter = 0;
     this.yaw = 0;
@@ -57,6 +64,7 @@
     this.combo = 0; this.comboTimer = 0; this.airUsed = false; this.chainCount = 0;
     this.sup = null; this.jitter = 0; this.lowHit = false; this.dmgTaken = 0; this.blockPose = false;
     this.noHitT = 0; this.curSpec = null; this.rushStop = 0; this.landLag = 0;
+    this.dashDir = 0; this.dashCd = 0; this.dashReq = null; this.dashReqT = 0; this.airDashUsed = false; this.airDashT = 0;
     this.yaw = facing > 0 ? 1 : -1;
     this.model.root.position.set(x, 0, 0);
   };
@@ -80,7 +88,18 @@
 
   FP.readInput = function (inp) {
     var pi = this.input;
-    ['p', 'k', 's', 'x', 'u'].forEach(function (k) { this.buf[k] = (inp[k] && !pi[k]) ? 0 : this.buf[k] + 1; }, this);
+    ['p', 'k', 's', 'x', 'u', 'e'].forEach(function (k) { this.buf[k] = (inp[k] && !pi[k]) ? 0 : this.buf[k] + 1; }, this);
+    // double-tap a direction to dash (CPU fighters press the dash button instead)
+    this.inT++;
+    if (this.dashReqT > 0) { this.dashReqT--; if (this.dashReqT === 0) this.dashReq = null; }
+    if ((inp.dl || inp.dr) && !inp.d) { this.dashReq = inp.dr ? 'r' : 'l'; this.dashReqT = 8; this.lastTap.l = this.lastTap.r = -99; }
+    else if (!inp.ai) ['l', 'r'].forEach(function (dk) {
+      if (inp[dk] && !pi[dk]) {
+        if (this.inT - (this.lastTap[dk] || -99) <= KC.DASH_TAP && !inp.d) { this.dashReq = dk; this.dashReqT = 8; this.lastTap[dk] = -99; }
+        else this.lastTap[dk] = this.inT;
+        this.lastTap[dk === 'l' ? 'r' : 'l'] = -99;
+      }
+    }, this);
     this.prevInput = pi;
     this.input = inp;
   };
@@ -149,8 +168,38 @@
     this.vx = dir * 0.072 * this.stats.speed * this.facing;
     this.vy = 0.19 * this.stats.jump;
     this.y = 0.001; this.airUsed = false;
-    this.setState('jump'); this.jumpDir = dir;
+    this.setState('jump'); this.jumpDir = dir; this.airDashUsed = false; this.airDashT = 0;
     KC.Audio.play('jump');
+  };
+
+  /* ---------- dashing ---------- */
+  // returns 1 (forward), -1 (back) or 0
+  FP.wantDash = function () {
+    if (this.dashCd > 0) return 0;
+    var raw = null;
+    if (this.fresh('e')) raw = this.input.l ? 'l' : this.input.r ? 'r' : 'fwd';
+    else if (this.dashReq) raw = this.dashReq;
+    if (!raw) return 0;
+    return raw === 'fwd' ? 1 : ((raw === 'r') === (this.facing > 0) ? 1 : -1);
+  };
+  FP.useDash = function () { this.consume('e'); this.dashReq = null; this.dashReqT = 0; };
+  FP.startDash = function (m, dir) {
+    this.useDash();
+    this.dashDir = dir; this.blockPose = false; this.setState('dash');
+    var sp = Math.min(1.15, this.stats.speed);
+    this.vx = (dir > 0 ? 0.17 : -0.13) * sp * this.facing;
+    if (dir < 0) this.invuln = Math.max(this.invuln, KC.BACKDASH_INVULN);
+    m.fx.hit(this.x - this.facing * dir * 0.3, 0.1, '#d9cdb4', 6, -this.facing * dir);
+    m.fx.ring(this.x, 0.06, dir > 0 ? '#ffffff' : '#9ad1ff', 0.8, false);
+    KC.Audio.play('dash');
+  };
+  FP.startAirDash = function (m, dir) {
+    this.useDash();
+    this.airDashUsed = true; this.airDashT = 10; this.dashDir = dir; this.jumpDir = 0;
+    this.vx = dir * 0.15 * Math.min(1.15, this.stats.speed) * this.facing;
+    this.vy = Math.max(this.vy, 0);
+    m.fx.ring(this.x, this.y + 1.0 * this.h, '#ffffff', 0.9, true);
+    KC.Audio.play('dash');
   };
 
   /* ---------- per-frame logic ---------- */
@@ -158,6 +207,7 @@
     var inp = this.input;
     this.st++; this.animT += 1 / 60;
     if (this.invuln > 0) this.invuln--;
+    if (this.dashCd > 0) this.dashCd--;
     if (this.comboTimer > 0) { this.comboTimer--; if (this.comboTimer === 0) this.combo = 0; }
     this.noHitT++;
     // Projectile ammo: mash all charges, then reload them all (1 s per charge) once you're empty
@@ -184,6 +234,8 @@
         this.faceOpp();
         if (m.phase !== 'fight') { this.vx *= 0.7; this.state = 'idle'; break; }
         if (this.tryAttack(m)) break;
+        var dd = this.wantDash();
+        if (dd) { this.startDash(m, dd); break; }
         if (inp.u) { this.jump(); break; }
         this.blockPose = false;
         if (inp.d) { if (this.state !== 'crouch') this.setState('crouch'); this.vx *= 0.6; this.blockPose = this.backHeld() && m.threatTo(this); }
@@ -198,6 +250,20 @@
       }
       case 'jump': {
         if (this.tryAttack(m)) break;
+        var ad = this.wantDash();
+        if (ad && !this.airDashUsed && this.y > 0.35) this.startAirDash(m, ad);
+        break;
+      }
+      case 'dash': {
+        var fwdD = this.dashDir > 0, dlen = fwdD ? KC.DASH_FRAMES : KC.BACKDASH_FRAMES;
+        if (this.st > (fwdD ? 7 : 9)) this.vx *= 0.82;
+        if (this.st % 3 === 0 && this.st < dlen - 4) m.fx.hit(this.x - this.facing * this.dashDir * 0.3, 0.08, '#d9cdb4', 1, -this.facing * this.dashDir);
+        // forward dash: cancel into an attack (dash-punch) or a running jump once it gets going
+        if (fwdD && this.st >= 5) {
+          if (this.tryAttack(m)) break;
+          if (inp.u) { var keep = this.vx; this.jump(); if (this.jumpDir >= 0) this.vx = keep * 0.6 + this.vx * 0.4; break; }
+        }
+        if (this.st >= dlen) { this.dashCd = KC.DASH_CD; this.setState(inp.d ? 'crouch' : 'idle'); }
         break;
       }
       case 'land': if (this.st >= (this.landLag || 4)) { this.landLag = 0; this.setState('idle'); } this.vx *= 0.6; break;
@@ -272,6 +338,7 @@
     // physics
     if (!this.grounded() || this.state === 'jump' || this.state === 'airhit' || (this.state === 'attack' && this.move && this.move.air) || this.vy > 0) {
       this.vy -= GRAVITY;
+      if (this.airDashT > 0) { this.airDashT--; this.vy = Math.max(this.vy, 0); }   // air dash: hold altitude briefly
       this.y += this.vy;
       if (this.y <= 0) {
         this.y = 0; this.vy = 0;
@@ -292,7 +359,8 @@
       case 'idle': target = this.blockPose ? P.block() : P.idle(t); k = 0.22; break;
       case 'walk': target = this.blockPose ? P.block() : P.walk(t, this.walkDir || 1); k = 0.25; break;
       case 'crouch': target = this.blockPose ? P.crouchBlock() : P.crouch(t); k = 0.35; break;
-      case 'jump': target = (this.jumpDir !== 0 && this.vy > -0.05) ? P.flip(t) : P.jump(t); k = 0.25; break;
+      case 'jump': target = this.airDashT > 0 ? P.dash(t) : (this.jumpDir !== 0 && this.vy > -0.05) ? P.flip(t) : P.jump(t); k = this.airDashT > 0 ? 0.45 : 0.25; break;
+      case 'dash': target = this.dashDir > 0 ? P.dash(t) : P.backdash(t); k = 0.45; break;
       case 'land': target = P.crouch(0); target.hipsY = -0.2; k = 0.5; break;
       case 'attack': {
         var mv = this.move;

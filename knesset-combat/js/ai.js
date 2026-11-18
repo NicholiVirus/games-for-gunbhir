@@ -29,7 +29,7 @@
 
   AI.prototype.input = function (m) {
     var f = this.f, o = f.opp, L = this.L;
-    var inp = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0 };
+    var inp = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0, e: 0, ai: 1 };
     var dx = o.x - f.x, dist = Math.abs(dx), toward = dx >= 0 ? 'r' : 'l', away = dx >= 0 ? 'l' : 'r';
 
     // release a pressed button after one frame so the next press registers as fresh
@@ -52,9 +52,11 @@
       this.threatT = -2; // decided
       if (f.alt && f.alt.type === 'counter' && f.actionable() && !projThreat && dist < 2.2 && R() < L.block * 0.45) { this.altNow = 1; }
       else if (projThreat && f.actionable() && R() < L.jumpProj && dist > 2.2) { this.jumpPlan = 1; }
+      else if (!projThreat && f.actionable() && dist < 2.0 && o.state !== 'super' && R() < L.block * 0.2) { this.dashBack = 1; }
       else if (R() < L.block) { this.defend = 26; this.defendLow = lowThreat || (R() < 0.3 && o.state !== 'super'); }
     }
     if (this.altNow) { this.altNow = 0; inp.d = 1; return this.tap(inp, 's'); }
+    if (this.dashBack) { this.dashBack = 0; inp[away] = 1; return this.tap(inp, 'e'); }   // backdash out of pressure
     if (this.jumpPlan) { this.jumpPlan = 0; inp.u = 1; inp[toward] = 1; this.intent = 'air'; this.intentT = 40; return inp; }
     var guardNearBreak = (f.blockTime || 0) > KC.GUARD_FRAMES * (0.55 + 0.3 * (1 - L.guardSense));
     if (guardNearBreak && R() < L.guardSense) { this.defend = 0; if (dist < 1.3 && f.actionable()) return this.tap(inp, R() < 0.5 ? 'p' : 'k'); inp[away] = 0; return inp; }
@@ -120,14 +122,17 @@
       if ((o.blockTime || 0) > KC.GUARD_FRAMES * 0.5 && dist < 1.4) return this.tap(inp, R() < 0.6 ? 'p' : 'k');
     }
     if (f.state === 'jump' && !f.airUsed && f.vy < 0.05 && dist < 1.6) return this.tap(inp, R() < 0.6 ? 'k' : 'p');
+    // dash-in attack: once a forward dash gets close, cancel it into a punch or kick
+    if (f.state === 'dash' && f.dashDir > 0 && f.st >= 5 && dist < 1.3 && R() < 0.35 + L.aggro * 0.5) return this.tap(inp, R() < 0.5 ? 'p' : 'k');
     if (!f.actionable()) return inp;
 
     /* ---- punish: opponent whiffed, is recovering, landing or guard-broken ---- */
     var recovering = (o.state === 'attack' && o.move && !o.moveHit && o.st > o.move.startup + o.move.active) || (o.state === 'land' && (o.landLag || 0) > 4) ||
-      (o.state === 'rush' && o.rushStop) || o.state === 'counter' && o.st > 26 || o.guardBroken > 0 || (o.state === 'hitstun' && o.stun > 25);
+      (o.state === 'rush' && o.rushStop) || o.state === 'counter' && o.st > 26 || o.guardBroken > 0 || (o.state === 'hitstun' && o.stun > 25) || (o.state === 'dash' && o.dashDir < 0 && o.st > 9);
     if (recovering && f.actionable() && R() < L.punish * 0.6) {
       if (f.meter >= 100 && f.hasSuper && dist < 3.2 && R() < L.superUse * 0.7) return this.tap(inp, 'x');
       if (dist < 1.25) return this.tap(inp, R() < 0.55 ? 'k' : 'p');
+      if (dist > 1.3 && dist < 3.4 && R() < this.skill) { inp[toward] = 1; return this.tap(inp, 'e'); }   // dash in to punish
       if (dist < 2.6) { inp[toward] = 1; return inp; }
     }
     /* ---- anti-air ---- */
@@ -148,6 +153,7 @@
     if (this.intentT <= 0) this.pickIntent(dist);
     switch (this.intent) {
       case 'approach':
+        if (dist > 2.8 && R() < 0.02 + 0.06 * this.skill) { inp[toward] = 1; return this.tap(inp, 'e'); }   // dash to close distance
         if (dist > 1.05) inp[toward] = 1;
         else { this.intent = R() < 0.5 ? 'poke' : 'heavy'; this.intentT = 10; }
         break;
@@ -175,6 +181,7 @@
         break;
       case 'retreat':
         inp[away] = 1; if (R() < 0.04) this.intentT = 0;
+        if (dist < 2.2 && R() < 0.03 * this.skill) return this.tap(inp, 'e');
         break;
       case 'crouch':
         inp.d = 1; if (dist < 1.3 && R() < 0.12) return this.tap(inp, R() < 0.5 ? 'k' : 'p');

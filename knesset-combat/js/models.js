@@ -390,6 +390,14 @@
       return M.mergePose(M.poses.idle(0), { rShRx: -1.6, rShRz: 0.15, rElRx: -0.1, lShRx: -1.5, lShRz: 0.0, lElRx: -0.1, torsoRx: 0.3, torsoRy: -0.1,
         lHipRx: -0.75, lKneeRx: 0.7, rHipRx: 0.45, rKneeRx: 0.2, headRx: 0.1 });
     },
+    dash: function (t) {
+      return P({ hipsY: -0.16, torsoRx: 0.55, torsoRy: 0.15, headRx: -0.4, rShRx: 0.95, rShRz: 0.25, rElRx: -0.5, lShRx: 0.95, lShRz: 0.25, lElRx: -0.5,
+        lHipRx: -1.05, lKneeRx: 1.0, rHipRx: 0.75, rKneeRx: 0.35 });
+    },
+    backdash: function (t) {
+      return P({ hipsY: -0.06, torsoRx: -0.28, torsoRy: 0.3, headRx: 0.12, lShRx: -0.8, lShRz: 0.4, lElRx: -1.2, rShRx: -0.6, rShRz: 0.3, rElRx: -1.3,
+        lHipRx: -0.75, lKneeRx: 1.15, rHipRx: 0.1, rKneeRx: 0.3 });
+    },
     rush: function (t) {
       var s = Math.sin(t * 22);
       return P({ hipsY: -0.08, torsoRx: 0.6, torsoRy: 0.4, headRx: -0.45, rShRx: -1.5, rShRz: 0.35, rElRx: -0.6, lShRx: 0.5, lShRz: 0.2, lElRx: -1.2,

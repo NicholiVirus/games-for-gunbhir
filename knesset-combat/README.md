@@ -17,7 +17,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Elite rarity (orange):** sits between Epic and Mythic. It gets 3 abilities and +60 HP. Rabin and Peres moved up to Elite.
 - **Shards:** Commons need 10. Single shards in the Shop cost 50% more.
 - **✦ Wild Shards:** every chest has a 1% chance to drop one. A Wild Shard unlocks any locked fighter of its rarity (use it in the Shop).
-- **Tutorial:** a 10-step, hands-on lesson: move, jump, crouch, punch, kick, combo, block, Special, Down-Special and Super. It's offered on first launch, and finishing it once pays 300 coins plus a Silver chest.
+- **Tutorial:** an 11-step, hands-on lesson: move, jump, crouch, dash, punch, kick, combo, block, Special, Down-Special and Super. It's offered on first launch, and finishing it once pays 300 coins plus a Silver chest.
 - **🏛️ Chamber skins:** redecorate the plenum. Skins apply in every mode, and you can preview them behind the menu before buying.
 
   | Skin | Price (coins) | What it adds |
@@ -45,12 +45,18 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 | Ability 1 · Special | `R` | `P` or `Num4` |
 | Ability 2 · Down-Special (Epic and Legendary) | `S` + `R` | `K` + `P` |
 | Super (Rare and up, meter full) | `Q` (left of W) | `O` (right of I) or `Num5` |
+| Dash / Backdash | double-tap forward / back, or `E` + direction | double-tap forward / back, or `H` (or `Num3`) + direction |
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
 - **Guard break:** you can hold block for only 2.5 seconds at a time. Past that, your guard breaks and you're stunned.
+- **Dashing:** every fighter can dash.
+  - **Forward dash:** covers about 2 m in a quarter second. From its 5th frame you can cancel it into a punch, kick, Special or Super (a dash-in attack), or into a running jump.
+  - **Backdash:** hops about 1.8 m back and is invincible for its first 7 frames, so it slips through attacks and projectiles, but its recovery can be punished.
+  - **Air dash:** once per jump, double-tap (or press dash) in the air to hover-dash forward or back.
+  - A short cooldown (0.2 s) stops endless dash chains. CPU opponents dash in, dash-punch, backdash out of pressure and dash to punish, more often at higher skill.
 - **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.
 - **CPU skill:** in the campaign it climbs every level, from 30% at level 1 (with a gentle early curve) to about 95% at level 250. Boss levels add a little extra. Smarter CPUs react faster, block better, punish missed attacks and let go of block before their guard breaks.
-- **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super.
+- **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super, LB dash.
 - `Esc` or the ❚❚ button pauses, and `M` toggles music.
 - **Mouse:** everything is clickable.
   - Select screen: left-click picks for P1, right-click for P2, and clicking a highlighted fighter again picks or recruits them.

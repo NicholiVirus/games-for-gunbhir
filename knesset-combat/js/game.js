@@ -104,10 +104,10 @@
   /* =====================================================================
    * INPUT (keyboard + gamepads mapped to virtual key codes)
    * ===================================================================== */
-  var keys = {}, just = {};
+  var keys = {}, just = {}, tapAt = {}, dbl = {};   // dbl: key pressed twice within 230 ms (double-tap dash), frame-rate independent
   var MAP = [
-    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyQ', 'KeyT', 'Pad0_y'] },
-    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['Semicolon', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['KeyO', 'Numpad5', 'Pad1_y'] }
+    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyQ', 'KeyT', 'Pad0_y'], e: ['KeyE', 'Pad0_lb'] },
+    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['Semicolon', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['KeyO', 'Numpad5', 'Pad1_y'], e: ['KeyH', 'Numpad3', 'Pad1_lb'] }
   ];
   var MENU = {
     up: ['KeyW', 'KeyI', 'ArrowUp', 'Pad0_up', 'Pad1_up'], down: ['KeyS', 'KeyK', 'ArrowDown', 'Pad0_down', 'Pad1_down'],
@@ -123,7 +123,7 @@
     if (PREVENT[e.code]) e.preventDefault();
     KC.Audio.init();
     if (e.repeat) return;
-    if (!keys[e.code]) just[e.code] = true;
+    if (!keys[e.code]) { just[e.code] = true; var tnow = performance.now(); if (tnow - (tapAt[e.code] || -1e9) < 230) { dbl[e.code] = true; tapAt[e.code] = -1e9; } else tapAt[e.code] = tnow; }
     keys[e.code] = true;
     if (e.key && e.key.length === 1) {
       cheatBuf = (cheatBuf + e.key.toUpperCase()).slice(-7);
@@ -148,10 +148,10 @@
         var ax = p.axes || [], b = p.buttons || [];
         var pr = function (n) { return !!(b[n] && b[n].pressed); };
         st.up = pr(12) || ax[1] < -0.55; st.down = pr(13) || ax[1] > 0.55; st.left = pr(14) || ax[0] < -0.55; st.right = pr(15) || ax[0] > 0.55;
-        st.a = pr(0); st.b = pr(1); st.x = pr(2); st.y = pr(3) || pr(5); st.start = pr(9); st.back = pr(8);
+        st.a = pr(0); st.b = pr(1); st.x = pr(2); st.y = pr(3) || pr(5); st.lb = pr(4) || pr(6); st.start = pr(9); st.back = pr(8);
         if (pr(0) || pr(9)) KC.Audio.init();
       }
-      ['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'start', 'back'].forEach(function (n) {
+      ['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y', 'lb', 'start', 'back'].forEach(function (n) {
         var code = 'Pad' + i + '_' + n, v = !!st[n];
         if (v && !keys[code]) just[code] = true;
         keys[code] = v;
@@ -165,10 +165,13 @@
     player: function (i, merged) {
       var m = MAP[i], o = {};
       for (var k in m) o[k] = Input.held(m[k]) || (Input.hit(m[k]) ? 1 : 0) || (merged ? (Input.held(MAP[1][k]) || (Input.hit(MAP[1][k]) ? 1 : 0)) : 0);   // quick taps between frames still count
+      o.dl = Input.dbl(m.l) || (merged ? Input.dbl(MAP[1].l) : 0);   // keyboard double-taps (dash), even if both taps land in one slow frame
+      o.dr = Input.dbl(m.r) || (merged ? Input.dbl(MAP[1].r) : 0);
       return o;
     },
     pp: function (i, btn) { return Input.hit(MAP[i][btn]); },
-    endFrame: function () { just = {}; }
+    endFrame: function () { just = {}; dbl = {}; },
+    dbl: function (list) { for (var i = 0; i < list.length; i++) if (dbl[list[i]]) return 1; return 0; }
   };
 
   /* =====================================================================
@@ -1135,6 +1138,7 @@
     { title: 'MOVE', text: 'Walk with <kbd>A</kbd> / <kbd>D</kbd> (or <kbd>←</kbd> <kbd>→</kbd>).', ok: function (t) { return t.walk >= 45; } },
     { title: 'JUMP', text: 'Press <kbd>W</kbd> (or <kbd>↑</kbd>) to jump.', ok: function (t) { return t.jumps >= 1; } },
     { title: 'CROUCH', text: 'Hold <kbd>S</kbd> (or <kbd>↓</kbd>) to crouch. Crouching dodges high attacks.', ok: function (t) { return t.crouch >= 30; } },
+    { title: 'DASH', text: 'Double-tap <kbd>D</kbd> to dash forward and double-tap <kbd>A</kbd> to backdash (or hold a direction and press <kbd>E</kbd>). A backdash is invincible for a split second.', ok: function (t) { return t.dashF >= 1 && t.dashB >= 1; } },
     { title: 'PUNCH', text: 'Walk up to the dummy and press <kbd>F</kbd> to punch it twice.', ok: function (t) { return t.lp >= 2; } },
     { title: 'KICK', text: 'Press <kbd>G</kbd> to kick. Kicks reach further and hit harder.', ok: function (t) { return t.hk >= 1; } },
     { title: 'COMBO', text: 'Tap <kbd>F</kbd> <kbd>F</kbd> quickly — a punch chains into another punch. Land a 2-hit combo.', ok: function (t) { return t.combo >= 2; } },
@@ -1149,12 +1153,12 @@
     var m = G.match;
     m.timerMax = 99999; KC.HUD.hideVs(); m.startRound(); m.setPhase('fight'); KC.HUD.banner(null); KC.HUD.show(true);
     G.ai[1] = { level: 'easy', input: function (mm) { return G.tutDummy(mm); } };
-    G.tut = { step: 0, walk: 0, jumps: 0, crouch: 0, lp: 0, hk: 0, combo: 0, blocks: 0, special: 0, alt: 0, sup: 0, prev: 'idle', lastMove: null, wait: 0, done: false };
+    G.tut = { step: 0, walk: 0, jumps: 0, crouch: 0, lp: 0, hk: 0, combo: 0, blocks: 0, special: 0, alt: 0, sup: 0, dashF: 0, dashB: 0, prev: 'idle', lastMove: null, wait: 0, done: false };
     $('tutorial').classList.add('show');
     G.tutUI();
   };
   G.tutDummy = function (m) {
-    var inp = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0 }, t = G.tut, d = m.f[1], p = m.f[0];
+    var inp = { l: 0, r: 0, u: 0, d: 0, p: 0, k: 0, s: 0, x: 0, e: 0, ai: 1 }, t = G.tut, d = m.f[1], p = m.f[0];
     if (!t || t.done) return inp;
     if (TUT_STEPS[t.step] && TUT_STEPS[t.step].dummy === 'attack') {
       var dist = Math.abs(p.x - d.x);
@@ -1183,6 +1187,7 @@
     if (p.state === 'walk') t.walk++;
     if (p.state === 'crouch') t.crouch++;
     if (entered && p.state === 'jump') t.jumps++;
+    if (entered && p.state === 'dash') { if (p.dashDir > 0) t.dashF++; else t.dashB++; }
     if (p.state === 'attack' && p.moveHit && p.move && p.atkId !== t.lastMove) { t.lastMove = p.atkId; if (p.move.id === 'LP' || p.move.id === 'CP') t.lp++; if (p.move.id === 'HK') t.hk++; }
     if (o.combo > t.combo) t.combo = o.combo;
     if (entered && p.state === 'blockstun') t.blocks++;

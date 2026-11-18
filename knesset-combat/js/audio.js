@@ -52,6 +52,7 @@
       case 'hitS': noise(t, 0.3, 1.0, 'lowpass', 2600, 200); osc('sine', 100, 30, t, 0.35, 1.0); osc('sawtooth', 220, 50, t, 0.2, 0.3); break;
       case 'block': osc('square', 1100, 700, t, 0.04, 0.25); noise(t, 0.05, 0.4, 'highpass', 3000); break;
       case 'whiff': noise(t, 0.12, 0.25, 'bandpass', 500, 2400, 1.5); break;
+      case 'dash': noise(t, 0.16, 0.3, 'bandpass', 2600, 700, 1.2); osc('sine', 170, 80, t, 0.1, 0.12); break;
       case 'jump': osc('sine', 260, 520, t, 0.08, 0.2); break;
       case 'land': osc('sine', 90, 50, t, 0.07, 0.35); break;
       case 'proj': osc('square', 380, 900, t, 0.16, 0.18); osc('triangle', 760, 1500, t, 0.16, 0.15); break;
