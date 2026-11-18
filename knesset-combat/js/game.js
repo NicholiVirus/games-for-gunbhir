@@ -928,7 +928,7 @@
     },
     tap: function () {
       KC.Audio.init();
-      if (this.spinning) { G.slotSkip(); return; }
+      if (this.spinning) return;   // the slot roll can't be skipped
       if (this.phase === 'tap') {
         var chance = this.camp ? KC.TAP_CHANCE : KC.TAP_CHANCE * 1.5;   // bought chests upgrade 50% more often (45% vs 30%)
         this.taps++; this.shake = 0.45;
@@ -999,7 +999,7 @@
       }
       if (this.phase !== 'done') { if (Input.menu('ok')) this.tap(); }
       else {
-        if (this.spinning) { if (Input.menu('ok')) G.slotSkip(); return; }
+        if (this.spinning) return;
         var n = $('chBtns').querySelectorAll('button').length;
         if (!n) return;
         if (Input.menu('left') || Input.menu('up')) { this.btn = (this.btn - 1 + n) % n; this.hl(); KC.Audio.play('move'); }
