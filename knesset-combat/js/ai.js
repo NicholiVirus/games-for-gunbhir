@@ -35,6 +35,8 @@
     // release a pressed button after one frame so the next press registers as fresh
     if (this.pressT > 0) { this.pressT--; if (this.pressT === 0) this.press = null; }
 
+    if ((f.state === 'hitstun' || f.state === 'airhit') && (f.combo || 0) >= 2) this.escapeArm = true;
+
     /* ---- defence ---- */
     var threat = false, lowThreat = false, projThreat = false;
     if ((o.state === 'attack' || o.state === 'rush' || o.state === 'super') && dist < 2.4) { threat = true; lowThreat = o.move && o.move.level === 'low'; if (o.move && o.move.air) lowThreat = false; }
@@ -141,6 +143,23 @@
       return this.tap(inp, R() < 0.6 ? 'k' : 'p');
     }
 
+    /* ---- escape: after eating a combo, backdash out and keep the distance (zoning) for a while ---- */
+    if (this.escapeArm && f.actionable()) {
+      this.escapeArm = false;
+      if (R() < 0.35 + 0.6 * this.skill) {
+        this.intent = 'zone'; this.intentT = 70 + ((R() * 60) | 0); this.keepAway = this.intentT;
+        if (dist < 2.6) { inp[away] = 1; return this.tap(inp, 'e'); }
+      }
+    }
+    if (this.keepAway > 0) this.keepAway--;
+
+    /* ---- projectiles: fire whenever there's room and ammo ---- */
+    var hasProj = f.ch.special.type === 'projectile' || (f.alt && f.alt.type === 'projectile');
+    if (hasProj && !m.hasProjectile(f) && dist > 2.2 && R() < 0.025 + 0.05 * this.skill + (this.keepAway > 0 ? 0.05 : 0)) {
+      if (f.ch.special.type === 'projectile') return this.tap(inp, 's');
+      inp.d = 1; return this.tap(inp, 's');
+    }
+
     /* ---- super ---- */
     if (f.meter >= 100 && f.hasSuper && R() < 0.02 * L.superUse) {
       var t = f.ch.super.type;
@@ -169,7 +188,8 @@
         if (f.alt && (f.alt.type === 'projectile' || f.alt.type === 'rush') && R() < 0.05) {
           if (f.alt.type === 'rush' ? (dist > 1.4 && dist < 3.6) : !m.hasProjectile(f)) { inp.d = 1; return this.tap(inp, 's'); }
         }
-        if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && R() < 0.12) return this.tap(inp, 's'); }
+        if (this.keepAway > 0 && dist < 3.2) { inp[away] = 1; if (dist < 1.6 && R() < 0.04 * this.skill) return this.tap(inp, 'e'); break; }
+        if (f.ch.special.type === 'projectile') { if (!m.hasProjectile(f) && R() < 0.22) return this.tap(inp, 's'); }
         else if (dist > 1.4 && dist < 3.6 && R() < 0.08) return this.tap(inp, 's');
         else if (dist < 1.4) inp[away] = 1;
         else inp[toward] = 1;
@@ -198,7 +218,9 @@
     return inp;
   };
   AI.prototype.pickIntent = function (dist) {
-    var L = this.L, r = R();
+    var L = this.L, r = R(), f = this.f;
+    if (this.keepAway > 0) { this.intent = 'zone'; this.intentT = this.keepAway; return; }
+    if ((f.ch.special.type === 'projectile' || (f.alt && f.alt.type === 'projectile')) && dist > 1.8 && R() < 0.4) { this.intent = 'zone'; this.intentT = L.think * 2; return; }
     this.intentT = L.think + ((R() * L.think) | 0);
     if (dist > 4.2) {
       if (r < 0.45) this.intent = 'zone'; else if (r < 0.85) this.intent = 'approach'; else this.intent = 'jumpin';
