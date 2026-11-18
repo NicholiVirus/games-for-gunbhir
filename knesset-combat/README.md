@@ -54,6 +54,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
   - **Backdash:** hops about 1.8 m back and is invincible for its first 7 frames, so it slips through attacks and projectiles, but its recovery can be punished.
   - **Air dash:** once per jump, double-tap (or press dash) in the air to hover-dash forward or back.
   - A short cooldown (0.2 s) stops endless dash chains.
+- **Free chest:** a free Wooden chest (one tier below the daily Silver chest, 3 upgrade taps) every 90 minutes from the main menu. The menu shows READY or a countdown.
 - **CPU zoning:** CPUs with projectiles fire them much more often from mid-range. After getting caught in a combo (2+ hits), a CPU backdashes out and keeps its distance for 1–2 s, throwing projectiles, more reliably at higher skill.
   - **Yigal Allon** has a nerfed dash: 25% shorter, cancels into attacks 4 frames later, and a 0.43 s cooldown. CPU opponents dash in, dash-punch, backdash out of pressure and dash to punish, more often at higher skill.
 - **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.

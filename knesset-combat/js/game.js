@@ -11,7 +11,7 @@
   var SAVE_KEY = 'kc26_save_v2', OLD_KEY = 'kc26_save_v1';
   var memoryStore = null;
   function defaults() {
-    return { coins: 0, earned: 0, matches: 0, wins: 0, cpuWins: 0, supers: 0, perfects: 0, campaign: 0, tour: 0, ranks: {}, shards: {}, campWins: 0, chests: 0, wild: {}, themes: ['classic'], theme: 'classic', tutorialDone: false, tutorialPrompted: false, lastDaily: 0, charWins: {}, owned: KC.STARTERS.slice(), gold: [],
+    return { coins: 0, earned: 0, matches: 0, wins: 0, cpuWins: 0, supers: 0, perfects: 0, campaign: 0, tour: 0, ranks: {}, shards: {}, campWins: 0, chests: 0, wild: {}, themes: ['classic'], theme: 'classic', tutorialDone: false, tutorialPrompted: false, lastDaily: 0, lastFree: 0, charWins: {}, owned: KC.STARTERS.slice(), gold: [],
       settings: { rounds: 2, timer: 99, stage: 'random', music: true, sfx: true, voice: true } };
   }
   var Save = KC.Save = {
@@ -430,6 +430,7 @@
     { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R + Q (Super), Player 2 on IJKL + U ; P + O (Super). Both players earn coins for the shared wallet.' },
     { id: 'campaign', label: 'ELECTION ARCADE', desc: 'Quick arcade ladder: beat five random rivals, then face the final boss in one run.' },
     { id: 'store', label: '🎁 CHEST STORE', desc: 'Buy chests with coins. Each spins on the slot machine for coins and shards — the way to unlock fighters. Lucky chests get extra upgrade taps.' },
+    { id: 'free', label: '⏱️ FREE CHEST', desc: 'A free Wooden chest every 90 minutes.' },
     { id: 'daily', label: '🗳️ DAILY FREE CHEST', desc: 'A free Silver chest every day. Come back tomorrow for another!' },
     { id: 'shop', label: 'SHOP · SHARDS & UPGRADES', desc: 'Buy shards toward locked fighters, upgrade your fighters to Rank 5, use Wild Shards, compare fighters and buy gold skins.' },
     { id: 'skins', label: '🏛️ CHAMBER SKINS', desc: 'Redecorate the Knesset: Hanukkah, Independence Day, Purim and Sukkot themes.' },
@@ -446,7 +447,7 @@
     render: function () {
       var self = this;
       $('menuList').innerHTML = MENU_ITEMS.map(function (it, i) {
-        var extra = it.id === 'daily' ? (G.dailyReady() ? ' <span class="badge-new">READY</span>' : ' <span class="badge-wait">' + G.dailyWait() + '</span>') : it.id === 'tutorial' && !Save.data.tutorialDone ? ' <span class="badge-new">NEW</span>' : '';
+        var extra = it.id === 'free' ? (G.freeReady() ? ' <span class="badge-new">READY</span>' : ' <span class="badge-wait">' + G.freeWait() + '</span>') : it.id === 'daily' ? (G.dailyReady() ? ' <span class="badge-new">READY</span>' : ' <span class="badge-wait">' + G.dailyWait() + '</span>') : it.id === 'tutorial' && !Save.data.tutorialDone ? ' <span class="badge-new">NEW</span>' : '';
         return '<li class="' + (i === self.sel ? 'sel' : '') + '" data-i="' + i + '">' + it.label + extra + '</li>'; }).join('');
       $('menuList').querySelectorAll('li').forEach(function (li) {
         li.onmouseenter = function () { if (self.sel !== +li.dataset.i) { self.sel = +li.dataset.i; highlight($('menuList'), self.sel); $('menuDesc').textContent = MENU_ITEMS[self.sel].desc; KC.Audio.play('move'); } };
@@ -471,6 +472,7 @@
         case 'tour': go('levels'); break;
         case 'store': G.chestStore('menu'); break;
         case 'daily': G.claimDaily(); break;
+        case 'free': G.claimFree(); break;
         case 'skins': G.chamberStore('menu'); break;
         case 'tutorial': G.startTutorial(); break;
         case 'shop': go('shop'); break;
@@ -1094,6 +1096,19 @@
   G.dailyWait = function () {
     var now = new Date(), mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), ms = mid - now;
     return Math.floor(ms / 3600000) + 'h ' + Math.floor((ms % 3600000) / 60000) + 'm';
+  };
+  // Free chest: a Wooden chest (one tier below the daily Silver) every 90 minutes
+  KC.FREE_CHEST_MS = 90 * 60 * 1000;
+  G.freeLeft = function () { var t = Save.data.lastFree || 0, n = Date.now(); if (t > n) t = n - KC.FREE_CHEST_MS; return Math.max(0, t + KC.FREE_CHEST_MS - n); };
+  G.freeReady = function () { return G.freeLeft() <= 0; };
+  G.freeWait = function () { var ms = G.freeLeft(); return Math.floor(ms / 3600000) + 'h ' + Math.ceil((ms % 3600000) / 60000) + 'm'; };
+  G.claimFree = function () {
+    if (!G.freeReady()) { KC.Audio.play('deny'); G.toast('Your next free chest is ready in ' + G.freeWait() + '.'); return; }
+    Save.data.lastFree = Date.now();
+    Save.data.chestQueue = Save.data.chestQueue || [];
+    Save.data.chestQueue.unshift({ tier: 0, taps: KC.BASE_TAPS });
+    Save.write(); KC.Audio.play('unlock'); G.toast('⏱️ Free Wooden chest claimed!');
+    go('chest');
   };
   G.claimDaily = function () {
     if (!G.dailyReady()) { KC.Audio.play('deny'); G.toast('Your next free chest is ready in ' + G.dailyWait() + '.'); return; }
