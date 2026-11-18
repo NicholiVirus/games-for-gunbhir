@@ -681,7 +681,7 @@
           var sx = f.x - f.facing * 6;
           vm.position.set(sx, 0, 0.45);
           if (f.facing < 0) vm.rotation.y = Math.PI;
-          var vhw = f.ch.super.obj === 'tram' ? 2.1 : f.ch.super.obj === 'bulldozer' ? 1.15 : 0.85;
+          var vhw = f.ch.super.obj === 'tram' ? 2.1 : f.ch.super.obj === 'limo' ? 2.2 : f.ch.super.obj === 'bulldozer' ? 1.15 : 0.85;
           this.addHazard({ kind: 'vehicle', owner: f, x: sx, y: 0, y0: 0, y1: 2.2, hw: vhw, vx: 0.3 * f.facing, mesh: vm, hits: 1,
             hit: this.superHit(f, { dmg: 250, knockdown: true, chip: 40, hitstop: 12, sfx: 'hitS' }), life: 80, pierce: true });
           KC.Audio.play('rush');

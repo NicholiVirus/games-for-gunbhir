@@ -553,7 +553,7 @@
   G.SHOP_FILTERS = [{ id: 'all', label: 'ALL' }, { id: 'owned', label: 'OWNED' }, { id: 'locked', label: 'LOCKED' }, { id: 'common', label: 'COMMON' }, { id: 'rare', label: 'RARE' }, { id: 'superrare', label: 'SUPER RARE' }, { id: 'epic', label: 'EPIC' }, { id: 'elite', label: 'ELITE' }, { id: 'mythic', label: 'MYTHIC' }, { id: 'legendary', label: 'LEGENDARY' }];
   function cellHTML(ch, i, extraCls, tags) {
     var owned = Save.owns(ch.id);
-    var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'icon' ? 'MK' : '';
+    var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'guest' ? 'GUEST' : ch.group === 'icon' ? 'MK' : '';
     var price = owned ? '' : '<span class="price shardp"><span class="shard"></span>' + Save.shards(ch.id) + '/' + KC.shardsNeeded(ch) + '</span>';
     return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + price + (tags || '') + '</div>';
   }

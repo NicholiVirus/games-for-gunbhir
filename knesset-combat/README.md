@@ -12,7 +12,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
-- **50 fighters**, sorted by rarity on the select screen and in the Shop.
+- **51 fighters**, sorted by rarity on the select screen and in the Shop.
   - **New fighters:** Yitzhak Ben-Zvi, Zalman Shazar, Benny Begin, Yossi Sarid, Shelly Yachimovich, Tommy Lapid, David Levy, Dalia Itzik, Chaim Herzog and Pnina Tamano-Shata, plus the Elite fighters Natan Sharansky and Orna Barbivai.
 - **Elite rarity (orange):** sits between Epic and Mythic. It gets 3 abilities and +60 HP. Rabin and Peres moved up to Elite.
 - **Shards:** Commons need 10. Single shards in the Shop cost 50% more.
@@ -157,7 +157,7 @@ Progress saves in your browser (`localStorage`). Settings → Reset Progress wip
 
 ## The roster (38)
 
-Legendary (the only one): Benjamin Netanyahu. Mythic (between Epic and Legendary): Golda Meir, Ariel Sharon, Moshe Dayan, Yigael Yadin and The Speaker.
+Legendary (the only one): Benjamin Netanyahu. Mythic: Golda Meir, Ariel Sharon, Moshe Dayan, Yigael Yadin, The Speaker and special guest Donald Trump.
 
 Added in this update: Yigael Yadin (Mythic), Ezer Weizman, Reuven Rivlin, Mansour Abbas, Moshe Arens (Rare), Amir Peretz (Epic, with the Iron Dome reflect super), Yitzhak Navon, Shulamit Aloni, Merav Michaeli and Moshe Kahlon (Common).
 
@@ -188,6 +188,7 @@ New icons: Chaim Weizmann (Rare), Moshe Dayan (Legendary, Battle Rhythm passive)
 | Yair Golan | Common | Rally Flag | — | — | — |
 | Tzipi Livni (starter) | Common | Negotiation Briefcase | — | — | — |
 | Isaac Herzog | Common | Presidential Seal | — | — | — |
+| Donald Trump (special guest) | Mythic | Executive Order | The Art of the Deal (counter) | The Beast (limo) | Rally Energy (faster meter) |
 | The Speaker (fictional boss) | Legendary | Order! Order! | Gavel Uppercut | Session Adjourned | Filibuster |
 
 ## Tech

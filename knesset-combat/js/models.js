@@ -112,7 +112,8 @@
       var vGeo = new T.CylinderGeometry(0.085, 0.0, 0.24, 3); vGeo.rotateY(Math.PI); vGeo.scale(1, 1, 0.25);
       torso.add(part(vGeo, L.shirt, 0, 0.45, front - 0.005, false));
       if (L.tie) {
-        torso.add(part(box(0.05, 0.26, 0.02), L.tie, 0, 0.36, front + 0.012, false));
+        if (L.longTie) torso.add(part(box(0.06, 0.4, 0.02), L.tie, 0, 0.29, front + 0.012, false));
+        else torso.add(part(box(0.05, 0.26, 0.02), L.tie, 0, 0.36, front + 0.012, false));
         torso.add(part(box(0.06, 0.04, 0.025), L.tie, 0, 0.5, front + 0.012, false));
       } else {
         torso.add(part(box(0.11, 0.03, 0.03), L.shirt, 0, 0.56, front - 0.02, false));
@@ -283,6 +284,15 @@
         cap = part(hemi(0.15), c, 0, 0.13, -0.008); cap.scale.set(1.04, 0.92, 1.06); cap.rotation.x = -0.3; head.add(cap);
         head.add(part(sph(0.07, 8, 6), c, 0, 0.17, -0.155));
         break;
+      case 'swoop': {
+        cap = part(hemi(0.156), c, 0, 0.13, -0.01); cap.scale.set(1.06, 0.95, 1.1); cap.rotation.x = -0.3; head.add(cap);
+        var sw1 = sph(0.09, 10, 8); sw1.scale(1.9, 0.7, 1.25);
+        var swm1 = part(sw1, c, -0.02, 0.255, 0.07); swm1.rotation.z = 0.18; swm1.rotation.x = 0.25; head.add(swm1);
+        var sw2 = sph(0.07, 8, 6); sw2.scale(1.2, 0.9, 1.5);
+        head.add(part(sw2, c, 0.1, 0.2, -0.02));
+        head.add(part(sw2, c, -0.11, 0.19, -0.03));
+        break;
+      }
       case 'bob': {
         cap = part(hemi(0.153), c, 0, 0.13, -0.008); cap.scale.set(1.05, 0.95, 1.07); cap.rotation.x = -0.25; head.add(cap);
         var bb = sph(0.15, 10, 8); bb.scale(1.1, 0.78, 0.95);
@@ -671,6 +681,29 @@
         addTo(g, M.part(box(2.3, 0.4, 0.35), '#2a2a2a', 0, 0.22, -0.55));
         var blade = addTo(g, M.part(box(0.15, 1.0, 1.7), '#c99700', 1.35, 0.55, 0)); blade.rotation.z = -0.15;
         addTo(g, M.part(cyl(0.06, 0.06, 0.6, 6), '#333', 0.3, 1.4, 0.4, false));
+        break;
+      }
+      case 'order': {
+        addTo(g, M.part(box(0.38, 0.28, 0.035), '#1d1d1d', 0, 0, 0));
+        addTo(g, M.part(box(0.33, 0.24, 0.04), '#fbfaf3', 0.01, 0.0, 0, false));
+        for (var ln = 0; ln < 4; ln++) addTo(g, M.part(box(0.24, 0.012, 0.042), '#9aa0a6', 0.0, 0.08 - ln * 0.04, 0, false));
+        var sig = addTo(g, M.part(box(0.2, 0.03, 0.044), '#d4af37', 0.02, -0.09, 0, false)); sig.rotation.z = 0.2;
+        addTo(g, M.part(cyl(0.035, 0.035, 0.046, 10), '#d4af37', -0.12, -0.08, 0, false)).rotation.x = Math.PI / 2;
+        g.rotation.y = Math.PI / 2; g.userData.spin = 'y';
+        break;
+      }
+      case 'limo': {
+        addTo(g, M.part(box(4.4, 0.75, 1.35), '#111111', 0, 0.75, 0));
+        addTo(g, M.part(box(3.0, 0.55, 1.25), '#141414', -0.3, 1.4, 0));
+        addTo(g, M.part(box(2.9, 0.4, 1.27), '#1e2b3a', -0.3, 1.42, 0, false)).material = M.toon('#1e2b3a', '#0a1420');
+        [[1.4, 0.62], [1.4, -0.62], [-1.5, 0.62], [-1.5, -0.62]].forEach(function (wp) { var wh = addTo(g, M.part(cyl(0.34, 0.34, 0.2, 12), '#0a0a0a', wp[0], 0.34, wp[1])); wh.rotation.x = Math.PI / 2; });
+        addTo(g, M.part(box(0.1, 0.25, 1.0), '#c0c0c0', 2.22, 0.75, 0, false));
+        addTo(g, M.part(sph(0.09, 6, 5), '#fff6a0', 2.22, 0.9, 0.5, false)).material = M.toon('#fff6a0', '#ffd23f');
+        addTo(g, M.part(sph(0.09, 6, 5), '#fff6a0', 2.22, 0.9, -0.5, false)).material = M.toon('#fff6a0', '#ffd23f');
+        [-0.5, 0.5].forEach(function (z) {
+          var pole = addTo(g, M.part(cyl(0.012, 0.012, 0.35, 4), '#c0c0c0', 1.9, 1.3, z * 1.1, false));
+          addTo(g, M.part(box(0.28, 0.18, 0.01), z > 0 ? '#3c3b6e' : '#ffffff', 2.03, 1.42, z * 1.1, false));
+        });
         break;
       }
       case 'tram': {

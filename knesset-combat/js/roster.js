@@ -522,6 +522,18 @@ KC.ROSTER = [
     quote: 'Orders received. Opponent dismissed.', victory: 'salute'
   },
   {
+    id: 'trump', name: 'Donald Trump', short: 'TRUMP', title: 'The Special Guest', rarity: 'mythic',
+    group: 'guest', years: 'Special Guest',
+    bio: '45th and 47th President of the United States. Moved the US embassy to Jerusalem and brokered the Abraham Accords. Visiting the plenum as a special guest.',
+    look: { height: 1.08, girth: 1.2, skin: '#f0b98a', hair: 'swoop', hairColor: '#e8c46a', outfit: 'suit', top: '#1c2640', pants: '#19223a', shirt: '#f6f6f6', tie: '#d42a2a', longTie: true, shoes: '#111111' },
+    stats: { speed: 0.95, power: 1.1, defense: 1.08, jump: 0.92 },
+    special: { type: 'projectile', name: 'Executive Order', proj: 'order' },
+    special2: { type: 'counter', name: 'The Art of the Deal' },
+    super: { type: 'vehicle', name: 'The Beast', color: '#111111', obj: 'limo' },
+    passive: { id: 'momentum', name: 'Rally Energy' },
+    quote: 'Tremendous win. Maybe the best win in the history of the Knesset.', victory: 'point'
+  },
+  {
     id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'mythic', price: 800,
     group: 'boss', years: 'Final Boss (fictional)',
     bio: 'The fictional keeper of order in the plenum. Final boss of the Election Campaign.',
