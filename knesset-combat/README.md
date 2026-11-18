@@ -45,21 +45,21 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 | Ability 1 · Special | `R` | `P` or `Num4` |
 | Ability 2 · Down-Special (Epic and Legendary) | `S` + `R` | `K` + `P` |
 | Super (Rare and up, meter full) | `Q` (left of W) | `O` (right of I) or `Num5` |
-| Dash / Backdash | double-tap forward / back, or `E` + direction | double-tap forward / back, or `H` (or `Num3`) + direction |
+| Dash / Backdash | double-tap `D` / `A` | double-tap `J` / `L` (or arrows) |
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
 - **Guard break:** you can hold block for only 2.5 seconds at a time. Past that, your guard breaks and you're stunned.
 - **Dashing:** every fighter can dash.
   - **Forward dash:** covers about 2 m in a quarter second. From its 5th frame you can cancel it into a punch, kick, Special or Super (a dash-in attack), or into a running jump.
   - **Backdash:** hops about 1.8 m back and is invincible for its first 7 frames, so it slips through attacks and projectiles, but its recovery can be punished.
-  - **Air dash:** once per jump, double-tap (or press dash) in the air to hover-dash forward or back.
+  - **Air dash:** once per jump, double-tap in the air to hover-dash forward or back.
   - A short cooldown (0.2 s) stops endless dash chains.
 - **Free chest:** a free Wooden chest (one tier below the daily Silver chest, 3 upgrade taps) every 90 minutes from the main menu. The menu shows READY or a countdown.
 - **CPU zoning:** CPUs with projectiles fire them much more often from mid-range. After getting caught in a combo (2+ hits), a CPU backdashes out and keeps its distance for 1–2 s, throwing projectiles, more reliably at higher skill.
   - **Yigal Allon** has a nerfed dash: 25% shorter, cancels into attacks 4 frames later, and a 0.43 s cooldown. CPU opponents dash in, dash-punch, backdash out of pressure and dash to punish, more often at higher skill.
 - **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.
 - **CPU skill:** in the campaign it climbs every level, from 30% at level 1 (with a gentle early curve) to about 95% at level 250. Boss levels add a little extra. Smarter CPUs react faster, block better, punish missed attacks and let go of block before their guard breaks.
-- **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super, LB dash.
+- **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super, double-tap the stick to dash.
 - `Esc` or the ❚❚ button pauses, and `M` toggles music.
 - **Mouse:** everything is clickable.
   - Select screen: left-click picks for P1, right-click for P2, and clicking a highlighted fighter again picks or recruits them.

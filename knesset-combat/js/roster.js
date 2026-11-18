@@ -601,7 +601,7 @@ KC.level = function (n) {
   // Every 10th level is a boss one rarity higher; every 50th is two rarities higher. Level 250 = Legendary.
   var ORDER = KC.RARITY_ORDER, boss = n % 10 === 0;
   var band = Math.min(4, Math.floor((n - 1) / 50));
-  var tierIdx = Math.min(ORDER.length - 1, band + (n % 50 === 0 ? 2 : boss ? 1 : 0));
+  var tierIdx = Math.min(ORDER.indexOf('elite'), band + (n % 50 === 0 ? 2 : boss ? 1 : 0));   // bosses top out at Elite (no Mythics); level 250 is Netanyahu
   var pool = KC.ROSTER.filter(function (c) { return c.rarity === ORDER[tierIdx]; });
   var ch = n === KC.LEVELS ? KC.rosterById.netanyahu : pool[(n * 7 + Math.floor(n / 10) * 3) % pool.length];
   var ai = n <= 30 ? 'easy' : n <= 100 ? 'normal' : n <= 180 ? 'hard' : 'boss';

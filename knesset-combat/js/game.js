@@ -106,8 +106,8 @@
    * ===================================================================== */
   var keys = {}, just = {}, tapAt = {}, dbl = {};   // dbl: key pressed twice within 230 ms (double-tap dash), frame-rate independent
   var MAP = [
-    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyQ', 'KeyT', 'Pad0_y'], e: ['KeyE', 'Pad0_lb'] },
-    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['Semicolon', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['KeyO', 'Numpad5', 'Pad1_y'], e: ['KeyH', 'Numpad3', 'Pad1_lb'] }
+    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyQ', 'KeyT', 'Pad0_y'] },
+    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['Semicolon', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['KeyO', 'Numpad5', 'Pad1_y'] }
   ];
   var MENU = {
     up: ['KeyW', 'KeyI', 'ArrowUp', 'Pad0_up', 'Pad1_up'], down: ['KeyS', 'KeyK', 'ArrowDown', 'Pad0_down', 'Pad1_down'],
@@ -440,9 +440,21 @@
   ];
   function rarBadge(ch) { var r = KC.RARITY[ch.rarity]; return '<span class="rar r-' + r.id + '">' + r.name.toUpperCase() + '</span>'; }
   G.rarBadge = rarBadge;
+  /* Minecraft-style splash: a random Hebrew / Yiddish word with a small English translation */
+  var SPLASH = [['Chutzpah!', 'nerve, audacity'], ['Mazel Tov!', 'congratulations'], ['Shalom!', 'peace / hello'], ['Yalla!', "let's go"], ['L\'chaim!', 'to life'],
+    ['Nu?', 'well? so?'], ['Oy Vey!', 'oh no'], ['Kol HaKavod!', 'well done'], ['Sababa!', 'cool, awesome'], ['Balagan!', 'total chaos'],
+    ['Mensch', 'a good person'], ['Kvetch', 'to complain'], ['Schlep', 'to drag along'], ['Tachles!', 'down to business'], ['Davka!', 'just to spite you'],
+    ['Toda Raba!', 'thank you very much'], ['Beseder', 'okay, fine'], ['Kadima!', 'forward!'], ['Achla!', 'excellent'], ['Shtick', 'a signature routine'],
+    ['Nachas', 'proud joy'], ['Mishpacha', 'family'], ['Shabbat Shalom!', 'peaceful Sabbath'], ['Chag Sameach!', 'happy holiday'], ['Am Yisrael Chai!', 'the people of Israel live'],
+    ['Savlanut', 'patience'], ['Kapara!', 'sweetheart / no worries'], ['Ein Breira', 'no choice'], ['Klum!', 'nothing at all'], ['Kosher!', 'legit, by the rules']];
+  G.splash = function () {
+    var w = SPLASH[(Math.random() * SPLASH.length) | 0], el = $('splash'); if (!el) return;
+    el.innerHTML = '<span class="sp-word">' + esc(w[0]) + '</span><span class="sp-tr">' + esc(w[1]) + '</span>';
+    el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  };
   screens.menu = {
     el: 'menu', sel: 0,
-    enter: function () { camMode = 'menu'; stage.setMode('day'); clearPreviews(); KC.Audio.playMusic('menu'); this.render(); },
+    enter: function () { camMode = 'menu'; stage.setMode('day'); clearPreviews(); KC.Audio.playMusic('menu'); this.render(); G.splash(); },
     refresh: function () { this.render(); },
     render: function () {
       var self = this;
@@ -1153,7 +1165,7 @@
     { title: 'MOVE', text: 'Walk with <kbd>A</kbd> / <kbd>D</kbd> (or <kbd>←</kbd> <kbd>→</kbd>).', ok: function (t) { return t.walk >= 45; } },
     { title: 'JUMP', text: 'Press <kbd>W</kbd> (or <kbd>↑</kbd>) to jump.', ok: function (t) { return t.jumps >= 1; } },
     { title: 'CROUCH', text: 'Hold <kbd>S</kbd> (or <kbd>↓</kbd>) to crouch. Crouching dodges high attacks.', ok: function (t) { return t.crouch >= 30; } },
-    { title: 'DASH', text: 'Double-tap <kbd>D</kbd> to dash forward and double-tap <kbd>A</kbd> to backdash (or hold a direction and press <kbd>E</kbd>). A backdash is invincible for a split second.', ok: function (t) { return t.dashF >= 1 && t.dashB >= 1; } },
+    { title: 'DASH', text: 'Double-tap <kbd>D</kbd> to dash forward and double-tap <kbd>A</kbd> to backdash (<kbd>←</kbd> <kbd>→</kbd> work too). A backdash is invincible for a split second.', ok: function (t) { return t.dashF >= 1 && t.dashB >= 1; } },
     { title: 'PUNCH', text: 'Walk up to the dummy and press <kbd>F</kbd> to punch it twice.', ok: function (t) { return t.lp >= 2; } },
     { title: 'KICK', text: 'Press <kbd>G</kbd> to kick. Kicks reach further and hit harder.', ok: function (t) { return t.hk >= 1; } },
     { title: 'COMBO', text: 'Tap <kbd>F</kbd> <kbd>F</kbd> quickly — a punch chains into another punch. Land a 2-hit combo.', ok: function (t) { return t.combo >= 2; } },
