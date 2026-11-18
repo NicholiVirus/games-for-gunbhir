@@ -455,13 +455,18 @@ KC.UPGRADE = {
 
 KC.MASTERY_TEXT = 'Chain any punch or kick into any other (4-hit strings), cancel specials and charges into your Super, and deal +15% damage from the 4th hit of a combo.';
 
+KC.RARITY_ORDER = ['common', 'rare', 'superrare', 'epic', 'mythic', 'legendary'];
+
 /* ---------- Campaign: 100 levels vs CPU ---------- */
 KC.LEVELS = 250;
 KC.level = function (n) {
-  var pool = KC.ROSTER.filter(function (c) { return c.id !== 'speaker'; });
-  var legends = pool.filter(function (c) { return c.rarity === 'legendary' || c.rarity === 'mythic'; });
-  var boss = n % 10 === 0;
-  var ch = boss ? (n % 50 === 0 ? KC.rosterById.speaker : legends[(n / 10) % legends.length]) : pool[(n * 5 + 3) % pool.length];
+  // Opponent rarity: Common for 1-50, Rare 51-100, Super Rare 101-150, Epic 151-200, Mythic 201-250.
+  // Every 10th level is a boss one rarity higher; every 50th is two rarities higher. Level 250 = Legendary.
+  var ORDER = KC.RARITY_ORDER, boss = n % 10 === 0;
+  var band = Math.min(4, Math.floor((n - 1) / 50));
+  var tierIdx = Math.min(ORDER.length - 1, band + (n % 50 === 0 ? 2 : boss ? 1 : 0));
+  var pool = KC.ROSTER.filter(function (c) { return c.rarity === ORDER[tierIdx]; });
+  var ch = n === KC.LEVELS ? KC.rosterById.netanyahu : pool[(n * 7 + Math.floor(n / 10) * 3) % pool.length];
   var ai = n <= 30 ? 'easy' : n <= 100 ? 'normal' : n <= 180 ? 'hard' : 'boss';
   if (boss && ai !== 'boss') ai = n <= 40 ? 'normal' : 'hard';
   return {

@@ -37,7 +37,9 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Campaign · 250 levels:** fixed CPU rivals that get tougher.
   - Levels 1–30 are Easy, 31–100 Normal, 101–180 Hard and 181–250 Boss.
-  - Every 10th level is a boss fight.
+  - Opponent rarity climbs every 50 levels: Common (1–50), Rare (51–100), Super Rare (101–150), Epic (151–200) and Mythic (201–250).
+  - Every 10th level is a boss one rarity higher, and every 50th level is two rarities higher.
+  - **Level 250 is the Legendary final boss. Beat it to win the game and become Prime Minister.**
   - Opponents also gain strength and upgrade ranks as you climb.
   - The first clear of a level pays 25 + 2 × level coins (+100 on boss levels); replays pay 30%.
 

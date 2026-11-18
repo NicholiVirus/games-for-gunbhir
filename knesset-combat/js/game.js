@@ -421,7 +421,7 @@
       });
       $('menuDesc').textContent = MENU_ITEMS[this.sel].desc;
       var d = Save.data, locked = Save.lockedByPrice(), own = d.owned.length;
-      var html = '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
+      var html = (d.pm ? '<div class="pm-badge">👑 PRIME MINISTER ' + esc((KC.rosterById[d.pmFighter] || KC.ROSTER[0]).short) + '</div>' : '') + '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
       if (locked.length) {
         var nx = locked[0], need = KC.shardsNeeded(nx), have = Save.shards(nx.id);
         html += '<div class="progress"><div style="width:' + Math.round(have / need * 100) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" class="dim" alt=""><div>Closest recruit: <b>' + esc(nx.name) + '</b> ' + rarBadge(nx) + '<br>' +
@@ -1038,6 +1038,37 @@
   };
   G.openChests = function () { if ((Save.data.chestQueue || []).length) go('chest'); };
 
+  /* ---------- the ending: beat level 250 and become Prime Minister ---------- */
+  screens.ending = {
+    el: 'ending',
+    enter: function () {
+      var d = Save.data, ch = KC.rosterById[d.pmFighter] || KC.ROSTER[0];
+      camMode = 'collection'; stage.setMode('night'); clearPreviews();
+      var pv = setPreview(0, ch, Save.hasGold(ch.id) ? KC.ALT_SKIN : null, false, 0.15, 0.25); pv.cheer = 9999;
+      KC.Audio.playMusic('fight'); KC.Audio.play('unlock'); KC.Audio.play('cheer', 2);
+      setTimeout(function () { KC.Audio.say('Congratulations, Prime Minister ' + ch.name + '!'); }, 600);
+      $('endName').textContent = ch.name.toUpperCase();
+      $('endStats').innerHTML = [['Campaign levels', KC.LEVELS + ' / ' + KC.LEVELS], ['Matches played', d.matches], ['Wins', d.wins], ['Coins earned', d.earned], ['Fighters recruited', d.owned.length + ' / ' + KC.ROSTER.length], ['Chests opened', d.chests || 0]]
+        .map(function (r) { return '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('');
+      var me = this; this.btn = 0; this.t = 0;
+      $('endBtns').querySelectorAll('button').forEach(function (b, i) {
+        b.onmouseenter = function () { me.btn = i; me.hl(); };
+        b.onclick = function () { me.btn = i; me.act(); };
+      });
+      this.hl();
+    },
+    hl: function () { var me = this; $('endBtns').querySelectorAll('button').forEach(function (b, i) { b.classList.toggle('sel', i === me.btn); }); },
+    act: function () { KC.Audio.play('select'); stage.setMode('day'); go(this.btn === 0 ? 'levels' : 'menu'); },
+    update: function (dt) {
+      this.t += dt;
+      if (Math.random() < dt * 6) fx.papers_((Math.random() - 0.5) * 6, 3 + Math.random() * 2, 4, 0);
+      if (Math.random() < dt * 0.8) stage.cheer(0.6, (Math.random() - 0.5) * 20);
+      if (Input.menu('left') || Input.menu('up')) { this.btn = 0; this.hl(); KC.Audio.play('move'); }
+      if (Input.menu('right') || Input.menu('down')) { this.btn = 1; this.hl(); KC.Audio.play('move'); }
+      if (Input.menu('ok')) this.act();
+    }
+  };
+
   /* ---------- shop (recruit fighters + gold skins) ---------- */
   screens.shop = {
     el: 'collection', cur: 0, gold: false, confirm: null,
@@ -1237,6 +1268,7 @@
     else if (where === 'ladder' && G.campaign) go('ladder');
     else if (where === 'shop') go('shop');
     else if (where === 'chest') go('chest');
+    else if (where === 'ending') go('ending');
     else go('menu');
   }
 
@@ -1273,6 +1305,8 @@
     if (humanWon) { var wid = m.f[w].ch.id; d.charWins[wid] = (d.charWins[wid] || 0) + 1; }
     if (finalStop && humanWon) d.campaign++;
     if (firstClear) d.tour = cfg.levelNo;
+    var ending = firstClear && cfg.levelNo === KC.LEVELS;
+    if (ending) { d.pm = true; d.pmFighter = m.f[0].ch.id; }
     var chestDrop = null;
     if (cfg.mode === 'tour' && humanWon) {
       d.campWins = (d.campWins || 0) + 1;
@@ -1284,7 +1318,7 @@
     }
     var golds = Save.refreshGold();
     Save.write();
-    showResults(m, cfg, { lines: lines, total: total, golds: golds, humanWon: humanWon, finalStop: finalStop, before: before, chest: chestDrop });
+    showResults(m, cfg, { lines: lines, total: total, golds: golds, humanWon: humanWon, finalStop: finalStop, before: before, chest: chestDrop, ending: ending });
   };
 
   var resCfg = null;
@@ -1328,6 +1362,7 @@
         if (info.finalStop && info.humanWon) { opts.unshift({ label: 'OPEN CHEST', fn: function () { G.campaign = null; endMatchTo('chest'); } }); opts.push({ label: 'SHOP', fn: function () { G.campaign = null; endMatchTo('shop'); } }); }
       } else if (cfg.mode === 'tour') {
         var tp = G.tourPick;
+        if (info.ending) opts.push({ label: '👑 BECOME PRIME MINISTER', fn: function () { endMatchTo('ending'); } });
         if ((Save.data.chestQueue || []).length) opts.push({ label: 'OPEN CHEST (' + Save.data.chestQueue.length + ')', fn: function () { endMatchTo('chest'); } });
         if (info.humanWon && cfg.levelNo < KC.LEVELS) opts.push({ label: 'NEXT LEVEL (' + (cfg.levelNo + 1) + ')', fn: function () { G.startLevel(cfg.levelNo + 1, tp.ch, tp.skin); } });
         if (!info.humanWon) opts.push({ label: 'RETRY LEVEL ' + cfg.levelNo, fn: function () { G.startLevel(cfg.levelNo, tp.ch, tp.skin); } });
@@ -1343,7 +1378,8 @@
       R.opts = opts; R.sel = 0;
       this.renderOpts();
       G.inputLock = 0.6;
-      this.autoChest = info.chest || (info.finalStop && info.humanWon && cfg.mode === 'campaign') ? 2.2 : 0;
+      this.autoEnding = info.ending ? 3 : 0;
+      this.autoChest = info.ending ? 0 : info.chest || (info.finalStop && info.humanWon && cfg.mode === 'campaign') ? 2.2 : 0;
     },
     renderOpts: function () {
       var R = resCfg;
@@ -1352,6 +1388,7 @@
     },
     update: function (dt) {
       var R = resCfg;
+      if (this.autoEnding > 0) { this.autoEnding -= dt; if (this.autoEnding <= 0) { endMatchTo('ending'); return; } }
       if (this.autoChest > 0) { this.autoChest -= dt; if (this.autoChest <= 0 && (Save.data.chestQueue || []).length) { endMatchTo('chest'); return; } }
       if (Input.menu('left') || Input.menu('up')) { R.sel = (R.sel - 1 + R.opts.length) % R.opts.length; KC.Audio.play('move'); this.renderOpts(); }
       if (Input.menu('right') || Input.menu('down')) { R.sel = (R.sel + 1) % R.opts.length; KC.Audio.play('move'); this.renderOpts(); }
