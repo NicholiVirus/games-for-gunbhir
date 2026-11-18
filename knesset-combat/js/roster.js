@@ -90,7 +90,7 @@ KC.ROSTER = [
     stats: { speed: 1, power: 0.9, defense: 0.96, jump: 1 },
     special: { type: 'rush', name: 'Chief of Staff Charge', dmg: 80 },
     special2: { type: 'projectile', name: 'Olive Branch', proj: 'olive' },
-    super: { type: 'beam', name: 'Peace Prize Beam', color: '#ffd76a', mult: 0.9 },
+    super: { type: 'beam', name: 'Peace Prize Beam', color: '#ffd76a', mult: 0.82 },
     quote: 'Discipline wins wars. And fights.', victory: 'salute'
   },
   {
@@ -133,7 +133,7 @@ KC.ROSTER = [
     stats: { speed: 1, power: 1.07, defense: 1.05, jump: 1 },
     special: { type: 'projectile', name: 'Cartoon Bomb', proj: 'bomb', dmg: 92 },
     special2: { type: 'rising', name: 'Comeback Uppercut', color: '#5aa0ff' },
-    super: { type: 'beam', name: 'The Red Line', color: '#ff2b2b' },
+    super: { type: 'beam', name: 'The Red Line', color: '#ff2b2b', mult: 1.08 },
     passive: { id: 'survivor', name: 'Survivor' },
     quote: 'I drew a red line. You crossed it.', victory: 'point'
   },
@@ -188,7 +188,7 @@ KC.ROSTER = [
     look: { height: 1.02, girth: 0.98, skin: '#e7b08a', hair: 'full', hairColor: '#cfcfcb', outfit: 'open', top: '#16171b', pants: '#16171b', shirt: '#1f2026', tie: null, shoes: '#111111' },
     stats: { speed: 1.05, power: 0.97, defense: 1, jump: 1.02, projSpeed: 1.1 },
     special: { type: 'projectile', name: 'Breaking News', proj: 'mic' },
-    super: { type: 'beam', name: 'Prime Time Special', color: '#7fd3ff' },
+    super: { type: 'beam', name: 'Prime Time Special', color: '#7fd3ff', mult: 1.05 },
     quote: "And that's the news tonight.", victory: 'wave'
   },
   {
@@ -297,7 +297,7 @@ KC.ROSTER = [
     look: { height: 1.0, girth: 0.98, skin: '#e2ae88', hair: 'short', hairColor: '#4a4540', outfit: 'suit', top: '#2a3348', pants: '#252d40', shirt: '#f2f2f2', tie: '#3a6ab0', shoes: '#1d1d1d' },
     stats: { speed: 1.05, power: 0.95, defense: 1, jump: 1.02 },
     special: { type: 'projectile', name: 'New Hope Banner', proj: 'banner' },
-    super: { type: 'beam', name: 'Breakaway Beam', color: '#8fd0ff' },
+    super: { type: 'beam', name: 'Breakaway Beam', color: '#8fd0ff', mult: 1.05 },
     quote: 'I always have a new plan.', victory: 'fist'
   },
   {
@@ -328,7 +328,7 @@ KC.ROSTER = [
     look: { height: 1.08, girth: 0.98, skin: '#e6b28c', hair: 'short', hairColor: '#b9b5ae', mustache: true, mustacheColor: '#b9b5ae', outfit: 'open', top: '#2d4a7a', pants: '#26406a', shirt: '#dfe9f7', tie: null, shoes: '#111111' },
     stats: { speed: 1.12, power: 1, defense: 1, jump: 1.1 },
     special: { type: 'rush', name: 'Fighter Pilot Dive' },
-    super: { type: 'beam', name: 'Afterburner', color: '#ff9a3d' },
+    super: { type: 'beam', name: 'Afterburner', color: '#ff9a3d', mult: 0.9 },
     quote: 'Wheels up. You are grounded.', victory: 'salute'
   },
   {
@@ -405,7 +405,7 @@ KC.ROSTER = [
     look: { height: 1.02, girth: 0.98, skin: '#e9b896', hair: 'fringe', hairColor: '#a8a49e', glasses: 'thick', glassesColor: '#222222', outfit: 'suit', top: '#3a3f4b', pants: '#343944', shirt: '#f2f2f2', tie: '#4b4b4b', shoes: '#1d1d1d' },
     stats: { speed: 1.02, power: 1.03, defense: 1.02, jump: 1.02 },
     special: { type: 'rush', name: 'Lavi Sortie' },
-    super: { type: 'beam', name: 'Jet Stream', color: '#9fd8ff' },
+    super: { type: 'beam', name: 'Jet Stream', color: '#9fd8ff', mult: 0.95 },
     quote: 'Calculated. Engineered. Done.', victory: 'salute'
   },
   {
@@ -460,7 +460,7 @@ KC.ROSTER = [
     look: { height: 1.02, girth: 1.2, skin: '#ebbd9a', hair: 'combed', hairColor: '#f0f0ec', glasses: 'thick', glassesColor: '#1d1d1d', outfit: 'suit', top: '#2a2d36', pants: '#24272f', shirt: '#f2f2f2', tie: '#8a2c2c', shoes: '#1d1d1d' },
     stats: { speed: 0.95, power: 0.98, defense: 1.05, jump: 0.95 },
     special: { type: 'projectile', name: 'Op-Ed', proj: 'folder' },
-    super: { type: 'beam', name: 'Hot Take', color: '#ff7a3d' },
+    super: { type: 'beam', name: 'Hot Take', color: '#ff7a3d', mult: 1.1 },
     quote: 'Like father, like son — but louder.', victory: 'point'
   },
   {

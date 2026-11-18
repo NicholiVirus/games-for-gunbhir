@@ -406,7 +406,7 @@
       case 'spin': var hs = P.headstand(t); hs.bodyRy = s.t * 0.55; return hs;
       case 'flurry': return s.phase === 0 ? P.rush(t) : P.flurry(t);
       case 'wave': return s.t < 10 ? P.throwWind() : P.throw();
-      case 'beam': return s.t < 8 ? P.throwWind() : P.throw();
+      case 'beam': return P.power(t);   // calls the beam down from the sky
       case 'rain': return P.power(t);
       case 'drop': case 'vehicle': return P.victory('point', t);
       case 'reflect': return P.counterStance(t);
@@ -703,20 +703,27 @@
         break;
       }
       case 'beam': {
+        // Sky beam: a targeting reticle chases the opponent, locks on, then a beam crashes down from the sky
         f.vx = 0;
-        if (s.t === 8) {
-          var len = 18;
-          var bg = new T.Group();
-          var beam = new T.Mesh(new T.CylinderGeometry(0.3, 0.3, len, 12, 1, true), M.glow(col, 0.75)); beam.rotation.z = Math.PI / 2; beam.position.x = len / 2; bg.add(beam);
-          var core2 = new T.Mesh(new T.CylinderGeometry(0.12, 0.12, len, 8, 1, true), M.glow('#ffffff', 0.9)); core2.rotation.z = Math.PI / 2; core2.position.x = len / 2; bg.add(core2);
-          var orb = new T.Mesh(new T.SphereGeometry(0.42, 12, 10), M.glow(col, 0.8)); bg.add(orb);
-          bg.position.set(f.x + f.facing * 0.55, 1.15 * f.h, 0.1);
-          if (f.facing < 0) bg.rotation.y = Math.PI;
-          this.addHazard({ kind: 'beam', owner: f, x: f.x, y: 1.15 * f.h, y0: -0.45, y1: 0.4, hw: len, vx: 0, mesh: bg, hits: 10, interval: 5,
-            hit: this.superHit(f, { dmg: 26, chip: 4 }), lastHit: this.superHit(f, { dmg: 40, knockdown: true, chip: 6, hitstop: 12, sfx: 'hitS' }), life: 52, beam: true });
-          KC.Audio.play('beam'); this.shake(0.12);
+        if (s.t === 1) {
+          var SKY = 14, bg = new T.Group();
+          var ret = new T.Group();
+          var rRing = new T.Mesh(new T.TorusGeometry(0.75, 0.06, 6, 28), M.glow(col, 0.9)); rRing.rotation.x = Math.PI / 2; ret.add(rRing);
+          var rDisc = new T.Mesh(new T.CircleGeometry(0.6, 24), M.glow(col, 0.22)); rDisc.rotation.x = -Math.PI / 2; ret.add(rDisc);
+          for (var ci = 0; ci < 4; ci++) { var tick = new T.Mesh(new T.BoxGeometry(0.34, 0.02, 0.07), M.glow('#ffffff', 0.9)); var ang = ci * Math.PI / 2; tick.position.set(Math.cos(ang) * 0.95, 0, Math.sin(ang) * 0.95); tick.rotation.y = -ang; ret.add(tick); }
+          var guide = new T.Mesh(new T.CylinderGeometry(0.035, 0.035, SKY, 6, 1, true), M.glow(col, 0.28)); guide.position.y = SKY / 2; ret.add(guide);
+          ret.position.y = 0.05; bg.add(ret);
+          var bm = new T.Group();
+          var outer = new T.Mesh(new T.CylinderGeometry(0.62, 0.62, SKY, 16, 1, true), M.glow(col, 0.6)); outer.geometry.translate(0, -SKY / 2, 0); bm.add(outer);
+          var inner = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, SKY, 10, 1, true), M.glow('#ffffff', 0.92)); inner.geometry.translate(0, -SKY / 2, 0); bm.add(inner);
+          var splash = new T.Mesh(new T.CircleGeometry(1.15, 28), M.glow(col, 0.5)); splash.rotation.x = -Math.PI / 2; splash.position.y = -SKY + 0.06; bm.add(splash);
+          bm.position.y = SKY; bm.scale.y = 0.001; bm.visible = false; bg.add(bm);
+          bg.position.set(o.x, 0, 0);
+          this.addHazard({ kind: 'beam', sky: true, owner: f, x: o.x, y: 0, y0: 0, y1: SKY, hw: 0.62, vx: 0, mesh: bg, ret: ret, bm: bm, hits: 10, interval: 5, armed: false,
+            hit: this.superHit(f, { dmg: 29, chip: 4 }), lastHit: this.superHit(f, { dmg: 45, knockdown: true, chip: 6, hitstop: 12, sfx: 'hitS' }), life: 102, beam: true });   // +11% vs. the old sideways beam: it can be dodged now
+          KC.Audio.play('beam');
         }
-        if (s.t >= 64) finish(14);
+        if (s.t >= 52) finish(14);
         break;
       }
       case 'drop': {
@@ -816,6 +823,29 @@
           if (h.y <= 0.15) { h.alive = false; self.fx.hit(h.x, 0.2, '#ffffff', 8); KC.Audio.play('block'); }
           break;
         case 'beam':
+          if (h.sky) {
+            // aim (tracks the target for 30 frames, locks for 12), then the beam drops and slowly drifts after them
+            var LOCK = 30, DROP = 42;
+            if (h.t < LOCK) h.x += Math.max(-0.075, Math.min(0.075, o.x - h.x));
+            else if (h.t > DROP + 6) h.x += Math.max(-0.028, Math.min(0.028, o.x - h.x));
+            h.x = Math.max(-STAGE_BOUND, Math.min(STAGE_BOUND, h.x));
+            h.mesh.position.x = h.x;
+            if (h.t < DROP) {
+              h.ret.rotation.y += h.t < LOCK ? 0.1 : 0.3;
+              h.ret.children[0].scale.setScalar(h.t < LOCK ? 1 + 0.12 * Math.sin(h.t * 0.6) : 0.8);
+              h.ret.visible = h.t < LOCK || h.t % 4 < 2;   // flashes once locked: last chance to dash away
+              if (h.t === LOCK) KC.Audio.play('tick');
+            } else {
+              if (h.t === DROP) { h.ret.visible = false; h.bm.visible = true; KC.Audio.play('boom'); }
+              var k = Math.min(1, (h.t - DROP + 1) / 6);
+              h.bm.scale.set(1 + Math.sin(h.t * 0.9) * 0.12, k, 1 + Math.sin(h.t * 0.9) * 0.12);
+              if (k >= 1 && !h.armed) { h.armed = true; self.shake(0.3); self.fx.ring(h.x, 0.1, '#ffffff', 2.2, false); self.fx.hit(h.x, 0.3, '#ffffff', 18); }
+              if (h.armed && h.t % 3 === 0) self.fx.hit(h.x + (Math.random() - 0.5) * 0.8, 0.15, h.owner.ch.super.color, 3);
+              if (h.t > h.life - 14) { h.armed = false; h.bm.scale.x = h.bm.scale.z = Math.max(0.05, (h.life - h.t) / 14); }
+            }
+            if (h.t > h.life) h.alive = false;
+            break;
+          }
           if (h.mesh) { var sc = 1 + Math.sin(h.t * 0.9) * 0.15; h.mesh.children[0].scale.set(sc, 1, sc); h.mesh.position.x = h.owner.x + h.owner.facing * 0.55; }
           h.x = h.owner.x;
           if (h.t > h.life) h.alive = false;
@@ -837,11 +867,11 @@
           break;
       }
       // collision with opponent
-      if (h.alive && h.cd <= 0 && o.invuln <= 0 && (h.kind !== 'drop' || h.armed)) {
+      if (h.alive && h.cd <= 0 && o.invuln <= 0 && (h.kind !== 'drop' || h.armed) && (!h.sky || h.armed)) {
         var hb = o.hurtbox();
         if (hb) {
           var x0, x1;
-          if (h.kind === 'beam') { if (h.owner.facing > 0) { x0 = h.owner.x; x1 = h.owner.x + h.hw; } else { x0 = h.owner.x - h.hw; x1 = h.owner.x; } }
+          if (h.kind === 'beam' && !h.sky) { if (h.owner.facing > 0) { x0 = h.owner.x; x1 = h.owner.x + h.hw; } else { x0 = h.owner.x - h.hw; x1 = h.owner.x; } }
           else { x0 = h.x - h.hw; x1 = h.x + h.hw; }
           var y0 = h.y + h.y0, y1 = h.y + h.y1;
           if (x0 < hb.x1 && x1 > hb.x0 && y0 < hb.y1 && y1 > hb.y0) {

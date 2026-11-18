@@ -38,14 +38,22 @@
     if ((f.state === 'hitstun' || f.state === 'airhit') && (f.combo || 0) >= 2) this.escapeArm = true;
 
     /* ---- defence ---- */
-    var threat = false, lowThreat = false, projThreat = false;
+    var threat = false, lowThreat = false, projThreat = false, skyDodge = null;
     if ((o.state === 'attack' || o.state === 'rush' || o.state === 'super') && dist < 2.4) { threat = true; lowThreat = o.move && o.move.level === 'low'; if (o.move && o.move.air) lowThreat = false; }
     for (var i = 0; i < m.hazards.length; i++) {
       var h = m.hazards[i];
       if (h.owner !== o) continue;
       var hd = (f.x - h.x) * (h.vx >= 0 ? 1 : -1);
+      if (h.sky && !h.armed && Math.abs(f.x - h.x) < 1.6) { skyDodge = h.x; continue; }   // sky beam reticle on us: get out from under it
       if (h.kind === 'beam' || h.kind === 'drop' || h.kind === 'fall') { threat = true; continue; }
       if (hd > -0.5 && hd < 3.6) { threat = true; projThreat = h.kind === 'proj' || h.kind === 'wave'; }
+    }
+    if (skyDodge != null && f.actionable() && R() < 0.25 + 0.7 * this.skill) {
+      var run = f.x >= skyDodge ? 'r' : 'l';
+      if (Math.abs(f.x) > KC.STAGE_BOUND - 1.2) run = f.x > 0 ? 'l' : 'r';   // cornered: run through to the other side
+      inp[run] = 1;
+      if (R() < 0.08 * this.skill) return this.tap(inp, 'e');
+      return inp;
     }
     if (threat && this.threatT < 0) this.threatT = L.react + ((R() * 6) | 0);
     if (!threat) this.threatT = -1;

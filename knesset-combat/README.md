@@ -12,6 +12,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Sky beams:** every beam Super now comes down from the sky. A reticle locks onto your opponent, flashes, then the beam crashes down. Dash out from under it to dodge. Used by Saar, Arens, Tommy Lapid, Yair Lapid, Ezer Weizman, Chaim Herzog, Rabin and Netanyahu.
+
 - **Balance pass on all 51 fighters:** tuned and retested over 6 rounds of simulated CPU-vs-CPU matches. Fighters of the same rarity are now within a few points of each other, and Netanyahu is finally the strongest fighter. Full patch notes are in the Balance pass section below.
 
 - **51 fighters**, sorted by rarity on the select screen and in the Shop.
@@ -22,12 +24,12 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **Tutorial:** an 11-step, hands-on lesson: move, jump, crouch, dash, punch, kick, combo, block, Special, Down-Special and Super. It's offered on first launch, and finishing it once pays 300 coins plus a Silver chest.
 - **🏛️ Chamber skins:** redecorate the plenum. Skins apply in every mode, and you can preview them behind the menu before buying.
 
-  | Skin | Price (coins) | What it adds |
+ | Skin | Price (coins) | What it adds |
   |---|---|---|
-  | Hanukkah | 1,200 | Lit hanukkiot, blue-and-white string lights, spinning dreidels |
-  | Independence Day | 1,000 | Flag garlands and fireworks |
-  | Purim | 900 | Masks, balloons and confetti |
-  | Sukkot | 900 | A palm-frond roof and hanging fruit |
+ | Hanukkah | 1,200 | Lit hanukkiot, blue-and-white string lights, spinning dreidels |
+ | Independence Day | 1,000 | Flag garlands and fireworks |
+ | Purim | 900 | Masks, balloons and confetti |
+ | Sukkot | 900 | A palm-frond roof and hanging fruit |
 
 - **🗳️ Daily free chest:** one Silver chest per day.
 - **⚖ Compare fighters:** in the Shop, press C (or the ⚖ button) on two fighters. You'll see rarity, rank, health, power, defense, speed, jump, ammo and every ability side by side, with the better value in green.
@@ -166,6 +168,7 @@ Every fighter was retuned using a CPU-vs-CPU simulator:
   - Elite: +60 HP → **+40 HP**.
 - **Rush specials are punishable when blocked.** A blocked charge used to recover almost as fast as the blocker (about 2 frames apart). Now the charger is stuck about 16 frames longer, enough for a punish.
 - **New tuning knobs per fighter:** Special and Down-Special damage, Super damage and bonus HP.
+- **Beam Supers come from the sky** (added after the pass): a targeting reticle chases the opponent for half a second, locks on and flashes, then the beam crashes down on that spot and slowly drifts after them. Because it can now be dodged, base beam damage went up 11% and each beam fighter's Super was retuned. The simulator puts all 8 within about 2.5 points of their earlier win rates.
 
 ### Results (average win rate across all matchups)
 
@@ -206,18 +209,18 @@ The "Power" and "Defense" values are base stats; rarity perks stack on top. Win 
 | Gadi Eisenkot | Rare | Speed 1.08 → 1.10 · Special (Chief's Advance) 95 → 92 dmg | 56% → 47% |
 | Chaim Weizmann | Rare | Power 1.02 → 0.94 | 55% → 45% |
 | Abba Eban | Rare | +20 HP · Special (Silver Tongue) 82 → 86 dmg | 45% → 48% |
-| Gideon Sa'ar | Rare | Power 1.00 → 0.95 | 51% → 46% |
+| Gideon Sa'ar | Rare | Power 1.00 → 0.95 · Super (Breakaway Beam) +5% dmg | 51% → 46% |
 | Mansour Abbas | Rare | Defense 1.06 → 0.94 | 56% → 45% |
-| Moshe Arens | Rare | Power 1.02 → 1.03 | 52% → 44% |
-| Tommy Lapid | Rare | Power 1.08 → 0.98 | 57% → 46% |
+| Moshe Arens | Rare | Power 1.02 → 1.03 · Super (Jet Stream) -5% dmg | 52% → 44% |
+| Tommy Lapid | Rare | Power 1.08 → 0.98 · Super (Hot Take) +10% dmg | 57% → 46% |
 | David Levy | Rare | Power 1.04 → 0.96 | 55% → 47% |
 | Dalia Itzik | Rare | Power 1.02 → 0.99 · Defense 1.02 → 0.98 · Super (Session Order) -10% dmg | 57% → 47% |
 | Levi Eshkol | Super Rare | Power 1.00 → 0.91 | 56% → 53% |
 | Yitzhak Shamir | Super Rare | Power 1.00 → 0.98 · Defense 1.18 → 1.06 · Special (Stalwart Shove) 95 → 86 dmg | 67% → 54% |
 | Ehud Olmert | Super Rare | Power 1.00 → 0.97 · Special (Municipal Memo) 82 → 84 dmg | 50% → 52% |
-| Yair Lapid | Super Rare | Power 0.98 → 0.97 · Projectile speed 1.00 → 1.10 | 47% → 51% |
+| Yair Lapid | Super Rare | Power 0.98 → 0.97 · Projectile speed 1.00 → 1.10 · Super (Prime Time Special) +5% dmg | 47% → 51% |
 | Avigdor Liberman | Super Rare | Power 1.12 → 1.06 · Defense 1.12 → 1.08 · Super (Coalition Crusher) -8% dmg | 57% → 52% |
-| Ezer Weizman | Super Rare | Defense 0.96 → 1.00 | 51% → 51% |
+| Ezer Weizman | Super Rare | Defense 0.96 → 1.00 · Super (Afterburner) -10% dmg | 51% → 51% |
 | Reuven Rivlin | Super Rare | Power 1.00 → 0.95 · Defense 1.06 → 1.00 | 54% → 53% |
 | Chaim Herzog | Super Rare | Power 1.04 → 0.96 | 55% → 49% |
 | Pnina Tamano-Shata | Super Rare | Power 1.00 → 0.90 · Defense 1.00 → 0.96 | 59% → 48% |
@@ -226,7 +229,7 @@ The "Power" and "Defense" values are base stats; rarity perks stack on top. Win 
 | Naftali Bennett | Epic | Power 1.00 → 0.88 · Super (Unicorn Exit) -20% dmg | 68% → 56% |
 | Yuli Edelstein | Epic | +15 HP | 51% → 54% |
 | Amir Peretz | Epic | Power 1.04 → 1.06 | 50% → 53% |
-| Yitzhak Rabin | Elite | Power 1.05 → 0.90 · Defense 1.00 → 0.96 · Speed 1.05 → 1.00 · Special (Chief of Staff Charge) 95 → 80 dmg · Super (Peace Prize Beam) -10% dmg | 78% → 58% |
+| Yitzhak Rabin | Elite | Power 1.05 → 0.90 · Defense 1.00 → 0.96 · Speed 1.05 → 1.00 · Special (Chief of Staff Charge) 95 → 80 dmg · Super (Peace Prize Beam) -18% dmg | 78% → 58% |
 | Shimon Peres | Elite | Power 0.95 → 0.98 · Defense 1.00 → 1.03 | 52% → 59% |
 | Natan Sharansky | Elite | Power 1.04 → 1.01 · Defense 1.08 → 0.97 | 67% → 58% |
 | Orna Barbivai | Elite | Power 1.06 → 0.93 | 70% → 60% |
@@ -236,7 +239,7 @@ The "Power" and "Defense" values are base stats; rarity perks stack on top. Win 
 | Yigael Yadin | Mythic | Power 1.06 → 0.95 | 70% → 67% |
 | Donald Trump | Mythic | Power 1.10 → 1.02 | 65% → 62% |
 | The Speaker | Mythic | Power 1.15 → 1.01 | 72% → 66% |
-| Benjamin Netanyahu | Legendary | Power 1.05 → 1.07 · Special (Cartoon Bomb) 82 → 92 dmg | 59% → 70% |
+| Benjamin Netanyahu | Legendary | Power 1.05 → 1.07 · Special (Cartoon Bomb) 82 → 92 dmg · Super (The Red Line) +8% dmg | 59% → 70% |
 
 ## Coins and unlocking
 
