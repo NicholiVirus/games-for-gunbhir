@@ -63,6 +63,7 @@ KC.ROSTER = [
     bio: "Served as interim Prime Minister in 1969 after Levi Eshkol's death. A former Palmach commander.",
     look: { height: 1.0, girth: 1.02, skin: '#e1ab85', hair: 'parted', hairColor: '#3b2d20', outfit: 'shirt', top: '#8c8a5c', pants: '#4e4a36', shirt: '#8c8a5c', tie: null, shoes: '#2a2018' },
     stats: { speed: 1.1, power: 1.0, defense: 1.0, jump: 1.05 },
+    dash: { dist: 0.75, cd: 26, cancel: 9 },   // toned down: fast walker + rush special made his dash too strong
     special: { type: 'rush', name: 'Palmach Dash' },
     quote: 'Interim? I am here to stay.', victory: 'salute'
   },

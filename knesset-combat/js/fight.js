@@ -186,7 +186,7 @@
   FP.startDash = function (m, dir) {
     this.useDash();
     this.dashDir = dir; this.blockPose = false; this.setState('dash');
-    var sp = Math.min(1.15, this.stats.speed);
+    var sp = Math.min(1.15, this.stats.speed) * ((this.ch.dash && this.ch.dash.dist) || 1);
     this.vx = (dir > 0 ? 0.17 : -0.13) * sp * this.facing;
     if (dir < 0) this.invuln = Math.max(this.invuln, KC.BACKDASH_INVULN);
     m.fx.hit(this.x - this.facing * dir * 0.3, 0.1, '#d9cdb4', 6, -this.facing * dir);
@@ -196,7 +196,7 @@
   FP.startAirDash = function (m, dir) {
     this.useDash();
     this.airDashUsed = true; this.airDashT = 10; this.dashDir = dir; this.jumpDir = 0;
-    this.vx = dir * 0.15 * Math.min(1.15, this.stats.speed) * this.facing;
+    this.vx = dir * 0.15 * Math.min(1.15, this.stats.speed) * ((this.ch.dash && this.ch.dash.dist) || 1) * this.facing;
     this.vy = Math.max(this.vy, 0);
     m.fx.ring(this.x, this.y + 1.0 * this.h, '#ffffff', 0.9, true);
     KC.Audio.play('dash');
@@ -259,11 +259,11 @@
         if (this.st > (fwdD ? 7 : 9)) this.vx *= 0.82;
         if (this.st % 3 === 0 && this.st < dlen - 4) m.fx.hit(this.x - this.facing * this.dashDir * 0.3, 0.08, '#d9cdb4', 1, -this.facing * this.dashDir);
         // forward dash: cancel into an attack (dash-punch) or a running jump once it gets going
-        if (fwdD && this.st >= 5) {
+        if (fwdD && this.st >= ((this.ch.dash && this.ch.dash.cancel) || 5)) {
           if (this.tryAttack(m)) break;
           if (inp.u) { var keep = this.vx; this.jump(); if (this.jumpDir >= 0) this.vx = keep * 0.6 + this.vx * 0.4; break; }
         }
-        if (this.st >= dlen) { this.dashCd = KC.DASH_CD; this.setState(inp.d ? 'crouch' : 'idle'); }
+        if (this.st >= dlen) { this.dashCd = (this.ch.dash && this.ch.dash.cd) || KC.DASH_CD; this.setState(inp.d ? 'crouch' : 'idle'); }
         break;
       }
       case 'land': if (this.st >= (this.landLag || 4)) { this.landLag = 0; this.setState('idle'); } this.vx *= 0.6; break;
