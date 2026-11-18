@@ -598,7 +598,7 @@ KC.level = function (n) {
     boost: 1 + (n - 1) * 0.0025,
     reward: 25 + n * 2 + (boss ? 100 : 0),
     chestTier: KC.chestBase(n),
-    skill: Math.min(0.97, 0.30 + (n - 1) / 249 * 0.65 + (boss ? 0.05 : 0))   // CPU gets smarter every level
+    skill: Math.min(0.97, 0.30 + Math.pow((n - 1) / 249, 1.4) * 0.65 + (boss && n > 1 ? 0.04 : 0))   // 30% at level 1, gentle early curve, ~95% at 250
   };
 };
 

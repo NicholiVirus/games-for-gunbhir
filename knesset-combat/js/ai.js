@@ -19,7 +19,7 @@
   var AI = KC.AI = function (fighter, level, skill) {
     this.f = fighter; this.level = level;
     this.skill = skill != null ? skill : (SKILL[level] != null ? SKILL[level] : 0.42);
-    this.skill = Math.min(1, this.skill + 0.06);   // slightly smarter across the board
+    if (skill == null) this.skill = Math.min(1, this.skill + 0.06);   // fixed difficulties are slightly smarter; campaign skill is used as-is
     this.L = blend(this.skill);
     this.plan = null; this.planT = 0;
     this.intent = 'approach'; this.intentT = 0; this.hold = {}; this.threatT = -1; this.defend = 0; this.defendLow = false;

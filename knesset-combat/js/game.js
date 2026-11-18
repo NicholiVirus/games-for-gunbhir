@@ -106,14 +106,14 @@
    * ===================================================================== */
   var keys = {}, just = {};
   var MAP = [
-    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyT', 'Pad0_y'] },
-    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['KeyO', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['Semicolon', 'Numpad5', 'Pad1_y'] }
+    { u: ['KeyW', 'Pad0_up'], d: ['KeyS', 'Pad0_down'], l: ['KeyA', 'Pad0_left'], r: ['KeyD', 'Pad0_right'], p: ['KeyF', 'Pad0_a'], k: ['KeyG', 'Pad0_b'], s: ['KeyR', 'Pad0_x'], x: ['KeyQ', 'KeyT', 'Pad0_y'] },
+    { u: ['KeyI', 'ArrowUp', 'Pad1_up'], d: ['KeyK', 'ArrowDown', 'Pad1_down'], l: ['KeyJ', 'ArrowLeft', 'Pad1_left'], r: ['KeyL', 'ArrowRight', 'Pad1_right'], p: ['KeyU', 'Numpad1', 'Pad1_a'], k: ['Semicolon', 'Numpad2', 'Pad1_b'], s: ['KeyP', 'Numpad4', 'Pad1_x'], x: ['KeyO', 'Numpad5', 'Pad1_y'] }
   ];
   var MENU = {
     up: ['KeyW', 'KeyI', 'ArrowUp', 'Pad0_up', 'Pad1_up'], down: ['KeyS', 'KeyK', 'ArrowDown', 'Pad0_down', 'Pad1_down'],
     left: ['KeyA', 'KeyJ', 'ArrowLeft', 'Pad0_left', 'Pad1_left'], right: ['KeyD', 'KeyL', 'ArrowRight', 'Pad0_right', 'Pad1_right'],
     ok: ['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Numpad1', 'Pad0_a', 'Pad1_a', 'Pad0_start', 'Pad1_start'],
-    back: ['Escape', 'Backspace', 'KeyG', 'KeyO', 'Pad0_b', 'Pad1_b'],
+    back: ['Escape', 'Backspace', 'KeyG', 'Semicolon', 'Pad0_b', 'Pad1_b'],
     pause: ['Escape', 'Backspace', 'Pad0_start', 'Pad1_start']
   };
   var PREVENT = {};
@@ -164,7 +164,7 @@
     menu: function (name) { return Input.hit(MENU[name]); },
     player: function (i, merged) {
       var m = MAP[i], o = {};
-      for (var k in m) o[k] = Input.held(m[k]) || (merged ? Input.held(MAP[1][k]) : 0);
+      for (var k in m) o[k] = Input.held(m[k]) || (Input.hit(m[k]) ? 1 : 0) || (merged ? (Input.held(MAP[1][k]) || (Input.hit(MAP[1][k]) ? 1 : 0)) : 0);   // quick taps between frames still count
       return o;
     },
     pp: function (i, btn) { return Input.hit(MAP[i][btn]); },
@@ -253,7 +253,7 @@
         el.querySelector('.nm').textContent = (G.matchCfg && G.ai && G.ai[i] ? 'CPU · ' : (i === 0 ? 'P1 · ' : 'P2 · ')) + f.ch.short + (f.rank ? ' ★' + f.rank : '');
         trails[i] = 1; lastHp[i] = 1; trailDelay[i] = 0; comboT[i] = 0; calloutT[i] = 0;
         hudEls.combo[i].classList.remove('on'); hudEls.callout[i].classList.remove('on');
-        hudEls.meter[i].querySelector('.mkey').textContent = G.ai && G.ai[i] ? 'CPU' : (i === 0 ? 'T' : ';');
+        hudEls.meter[i].querySelector('.mkey').textContent = G.ai && G.ai[i] ? 'CPU' : (i === 0 ? 'Q' : 'O');
         hudEls.meter[i].classList.toggle('none', !f.hasSuper);
         hudEls.meter[i].querySelector('.mlabel').textContent = f.hasSuper ? 'SUPER' : 'NO SUPER · ' + KC.RARITY[f.ch.rarity].name.toUpperCase();
       }
@@ -424,7 +424,7 @@
   /* ---------- main menu ---------- */
   var MENU_ITEMS = [
     { id: 'tour', label: 'CAMPAIGN · 250 LEVELS', desc: 'Fight through 250 levels of CPU rivals. Every 10th level is a boss. Wins drop tap-to-upgrade chests full of coins and leader shards.' },
-    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R T, Player 2 on IJKL + U O P ;. Both players earn coins for the shared wallet.' },
+    { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R + Q (Super), Player 2 on IJKL + U ; P + O (Super). Both players earn coins for the shared wallet.' },
     { id: 'campaign', label: 'ELECTION ARCADE', desc: 'Quick arcade ladder: beat five random rivals, then face the final boss in one run.' },
     { id: 'store', label: '🎁 CHEST STORE', desc: 'Buy chests with coins. Each spins on the slot machine for coins and shards — the way to unlock fighters. Lucky chests get extra upgrade taps.' },
     { id: 'daily', label: '🗳️ DAILY FREE CHEST', desc: 'A free Silver chest every day. Come back tomorrow for another!' },
@@ -602,7 +602,7 @@
       var st = Save.data.settings;
       $('selStage').innerHTML = 'Chamber: <b>' + { random: 'Random', day: 'Day Session', night: 'Night Session' }[st.stage] + '</b> · First to <b>' + st.rounds + '</b> round' + (st.rounds > 1 ? 's' : '') + ' · Timer <b>' + (st.timer >= 1000 ? '∞' : st.timer) + '</b> <span style="opacity:.6">(change in Settings)</span>';
       $('selHint').innerHTML = two
-        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick/buy · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>IJKL</kbd> move · <kbd>U</kbd> pick/buy · <kbd>O</kbd> undo · <kbd>P</kbd> skin'
+        ? 'P1: <kbd>WASD</kbd> move · <kbd>F</kbd> pick/buy · <kbd>G</kbd> undo · <kbd>R</kbd> skin &nbsp;|&nbsp; P2: <kbd>IJKL</kbd> move · <kbd>U</kbd> pick · <kbd>;</kbd> undo · <kbd>P</kbd> skin'
         : '<kbd>WASD</kbd>/<kbd>IJKL</kbd> move · <kbd>F</kbd>/<kbd>Enter</kbd> pick or buy · <kbd>R</kbd> skin · <kbd>Esc</kbd> back';
       this.render(true);
     },
@@ -647,9 +647,9 @@
       var me = this;
       $('selMode').innerHTML = $('selMode').innerHTML.replace(/<span class="coin"><\/span>\d+$/, G.coin(Save.data.coins));
       var p1c = KC.ROSTER[sel.p[0].cur];
-      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'T', p: 'F', k: 'G' }, confirm: sel.p[0].confirm === sel.p[0].cur });
+      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'Q', p: 'F', k: 'G' }, confirm: sel.p[0].confirm === sel.p[0].cur });
       if (sel.two) {
-        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: ';', p: 'U', k: 'O' }, confirm: sel.p[1].confirm === sel.p[1].cur });
+        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: 'O', p: 'U', k: ';' }, confirm: sel.p[1].confirm === sel.p[1].cur });
       } else {
         if (sel.mode === 'tour') { $('selP2').innerHTML = levelHTML(KC.level(sel.levelNo)); }
         else $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'ELECTION ARCADE' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
@@ -828,7 +828,7 @@
       $('lvGrid').onmouseleave = function () { if (self.anchor && self.cur !== self.anchor) self.moveTo(self.anchor, false); };
       var cw = (Save.data.campWins || 0) % 10, cq = (Save.data.chestQueue || []).length;
       $('lvSub').innerHTML = 'Cleared ' + (Save.data.tour || 0) + ' / ' + KC.LEVELS + ' &nbsp;·&nbsp; Wallet ' + G.coin(Save.data.coins) +
-        '<div class="streak"><span>BIG CHEST STREAK</span><div class="sbar"><div style="width:' + (cw * 10) + '%"></div></div><b>' + cw + '/10 wins</b>' +
+        '<div class="streak"><span>' + ((Save.data.campWins || 0) % 2 ? 'CHEST NEXT WIN' : 'CHEST IN 2 WINS') + ' · BONUS CHEST</span><div class="sbar"><div style="width:' + (cw * 10) + '%"></div></div><b>' + cw + '/10 wins</b>' +
         (cq ? '<button type="button" id="lvChest" class="lv-chest">🎁 OPEN CHESTS (' + cq + ')</button>' : '') + '</div>';
       var lc = $('lvChest'); if (lc) lc.onclick = function () { KC.Audio.play('select'); go('chest'); };
       this.info(true);
@@ -1140,7 +1140,7 @@
     { title: 'BLOCK', text: 'The dummy is attacking! Hold <kbd>A</kbd> (away from it) to block 3 hits. Blocks only last 2.5 s — let go between attacks.', ok: function (t) { return t.blocks >= 3; }, dummy: 'attack' },
     { title: 'SPECIAL', text: 'Press <kbd>R</kbd> for your Special. Rabin charges forward with a shoulder tackle.', ok: function (t) { return t.special >= 1; } },
     { title: 'DOWN-SPECIAL', text: 'Hold <kbd>S</kbd> and press <kbd>R</kbd> for Ability 2 (Epic rarity and up). Rabin throws an Olive Branch — you have 3 shots before a reload.', ok: function (t) { return t.alt >= 1; } },
-    { title: 'SUPER', text: 'Damage fills your Super meter — it is full now! Press <kbd>T</kbd> to fire the Peace Prize Beam.', ok: function (t) { return t.sup >= 1; }, start: function (m) { m.f[0].meter = 100; } }
+    { title: 'SUPER', text: 'Damage fills your Super meter — it is full now! Press <kbd>Q</kbd> (just left of W) to fire the Peace Prize Beam.', ok: function (t) { return t.sup >= 1; }, start: function (m) { m.f[0].meter = 100; } }
   ];
   G.tut = null;
   G.startTutorial = function () {
@@ -1426,7 +1426,7 @@
       if (Input.hit(['Enter', 'NumpadEnter', 'Space', 'KeyF', 'KeyU', 'Pad0_a', 'Pad1_a'])) this.buy();
       if (Input.hit(['KeyB', 'Pad0_y', 'Pad1_y'])) this.buy(Save.owns(KC.ROSTER[this.cur].id) ? 'gold' : 'shard');
       if (Input.hit(['KeyR', 'KeyP', 'Pad0_x', 'Pad1_x'])) { this.gold = !this.gold; KC.Audio.play('select'); this.render(true); }
-      if (Input.hit(['Escape', 'Backspace', 'KeyG', 'KeyO', 'Pad0_b', 'Pad1_b'])) { KC.Audio.play('back'); go('menu'); }
+      if (Input.hit(['Escape', 'Backspace', 'KeyG', 'Semicolon', 'Pad0_b', 'Pad1_b'])) { KC.Audio.play('back'); go('menu'); }
     }
   };
 
@@ -1465,7 +1465,7 @@
   };
   G.skipClick = false;
   window.addEventListener('mousedown', function (e) { if (G.screen === 'fight' && !e.target.closest('button')) G.skipClick = true; });
-  G.skipPressed = function () { if (G.skipClick) { G.skipClick = false; return true; } return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyU', 'KeyO', 'Pad0_a', 'Pad1_a']); };
+  G.skipPressed = function () { if (G.skipClick) { G.skipClick = false; return true; } return Input.hit(['Enter', 'Space', 'KeyF', 'KeyG', 'KeyU', 'Semicolon', 'Pad0_a', 'Pad1_a']); };
   screens.fight = {
     update: function () {
       if (Input.menu('pause') && G.match && G.match.phase !== 'matchEnd') pauseMenu();
@@ -1550,9 +1550,10 @@
     if (cfg.mode === 'tour' && humanWon) {
       d.campWins = (d.campWins || 0) + 1;
       var LV2 = KC.level(cfg.levelNo), streak = d.campWins % 10 === 0;
-      if (LV2.boss || streak || Math.random() < 0.6) {
-        chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 1 : 0)), streak: streak };
-        d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: chestDrop.tier, taps: KC.BASE_TAPS, camp: true });
+      // a chest every 2nd campaign win (boss levels always), and a big bonus chest every 10th win
+      if (streak || LV2.boss || d.campWins % 2 === 0) {
+        chestDrop = { tier: Math.min(KC.CHESTS.length - 1, LV2.chestTier + (streak ? 2 : 0)), streak: streak, taps: streak ? 5 : KC.BASE_TAPS };
+        d.chestQueue = d.chestQueue || []; d.chestQueue.push({ tier: chestDrop.tier, taps: chestDrop.taps, camp: true });
       }
     }
     var golds = Save.refreshGold();
@@ -1578,8 +1579,8 @@
       $('resTitle').textContent = title; $('resSub').textContent = sub;
       var earn = '<h3>COINS EARNED</h3>' + info.lines.map(function (l) { return '<div class="row"><span>' + esc(l[0]) + '</span><b>+' + G.coin(l[1]) + '</b></div>'; }).join('');
       earn += '<div class="total"><span>TOTAL</span><b>+' + G.coin(info.total) + '</b></div><div class="next-unlock" style="margin-top:6px">Wallet: <b class="wallet" style="color:#fff">' + G.coin(info.before) + ' → ' + G.coin(d.coins) + '</b></div>';
-      if (info.chest) { var ct = KC.CHESTS[info.chest.tier]; earn += '<div class="chestdrop" style="border-color:' + ct.color + '"><span class="cd-box" style="background:' + ct.color + '"></span><div><b>' + (info.chest.streak ? '10-WIN STREAK! ' : 'CHEST DROP! ') + '</b>' + ct.name + '<br><span style="opacity:.8">Tap it up to 3 times to try to upgrade it.</span></div></div>'; }
-      else if (cfg.mode === 'tour' && info.humanWon) earn += '<div class="next-unlock">No chest this time (60% drop rate). Boss levels and every 10th win always drop one.</div>';
+      if (info.chest) { var ct = KC.CHESTS[info.chest.tier]; earn += '<div class="chestdrop" style="border-color:' + ct.color + '"><span class="cd-box" style="background:' + ct.color + '"></span><div><b>' + (info.chest.streak ? '10-WIN STREAK! ' : 'CHEST DROP! ') + '</b>' + ct.name + '<br><span style="opacity:.8">' + (info.chest.streak ? '★ Bonus chest: 2 tiers better with 5 upgrade taps!' : 'Tap it up to 3 times to try to upgrade it.') + '</span></div></div>'; }
+      else if (cfg.mode === 'tour' && info.humanWon) earn += '<div class="next-unlock">No chest this time — chests drop every 2nd campaign win, and every 10th win gives a big bonus chest.</div>';
       $('resEarn').innerHTML = earn;
       var u = '';
       info.golds.forEach(function (ch, i) { u += '<div class="unl" style="animation-delay:' + (0.3 + i * 0.15) + 's"><img src="' + por(ch, true) + '" alt=""><div><div class="u1">NEW SKIN</div><div class="u2">' + esc(ch.short) + ' — ' + KC.ALT_SKIN.name + '</div></div></div>'; });

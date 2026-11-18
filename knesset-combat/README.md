@@ -41,15 +41,15 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 |---|---|---|
 | Move / Jump / Crouch | `A` `D` / `W` / `S` | `J` `L` / `I` / `K` (arrows also work) |
 | Punch | `F` | `U` or `Num1` |
-| Kick | `G` | `O` or `Num2` |
+| Kick | `G` | `;` or `Num2` |
 | Ability 1 · Special | `R` | `P` or `Num4` |
 | Ability 2 · Down-Special (Epic and Legendary) | `S` + `R` | `K` + `P` |
-| Super (Rare and up, meter full) | `T` | `;` or `Num5` |
+| Super (Rare and up, meter full) | `Q` (left of W) | `O` (right of I) or `Num5` |
 
 - **Block:** hold away from your opponent. Down + away blocks sweeps; jump-ins must be blocked standing.
 - **Guard break:** you can hold block for only 2.5 seconds at a time. Past that, your guard breaks and you're stunned.
 - **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.
-- **CPU skill:** in the campaign it climbs every level, from 30% at level 1 to 95% at level 250. Boss levels add a little extra. Smarter CPUs react faster, block better, punish missed attacks and let go of block before their guard breaks.
+- **CPU skill:** in the campaign it climbs every level, from 30% at level 1 (with a gentle early curve) to about 95% at level 250. Boss levels add a little extra. Smarter CPUs react faster, block better, punish missed attacks and let go of block before their guard breaks.
 - **Gamepads:** pad 1 = P1, pad 2 = P2. Stick or D-pad to move, A punch, B kick, X special (hold down for Ability 2), Y super.
 - `Esc` or the ❚❚ button pauses, and `M` toggles music.
 - **Mouse:** everything is clickable.
@@ -62,7 +62,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Campaign · 250 levels:** fixed CPU rivals that get tougher.
   - Levels 1–30 are Easy, 31–100 Normal, 101–180 Hard and 181–250 Boss.
-  - Opponent rarity climbs every 50 levels: Common (1–50), Rare (51–100), Super Rare (101–150), Epic (151–200) and Mythic (201–250).
+  - Opponent rarity climbs every 50 levels: Common (1–50), Rare (51–100), Super Rare (101–150), Epic (151–200) and Elite (201–250).
   - Every 10th level is a boss one rarity higher, and every 50th level is two rarities higher.
   - **Level 250 is the Legendary final boss. Beat it to win the game and become Prime Minister.**
   - Opponents also gain strength and upgrade ranks as you climb.
@@ -84,7 +84,7 @@ Every chest starts with 3 upgrade taps. Each tap has a **45%** chance to upgrade
 
 ## Chests and shards
 
-- **Drops:** each campaign win has a 60% chance to drop a ballot-box chest. Boss levels and every 10th win (the streak bar) always drop one, and the 10th win gives a chest 1 tier better.
+- **Drops:** every 2nd campaign win drops a ballot-box chest, and boss levels always drop one. Every 10th win gives a **bonus chest** that's 2 tiers better with 5 upgrade taps.
 - **Tiers:** Wooden → Silver → Golden → Epic → Mythic → Legendary. The base tier rises every 80 levels, up to Epic. Mythic and Legendary boxes only come from lucky taps.
 - **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
