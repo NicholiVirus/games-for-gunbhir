@@ -1240,7 +1240,7 @@
   /* ---------- compare two fighters (Shop) ---------- */
   KC.effStats = function (ch, rank) {
     var r = KC.RARITY[ch.rarity], U = KC.UPGRADE, st = ch.stats, proj = ch.special.type === 'projectile' || (KC.hasAlt(ch) && ch.special2.type === 'projectile');
-    return { rarity: r, rank: rank, abilities: KC.abilities(ch).length, hp: 1000 + rank * U.health + (r.hp || 0),
+    return { rarity: r, rank: rank, abilities: KC.abilities(ch).length, hp: 1000 + rank * U.health + (r.hp || 0) + (st.hp || 0),
       power: st.power * r.power * (1 + rank * U.power), defense: (st.defense || 1) * (1 + rank * U.defense), speed: st.speed, jump: st.jump,
       ammo: proj ? Math.min(KC.PROJ_MAX || 6, 3 + rank) : 0 };
   };

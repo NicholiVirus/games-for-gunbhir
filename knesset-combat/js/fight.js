@@ -13,6 +13,7 @@
   KC.BACKDASH_FRAMES = 18;   // backdash length
   KC.BACKDASH_INVULN = 7;    // backdash is invincible for its first 7 frames
   KC.DASH_CD = 12;           // short cooldown so dashes can't be chained endlessly
+  KC.RUSH_BLOCK_RECOVERY = 30;   // a blocked rush special leaves the charger open (was 18: nearly safe on block)
 
   /* ---------- frame data (60 fps). hb = [x0, x1, y0, y1] relative to fighter, scaled by height ---------- */
   var MOVES = KC.MOVES = {
@@ -50,7 +51,7 @@
     var U = KC.UPGRADE, bst = boost || 1;
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
-    this.maxHealth = 1000 + this.rank * U.health + (this.rar.hp || 0);   // Elite rarity: +60 HP
+    this.maxHealth = 1000 + this.rank * U.health + (this.rar.hp || 0) + (ch.stats.hp || 0);   // rarity HP perk + per-fighter balance tuning
     this.projMax = Math.min(KC.PROJ_MAX, 3 + this.rank);
     this.comboMaster = this.rank >= KC.UPGRADE.max;   // Rank 5: Combo Mastery   // 3 on screen by default, +1 per rank, max 6
     this.reset(0, 1);
@@ -148,7 +149,7 @@
   FP.startSpecial = function (m, sp) {
     sp = sp || this.ch.special;
     this.curSpec = sp; this.moveHit = false;
-    if (sp.type === 'rush') { this.setState('rush'); this.rushStop = 0; this.armor = sp.armor ? 1 : 0; KC.Audio.play('rush'); }
+    if (sp.type === 'rush') { this.setState('rush'); this.rushStop = 0; this.rushBlocked = false; this.armor = sp.armor ? 1 : 0; KC.Audio.play('rush'); }
     else if (sp.type === 'rising') { this.setState('rising'); this.vx = 0; this.invuln = Math.max(this.invuln, 10); KC.Audio.play('whiff'); }
     else if (sp.type === 'counter') { this.setState('counter'); this.vx = 0; KC.Audio.play('select'); }
     else this.setState('special');
@@ -272,7 +273,7 @@
           this.vy = 0.2 * Math.min(1.1, this.stats.jump); this.vx = 0.035 * this.facing; this.y = 0.001;
           m.fx.ring(this.x, 0.1, (this.curSpec && this.curSpec.color) || '#ffffff', 0.8, false); KC.Audio.play('rush');
         }
-        if (this.st >= 4 && this.st <= 18) m.boxCheck(this, [-0.1, 0.85, 0.5, 2.1], { dmg: 92, knockdown: true, launch: true, chip: 8, bstun: 14, push: 0.06, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 });
+        if (this.st >= 4 && this.st <= 18) m.boxCheck(this, [-0.1, 0.85, 0.5, 2.1], { dmg: (this.curSpec && this.curSpec.dmg) || 92, knockdown: true, launch: true, chip: 8, bstun: 14, push: 0.06, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 });
         if (this.st > 6 && this.st % 3 === 0 && this.y > 0.2) m.fx.hit(this.x + this.facing * 0.3, this.y + 1.9 * this.h, (this.curSpec && this.curSpec.color) || '#ffffff', 2, 0);
         if (this.st > 5 && this.grounded()) { this.setState('land'); this.landLag = 14; }
         break;
@@ -309,13 +310,13 @@
         if (this.st < 9) this.vx = 0;
         else if (this.st < 30 && !this.moveHit) {
           this.vx = spd * this.facing;
-          m.boxCheck(this, [0.0, 0.85, 0.4, 1.7], { dmg: 95, knockdown: true, chip: 10, bstun: 16, push: 0.12, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 });
+          if (m.boxCheck(this, [0.0, 0.85, 0.4, 1.7], { dmg: (this.curSpec && this.curSpec.dmg) || 95, knockdown: true, chip: 10, bstun: 16, push: 0.12, hitstop: 9, level: 'mid', sfx: 'hitH', meter: 12 }) === 'block') this.rushBlocked = true;
           if (this.st % 3 === 0) m.fx.hit(this.x - this.facing * 0.3, 0.1, '#d9cdb4', 2, -this.facing);
         } else if (this.comboMaster && this.moveHit && this.fresh('x') && this.meter >= 100 && this.hasSuper) { this.consume('x'); this.startSuper(m); break;
         } else {
           this.vx *= 0.7; this.armor = 0;
           if (!this.rushStop) this.rushStop = this.st;
-          if (this.st - this.rushStop >= 18) { this.rushStop = 0; this.setState('idle'); }
+          if (this.st - this.rushStop >= (this.rushBlocked ? KC.RUSH_BLOCK_RECOVERY : 18)) { this.rushStop = 0; this.setState('idle'); }   // a blocked charge is punishable
         }
         break;
       }
@@ -517,7 +518,7 @@
       KC.Audio.play('gavel'); this.shake(0.15);
       this.callout(def, 'COUNTER!', true);
       this.addMeter(def, 15);
-      if (melee && Math.abs(att.x - def.x) < 2.8) this.resolveHit(def, att, { dmg: 110, knockdown: true, hitstop: 12, sfx: 'hitS', meter: 8, level: 'mid' }, def.x, true);
+      if (melee && Math.abs(att.x - def.x) < 2.8) this.resolveHit(def, att, { dmg: (def.curSpec && def.curSpec.dmg) || 110, knockdown: true, hitstop: 12, sfx: 'hitS', meter: 8, level: 'mid' }, def.x, true);
       return 'countered';
     }
     // armor (rush specials)
@@ -615,7 +616,7 @@
     mesh.position.set(f.x + f.facing * 0.7, y, 0.05);
     if (f.facing < 0) mesh.rotation.y += Math.PI;
     this.addHazard({ kind: 'proj', owner: f, x: f.x + f.facing * 0.7, y: y, y0: -0.25, y1: 0.25, hw: 0.22, vx: 0.13 * f.stats.projSpeed * f.facing,
-      mesh: mesh, hit: { dmg: 82, stun: 18, bstun: 14, chip: 12, push: 0.09, hitstop: 7, level: 'mid', sfx: 'hitH', meter: 8 }, life: 160 });
+      mesh: mesh, hit: { dmg: sp.dmg || 82, stun: 18, bstun: 14, chip: 12, push: 0.09, hitstop: 7, level: 'mid', sfx: 'hitH', meter: 8 }, life: 160 });
     KC.Audio.play('proj');
   };
   MP.startSuperFreeze = function (f) {
@@ -627,8 +628,10 @@
     this.stage.cheer(0.5, f.x);
   };
   MP.superHit = function (f, extra) {
-    var base = { dmg: 30, stun: 16, bstun: 8, chip: 5, push: 0.02, hitstop: 3, level: 'mid', sfx: 'hitL', meter: 0, superHit: true };
-    return Object.assign(base, extra || {});
+    var base = Object.assign({ dmg: 30, stun: 16, bstun: 8, chip: 5, push: 0.02, hitstop: 3, level: 'mid', sfx: 'hitL', meter: 0, superHit: true }, extra || {});
+    var mult = (f.ch.super && f.ch.super.mult) || 1;   // per-fighter super tuning
+    if (mult !== 1) { base.dmg = Math.round(base.dmg * mult); base.chip = Math.round(base.chip * mult); }
+    return base;
   };
   MP.superStep = function (f) {
     var s = f.sup, o = f.opp, self = this;
