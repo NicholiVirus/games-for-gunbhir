@@ -69,8 +69,8 @@
 
     /* ---- combos: hit-confirm into a planned route ---- */
     if (f.state === 'attack' && f.moveHit && f.move && !f.move.air) {
-      if (!this.routeFor || this.routeFor !== f.move) {
-        this.routeFor = f.move;
+      if (this.routeFor !== f.atkId) {
+        this.routeFor = f.atkId;
         // decide once per connecting hit: continue the string, cash out into special/super, or stop
         var go = R() < L.combo;
         var id = f.move.id, nxt = null;

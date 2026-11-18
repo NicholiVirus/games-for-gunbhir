@@ -10,6 +10,31 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 - **GitHub Pages:** enable Pages for the repository and open `/knesset-combat/`.
 - **Attract mode:** open `index.html#demo` to watch two random CPUs fight on Hard.
 
+## New in this update
+
+- **50 fighters**, sorted by rarity on the select screen and in the Shop.
+  - **New fighters:** Yitzhak Ben-Zvi, Zalman Shazar, Benny Begin, Yossi Sarid, Shelly Yachimovich, Tommy Lapid, David Levy, Dalia Itzik, Chaim Herzog and Pnina Tamano-Shata, plus the Elite fighters Natan Sharansky and Orna Barbivai.
+- **Elite rarity (orange):** sits between Epic and Mythic. It gets 3 abilities and +60 HP. Rabin and Peres moved up to Elite.
+- **Shards:** Commons need just 3. Single shards in the Shop cost 50% more.
+- **✦ Wild Shards:** every chest has a 1% chance to drop one. A Wild Shard unlocks any locked fighter of its rarity (use it in the Shop).
+- **Tutorial:** a 10-step, hands-on lesson: move, jump, crouch, punch, kick, combo, block, Special, Down-Special and Super. It's offered on first launch, and finishing it once pays 300 coins plus a Silver chest.
+- **🏛️ Chamber skins:** redecorate the plenum. Skins apply in every mode, and you can preview them behind the menu before buying.
+
+  | Skin | Price (coins) | What it adds |
+  |---|---|---|
+  | Hanukkah | 1,200 | Lit hanukkiot, blue-and-white string lights, spinning dreidels |
+  | Independence Day | 1,000 | Flag garlands and fireworks |
+  | Purim | 900 | Masks, balloons and confetti |
+  | Sukkot | 900 | A palm-frond roof and hanging fruit |
+
+- **🗳️ Daily free chest:** one Silver chest per day.
+- **⚖ Compare fighters:** in the Shop, press C (or the ⚖ button) on two fighters. You'll see rarity, rank, health, power, defense, speed, jump, ammo and every ability side by side, with the better value in green.
+- **Melee:** every fighter has full melee (punch, kick, sweep and jump attacks), and it's now listed on every fighter panel.
+- **Bigger, clearer cooldowns** under each Super meter:
+  - an **AMMO** row with pips and a count, turning into a **RELOADING** bar with a countdown
+  - a **GUARD** bar showing how much of your 2.5 s block is left, and a **GUARD BROKEN** countdown
+  - **SUPER %** on the meter, and **SUPER READY!** when it's full
+
 ## Controls
 
 | Action | Player 1 | Player 2 |
@@ -64,7 +89,7 @@ Every chest starts with 3 upgrade taps. Each tap has a **45%** chance to upgrade
 - **Tap to upgrade:** tap a chest 3 times before opening it. Each tap has a 30% chance to upgrade it one tier, and the chest then opens by itself.
 - **Auto-open:** after a chest drops, the results screen jumps to the chest automatically.
 - **What's inside:** coins (Wooden gives 10–25, Legendary gives 100–200) plus **shards** of leaders you don't own yet. Better chests favor rarer leaders.
-- **Recruiting with shards:** collect 10 (Common), 15 (Rare), 17 (Super Rare), 20 (Epic), 25 (Mythic) or 30 (Legendary) shards to recruit a leader for free.
+- **Recruiting with shards:** collect 3 (Common), 15 (Rare), 17 (Super Rare), 20 (Epic), 22 (Elite), 25 (Mythic) or 30 (Legendary) shards to recruit a leader for free.
   - You can buy single shards in the Shop with `B`. They cost a premium: about 6× more per shard than recruiting outright.
 - **Super Reflect:** Abba Eban's Diplomatic Immunity super raises a mirror shield for 4 seconds that bounces enemy projectiles back faster, for 1.5× damage.
 - **Reset save:** Settings → Reset Save, then confirm.
@@ -95,6 +120,7 @@ Every chest starts with 3 upgrade taps. Each tap has a **45%** chance to upgrade
 | Rare | 2 · Special + Super | +4% damage | 200 coins |
 | Super Rare | 2 · Special + Super | +2% damage | 300 coins |
 | Epic | 3 · Special + Down-Special + Super | — | 400 coins |
+| Elite | 3 · Special + Down-Special + Super | +60 HP | 450 coins |
 | Mythic | 3 · Special + Down-Special + Super | unique passive | 500 coins |
 | Legendary | 3 · Special + Down-Special + Super | unique passive | 600 coins (The Speaker: 800) |
 

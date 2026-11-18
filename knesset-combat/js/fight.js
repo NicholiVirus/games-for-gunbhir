@@ -43,7 +43,7 @@
     var U = KC.UPGRADE, bst = boost || 1;
     this.stats.power *= (1 + this.rank * U.power) * bst;
     this.stats.defense *= (1 + this.rank * U.defense) * bst;
-    this.maxHealth = 1000 + this.rank * U.health;
+    this.maxHealth = 1000 + this.rank * U.health + (this.rar.hp || 0);   // Elite rarity: +60 HP
     this.projMax = Math.min(KC.PROJ_MAX, 3 + this.rank);
     this.comboMaster = this.rank >= KC.UPGRADE.max;   // Rank 5: Combo Mastery   // 3 on screen by default, +1 per rank, max 6
     this.reset(0, 1);
@@ -95,6 +95,7 @@
 
   FP.startMove = function (mv) {
     this.move = mv; this.moveHit = false; this.setState('attack');
+    this.atkId = (this.atkId || 0) + 1;   // unique id per attack (moves are shared objects)
     if (mv.air) this.airUsed = true;
     KC.Audio.play('whiff');
   };

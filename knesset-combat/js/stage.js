@@ -3,6 +3,13 @@
   var T = THREE;
   var M = KC.Models;
   var S = KC.Stage = {};
+  KC.THEMES = [
+    { id: 'classic', name: 'Classic Plenum', price: 0, desc: 'The Knesset as it is — wood, stone and 120 blue seats.' },
+    { id: 'hanukkah', name: 'Hanukkah', price: 1200, desc: 'Giant lit hanukkiot by the dais, blue-and-white string lights and spinning dreidels.' },
+    { id: 'independence', name: 'Independence Day', price: 1000, desc: 'Flag garlands across the chamber and fireworks over the gallery.' },
+    { id: 'purim', name: 'Purim', price: 900, desc: 'Carnival masks, balloons and non-stop confetti.' },
+    { id: 'sukkot', name: 'Sukkot', price: 900, desc: 'A palm-frond schach roof with hanging pomegranates, etrogim and grapes.' }
+  ];
 
   function lam(color, opts) { var o = Object.assign({ color: new T.Color(color), flatShading: true }, opts || {}); return new T.MeshLambertMaterial(o); }
   function mesh(geo, mat, x, y, z, shadow) {
@@ -159,7 +166,7 @@
     rost.add(mesh(new T.SphereGeometry(0.04, 6, 4), lam('#333'), 0, 1.66, 0.29));
 
     /* ---- Israeli flags ---- */
-    var flagTex = canvasTex(320, 220, function (ctx, w, h) {
+    var flagTex = st.flagTex = canvasTex(320, 220, function (ctx, w, h) {
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = '#0038b8'; ctx.fillRect(0, h * 0.1, w, h * 0.15); ctx.fillRect(0, h * 0.75, w, h * 0.15);
       drawStar(ctx, w / 2, h / 2 + 4, h * 0.2, 9, '#0038b8');
@@ -264,6 +271,7 @@
     st.update = function (dt, focusX) {
       st.t += dt;
       var t = st.t;
+      if (st.themeTick) st.themeTick(dt, t);
       st.lookX += ((focusX || 0) - st.lookX) * Math.min(1, dt * 3);
       // flags
       st.flags.forEach(function (f) {
@@ -350,6 +358,137 @@
     };
     st.setVotes('—', 1, '—', 1, 'KNESSET COMBAT 26\'');
 
+
+    /* ---------- chamber skins (themes) ---------- */
+    st.themeLight = new T.PointLight(0xffffff, 0, 40, 1.2); st.themeLight.position.set(0, 8, -3); G.add(st.themeLight);
+    function glowMat(c, o) { return new T.MeshBasicMaterial({ color: new T.Color(c), transparent: true, opacity: o == null ? 0.9 : o, blending: T.AdditiveBlending, depthWrite: false }); }
+    function stringLights(g, list, y, z, x0, x1, n, sag, colors) {
+      var geo = new T.SphereGeometry(0.07, 6, 5);
+      for (var i = 0; i < n; i++) {
+        var u = i / (n - 1), x = x0 + (x1 - x0) * u, yy = y - Math.sin(u * Math.PI) * sag;
+        var b = new T.Mesh(geo, new T.MeshBasicMaterial({ color: new T.Color(colors[i % colors.length]) })); b.position.set(x, yy, z); g.add(b);
+        list.push({ kind: 'twinkle', m: b, ph: Math.random() * 6 });
+      }
+      var wire = new T.Mesh(new T.CylinderGeometry(0.01, 0.01, Math.abs(x1 - x0), 4), new T.MeshBasicMaterial({ color: '#222' }));
+      wire.rotation.z = Math.PI / 2; wire.position.set((x0 + x1) / 2, y - sag * 0.6, z); g.add(wire);
+    }
+    function hanukkiah(g, list, x, z, sc) {
+      var h = new T.Group(); h.position.set(x, 0, z); h.scale.setScalar(sc); g.add(h);
+      var gold = M.toon('#d4af37', '#5a4400');
+      function add(geo, px, py, pz) { var m = new T.Mesh(geo, gold); m.position.set(px, py, pz); m.castShadow = true; h.add(m); return m; }
+      add(new T.CylinderGeometry(0.5, 0.65, 0.25, 10), 0, 0.12, 0);
+      add(new T.CylinderGeometry(0.08, 0.1, 2.0, 8), 0, 1.25, 0);
+      add(new T.BoxGeometry(3.4, 0.12, 0.14), 0, 2.2, 0);
+      for (var i = -4; i <= 4; i++) {
+        var hx = i * 0.4, top = i === 0 ? 2.65 : 2.3;
+        if (i !== 0) add(new T.CylinderGeometry(0.035, 0.035, Math.abs(hx) * 0.7, 6), hx * 0.7, 2.2 - Math.abs(hx) * 0.18, 0).rotation.z = hx > 0 ? 0.9 : -0.9;
+        if (i === 0) add(new T.CylinderGeometry(0.05, 0.05, 0.45, 6), 0, 2.42, 0);
+        add(new T.CylinderGeometry(0.09, 0.06, 0.1, 8), hx, top, 0);
+        var candle = new T.Mesh(new T.CylinderGeometry(0.05, 0.05, 0.32, 8), M.toon(i % 2 ? '#7fb2ff' : '#ffffff')); candle.position.set(hx, top + 0.2, 0); h.add(candle);
+        var flame = new T.Mesh(new T.ConeGeometry(0.06, 0.2, 8), glowMat('#ffcf6a')); flame.position.set(hx, top + 0.46, 0); h.add(flame);
+        var halo = new T.Mesh(new T.SphereGeometry(0.14, 8, 6), glowMat('#ff9a3d', 0.35)); halo.position.copy(flame.position); h.add(halo);
+        list.push({ kind: 'flame', m: flame, h: halo, ph: Math.random() * 6 });
+      }
+    }
+    st.setTheme = function (id) {
+      if (st.themeGroup) { G.remove(st.themeGroup); }
+      var g = new T.Group(), list = [];
+      st.themeGroup = g; st.theme = id; G.add(g); st.themeTick = null;
+      st.themeLight.intensity = 0;
+      if (id === 'hanukkah') {
+        hanukkiah(g, list, -6.2, -9.6, 1); hanukkiah(g, list, 6.2, -9.6, 1); hanukkiah(g, list, 0, -13.6, 1.4);
+        stringLights(g, list, 4.9, -14.0, -17, 17, 60, 0.5, ['#3d7bff', '#ffffff']);
+        stringLights(g, list, 6.6, -14.0, -17, 17, 60, 0.4, ['#ffffff', '#7fb2ff']);
+        [-5, -2, 2, 5].forEach(function (x, i) {
+          var d = M.buildProp('dreidel', i % 2 ? '#3d7bff' : '#c9d2df'); d.scale.setScalar(1.6); d.position.set(x, 3.2 + (i % 2) * 0.6, -6.5); g.add(d);
+          list.push({ kind: 'dreidel', m: d, y: d.position.y, ph: i * 1.7 });
+        });
+        st.themeLight.color.set('#7fa8ff'); st.themeLight.intensity = 1.1;
+      } else if (id === 'independence') {
+        [[-14.1, 4.6, 0.6], [-13.2, 6.2, 0.5], [-9, 5.4, 0.9]].forEach(function (row, ri) {
+          var z = row[0], y = row[1], sag = row[2], n = 34;
+          for (var i = 0; i < n; i++) {
+            var u = i / (n - 1), x = -16 + 32 * u, yy = y - Math.sin(u * Math.PI) * sag;
+            var fl = new T.Mesh(new T.PlaneGeometry(0.62, 0.42), (i + ri) % 3 === 2 ? new T.MeshLambertMaterial({ color: '#0038b8', side: T.DoubleSide }) : new T.MeshLambertMaterial({ map: st.flagTex, side: T.DoubleSide }));
+            fl.position.set(x, yy - 0.22, z); g.add(fl); list.push({ kind: 'flutter', m: fl, ph: i * 0.6 });
+          }
+        });
+        var sparks = [];
+        for (var k = 0; k < 90; k++) { var sp = new T.Mesh(new T.SphereGeometry(0.09, 5, 4), glowMat('#ffffff')); sp.visible = false; g.add(sp); sparks.push({ m: sp, life: 0 }); }
+        st.fireT = 0;
+        list.push({ kind: 'fireworks', sparks: sparks });
+        st.themeLight.color.set('#bcd4ff'); st.themeLight.intensity = 0.9;
+      } else if (id === 'purim') {
+        var cols = ['#ff4d6d', '#ffd166', '#4cd964', '#4d96ff', '#b46cff', '#ff9a3d'];
+        var conf = new T.InstancedMesh(new T.PlaneGeometry(0.12, 0.07), new T.MeshBasicMaterial({ side: T.DoubleSide }), 320), c = new T.Color(), arr = [];
+        for (var q = 0; q < 320; q++) { conf.setColorAt(q, c.set(cols[q % cols.length])); arr.push({ x: (Math.random() - 0.5) * 30, y: Math.random() * 11, z: -13 + Math.random() * 15, r: Math.random() * 6, v: 0.6 + Math.random() * 0.8 }); }
+        g.add(conf); list.push({ kind: 'confetti', m: conf, arr: arr });
+        var maskTex = function (col) {
+          var cv = document.createElement('canvas'); cv.width = 256; cv.height = 160; var x2 = cv.getContext('2d');
+          x2.fillStyle = col; x2.beginPath(); x2.moveTo(10, 60); x2.quadraticCurveTo(128, 0, 246, 60); x2.quadraticCurveTo(220, 150, 128, 110); x2.quadraticCurveTo(36, 150, 10, 60); x2.fill();
+          x2.fillStyle = '#1b1230'; x2.beginPath(); x2.ellipse(80, 70, 30, 18, -0.2, 0, Math.PI * 2); x2.fill(); x2.beginPath(); x2.ellipse(176, 70, 30, 18, 0.2, 0, Math.PI * 2); x2.fill();
+          x2.strokeStyle = '#ffd166'; x2.lineWidth = 6; x2.stroke();
+          x2.fillStyle = '#ffd166'; for (var f = 0; f < 5; f++) { x2.beginPath(); x2.ellipse(40 + f * 44, 18, 8, 22, (f - 2) * 0.3, 0, Math.PI * 2); x2.fill(); }
+          var tx = new T.CanvasTexture(cv); tx.encoding = T.sRGBEncoding; return tx;
+        };
+        [[-10.5, '#b46cff'], [10.5, '#ff4d6d'], [-3.6, '#4d96ff'], [3.6, '#4cd964']].forEach(function (mk, i) {
+          var pl = new T.Mesh(new T.PlaneGeometry(i < 2 ? 4 : 2.2, i < 2 ? 2.5 : 1.4), new T.MeshBasicMaterial({ map: maskTex(mk[1]), transparent: true }));
+          pl.position.set(mk[0], i < 2 ? 5.2 : 7.9, -14.1); g.add(pl);
+        });
+        for (var bl = 0; bl < 14; bl++) {
+          var bc = cols[bl % cols.length], bg = new T.Group();
+          var ball = new T.Mesh(new T.SphereGeometry(0.35, 12, 10), M.toon(bc)); ball.scale.set(1, 1.2, 1); bg.add(ball);
+          var str = new T.Mesh(new T.CylinderGeometry(0.008, 0.008, 1.4, 3), new T.MeshBasicMaterial({ color: '#ddd' })); str.position.y = -1.1; bg.add(str);
+          bg.position.set(-12 + bl * 1.8, 5 + Math.random() * 2.5, -11.5 + Math.random() * 3); g.add(bg);
+          list.push({ kind: 'balloon', m: bg, y: bg.position.y, ph: Math.random() * 6 });
+        }
+        list.push({ kind: 'hue' });
+        st.themeLight.intensity = 1.0;
+      } else if (id === 'sukkot') {
+        var frond = new T.InstancedMesh(new T.BoxGeometry(2.2, 0.05, 0.26), M.toon('#3f8a3a'), 160), mx = new T.Matrix4(), qq = new T.Quaternion(), e = new T.Euler(), pv = new T.Vector3(), one = new T.Vector3(1, 1, 1);
+        for (var fi = 0; fi < 160; fi++) { e.set((Math.random() - 0.5) * 0.3, Math.random() * Math.PI, (Math.random() - 0.5) * 0.2); qq.setFromEuler(e); pv.set((Math.random() - 0.5) * 22, 9.2 + Math.random() * 0.6, -13 + Math.random() * 16); mx.compose(pv, qq, one); frond.setMatrixAt(fi, mx); }
+        g.add(frond);
+        for (var bi = 0; bi < 6; bi++) { var beam = new T.Mesh(new T.BoxGeometry(24, 0.2, 0.2), M.toon('#8a5a2b')); beam.position.set(0, 9.0, -12 + bi * 3); g.add(beam); }
+        var fruitCols = [['#c0392b', 0.16, 1], ['#f2d43a', 0.13, 1.35], ['#6b2fa0', 0.07, 1]];
+        for (var hs = 0; hs < 36; hs++) {
+          var hx2 = -15 + (hs % 18) * 1.75, hz = hs < 18 ? -13.6 : -7.4, len = 1.5 + Math.random() * 1.6, fy = (hs < 18 ? 8.3 : 9.0) - len;
+          var cord = new T.Mesh(new T.CylinderGeometry(0.01, 0.01, len, 3), new T.MeshBasicMaterial({ color: '#c9b48a' })); cord.position.set(hx2, fy + len / 2, hz); g.add(cord);
+          var fc = fruitCols[hs % 3];
+          if (hs % 3 === 2) { for (var gr = 0; gr < 7; gr++) { var gm = new T.Mesh(new T.SphereGeometry(fc[1], 6, 5), M.toon(fc[0])); gm.position.set(hx2 + (Math.random() - 0.5) * 0.18, fy - gr * 0.07, hz + (Math.random() - 0.5) * 0.18); g.add(gm); } }
+          else { var fm = new T.Mesh(new T.SphereGeometry(fc[1], 10, 8), M.toon(fc[0])); fm.scale.set(1, fc[2], 1); fm.position.set(hx2, fy, hz); g.add(fm); list.push({ kind: 'sway', m: fm, x: hx2, ph: Math.random() * 6 }); }
+        }
+        stringLights(g, list, 4.6, -14.0, -17, 17, 40, 0.6, ['#ffcf6a', '#ff9a3d', '#fff3b0']);
+        st.themeLight.color.set('#ffcf8a'); st.themeLight.intensity = 0.9;
+      }
+      if (!list.length) return;
+      st.themeTick = function (dt, t) {
+        list.forEach(function (it) {
+          switch (it.kind) {
+            case 'flame': var f = 0.8 + Math.sin(t * 17 + it.ph) * 0.12 + Math.random() * 0.12; it.m.scale.set(f, f * (1.1 + Math.sin(t * 11 + it.ph) * 0.15), f); it.h.material.opacity = 0.25 + Math.random() * 0.15; break;
+            case 'twinkle': it.m.visible = Math.sin(t * 3 + it.ph) > -0.6; break;
+            case 'dreidel': it.m.rotation.y += dt * 9; it.m.position.y = it.y + Math.sin(t * 1.6 + it.ph) * 0.25; it.m.rotation.z = Math.sin(t * 2 + it.ph) * 0.12; break;
+            case 'flutter': it.m.rotation.y = Math.sin(t * 2.5 + it.ph) * 0.35; break;
+            case 'balloon': it.m.position.y = it.y + Math.sin(t * 0.9 + it.ph) * 0.3; it.m.rotation.z = Math.sin(t * 0.7 + it.ph) * 0.1; break;
+            case 'sway': it.m.position.x = it.x + Math.sin(t * 1.2 + it.ph) * 0.05; break;
+            case 'hue': st.themeLight.color.setHSL((t * 0.08) % 1, 0.8, 0.6); break;
+            case 'confetti':
+              var mm = new T.Matrix4(), qd = new T.Quaternion(), ed = new T.Euler(), pp = new T.Vector3(), sc1 = new T.Vector3(1, 1, 1);
+              it.arr.forEach(function (c, i) { c.y -= c.v * dt; c.r += dt * 3; if (c.y < 0) c.y = 11; ed.set(c.r, c.r * 0.7, 0); qd.setFromEuler(ed); pp.set(c.x + Math.sin(t + i) * 0.2, c.y, c.z); mm.compose(pp, qd, sc1); it.m.setMatrixAt(i, mm); });
+              it.m.instanceMatrix.needsUpdate = true; break;
+            case 'fireworks':
+              st.fireT -= dt;
+              if (st.fireT <= 0) {
+                st.fireT = 0.9 + Math.random() * 1.2;
+                var ox = (Math.random() - 0.5) * 22, oy = 8 + Math.random() * 3, oz = -13 + Math.random() * 3, col = ['#3d7bff', '#ffffff', '#ffd166', '#7fb2ff'][(Math.random() * 4) | 0], cnt = 0;
+                it.sparks.forEach(function (sp) { if (sp.life <= 0 && cnt < 30) { cnt++; sp.life = 1.1; sp.m.visible = true; sp.m.material.color.set(col); sp.m.position.set(ox, oy, oz); var a = Math.random() * Math.PI * 2, b = Math.random() * Math.PI - Math.PI / 2, v = 2 + Math.random() * 1.5; sp.v = [Math.cos(a) * Math.cos(b) * v, Math.sin(b) * v, Math.sin(a) * Math.cos(b) * v * 0.4]; } });
+              }
+              it.sparks.forEach(function (sp) { if (sp.life <= 0) return; sp.life -= dt; if (sp.life <= 0) { sp.m.visible = false; return; } sp.m.position.x += sp.v[0] * dt; sp.m.position.y += sp.v[1] * dt; sp.m.position.z += sp.v[2] * dt; sp.v[1] -= 2.2 * dt; sp.m.material.opacity = sp.life; });
+              break;
+          }
+        });
+      };
+    };
+    st.setTheme('classic');
     st.setMode = function (mode) {
       st.mode = mode;
       if (mode === 'night') {

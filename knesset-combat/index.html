@@ -120,12 +120,13 @@
     <h2>SHOP · SHARDS &amp; UPGRADES</h2>
     <div class="sub" id="colSub"></div>
     <div class="shop-tabs" id="shopTabs"></div>
-    <div class="rar-key"><span class="rar r-common">COMMON · 1 ability</span><span class="rar r-rare">RARE · 2</span><span class="rar r-superrare">SUPER RARE · 2</span><span class="rar r-epic">EPIC · 3</span><span class="rar r-mythic">MYTHIC · 3 + passive</span><span class="rar r-legendary">LEGENDARY · 3 + passive</span></div>
+    <div class="rar-key"><span class="rar r-common">COMMON · 1 ability</span><span class="rar r-rare">RARE · 2</span><span class="rar r-superrare">SUPER RARE · 2</span><span class="rar r-epic">EPIC · 3</span><span class="rar r-elite">ELITE · 3</span><span class="rar r-mythic">MYTHIC · 3 + passive</span><span class="rar r-legendary">LEGENDARY · 3 + passive</span></div>
     <div class="sel-grid col-grid" id="colGrid"></div>
-    <div class="hint">Click a tab or Q/E to filter · Arrows/WASD browse · ENTER/F buy shard or upgrade · B shard / gold skin · R/P preview gold · ESC back</div>
+    <div class="hint">Click a tab or Q/E to filter · Arrows/WASD or click to select · click again / ENTER to buy or upgrade · C compare · B shard / gold skin · R/P preview gold · ESC back</div>
   </div>
   <div class="col-info panel" id="colInfo"></div>
   <div class="col-lock" id="colLock"></div>
+  <div class="compare" id="compare"></div>
 </div>
 
 <!-- how to play -->
@@ -159,10 +160,11 @@
       <div class="rules">
         <h3>RARITY &amp; ABILITIES</h3>
         <ul>
-          <li><span class="rar r-common">COMMON</span> 1 ability (Special) and a +8% damage perk · costs <span class="coin"></span>100</li>
+          <li><span class="rar r-common">COMMON</span> 1 ability (Special) and a +8% damage perk · just 3 shards</li>
           <li><span class="rar r-rare">RARE</span> 2 abilities (Special + Super) and a +4% damage perk · <span class="coin"></span>200</li>
           <li><span class="rar r-superrare">SUPER RARE</span> 2 abilities (Special + Super) and a +2% damage perk · 17 shards</li>
           <li><span class="rar r-epic">EPIC</span> 3 abilities (Special + Down-Special + Super) · <span class="coin"></span>400</li>
+          <li><span class="rar r-elite">ELITE</span> 3 abilities plus a +60 HP perk · 22 shards</li>
           <li><span class="rar r-mythic">MYTHIC</span> 3 abilities plus a unique passive · <span class="coin"></span>500 · 25 shards</li>
           <li><span class="rar r-legendary">LEGENDARY</span> 3 abilities plus a unique passive (Survivor, Iron Will, Momentum, Filibuster) · <span class="coin"></span>600+</li>
         </ul>
@@ -175,6 +177,7 @@
           <li><b>Campaign · 250 levels:</b> fixed rivals that get tougher. Every 10th level is a boss. First clears pay a big bonus; replays pay 30%.</li>
           <li><b>🎁 Chest Store:</b> buy chests with coins (150–1,600). Every chest starts with 3 upgrade taps. Bought chests upgrade at 45% per tap (campaign chests 30%), and Lucky chests have 5, 6 or 8 taps.</li>
           <li><b>Chests:</b> campaign wins have a 60% chance to drop a ballot-box chest (bosses and every 10th win always do). Tap it 3 times — each tap has a 30% chance to upgrade it, then it opens automatically: Wooden → Silver → Golden → Epic → Mythic → Legendary. Chests give coins and <b>shards</b>.</li>
+          <li><b>✦ Wild Shards:</b> every chest has a 1% chance to drop one. A Wild Shard unlocks any locked fighter of its rarity — use it in the Shop.</li>
           <li><b>Shards:</b> collect 10 (Common), 15 (Rare), 17 (Super Rare), 20 (Epic), 25 (Mythic) or 30 (Legendary) shards to recruit a leader for free.  You can buy single shards in the Shop with <kbd>B</kbd>.</li>
           <li><b>Projectile ammo:</b> 3 shots (+1 per upgrade rank, max 6). Mash them all, then they reload together — 1 second per shot — once you're empty.</li>
           <li><b>Election Night Gold</b> skin: win 3 matches with a fighter, or buy it for <span class="coin"></span>150.</li>
@@ -223,6 +226,7 @@
   <div class="callout p1"></div><div class="callout p2"></div>
 </div>
 <div id="banner"><div class="big"></div><div class="sub"></div></div>
+<div id="tutorial"></div>
 <div id="vs">
   <div class="vs-side l"><img alt=""><div class="vs-name"></div><div class="vs-title"></div></div>
   <div class="vs-mid">VS</div>

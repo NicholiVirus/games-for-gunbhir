@@ -608,6 +608,32 @@
         g.userData.spin = 'x';
         break;
       }
+      case 'chess': {
+        var cm = '#f2f2f2';
+        addTo(g, M.part(cyl(0.13, 0.15, 0.06, 12), cm, 0, -0.18, 0));
+        addTo(g, M.part(cyl(0.08, 0.11, 0.16, 10), cm, 0, -0.07, 0));
+        var neck = addTo(g, M.part(box(0.1, 0.22, 0.13), cm, 0.0, 0.08, 0)); neck.rotation.z = -0.25;
+        var snout = addTo(g, M.part(box(0.17, 0.08, 0.11), cm, 0.07, 0.15, 0)); snout.rotation.z = -0.35;
+        addTo(g, M.part(new T.ConeGeometry(0.03, 0.07, 4), cm, -0.04, 0.24, 0.03, false));
+        addTo(g, M.part(sph(0.015, 5, 4), '#111', 0.04, 0.17, 0.06, false));
+        g.userData.spin = 'z';
+        break;
+      }
+      case 'rock': {
+        var rk = new T.IcosahedronGeometry(0.17, 0); rk.scale(1.2, 0.85, 1);
+        addTo(g, M.part(rk, '#8a7f72', 0, 0, 0));
+        addTo(g, M.part(new T.IcosahedronGeometry(0.06, 0), '#b07a3c', 0.1, 0.08, 0.05, false));
+        g.userData.spin = 'x';
+        break;
+      }
+      case 'dreidel': {
+        var dc = color || '#3d7bff';
+        addTo(g, M.part(box(0.3, 0.3, 0.3), dc, 0, 0.15, 0));
+        var tip = addTo(g, M.part(new T.ConeGeometry(0.21, 0.22, 4), dc, 0, -0.11, 0)); tip.rotation.y = Math.PI / 4; tip.rotation.x = Math.PI;
+        addTo(g, M.part(cyl(0.03, 0.03, 0.18, 6), '#e8e8e8', 0, 0.39, 0));
+        addTo(g, M.part(box(0.12, 0.14, 0.02), '#f2c14e', 0, 0.15, 0.16, false));
+        break;
+      }
       case 'teacup': {
         addTo(g, M.part(cyl(0.12, 0.08, 0.13, 10), '#f7f3e8', 0, 0, 0));
         addTo(g, M.part(cyl(0.18, 0.15, 0.025, 12), '#f7f3e8', 0, -0.07, 0));
