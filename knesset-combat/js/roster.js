@@ -6,7 +6,7 @@
  *   rare       2 abilities — Special + Super                         (+4% damage perk)
  *   epic       3 abilities — Special + Down-Special + Super
  *   legendary  3 abilities — Special + Down-Special + Super + a unique passive
- * Fighters are unlocked by spending Coins earned from matches. Ben-Gurion is the free starter.
+ * Fighters are unlocked with shards from chests. New players start with 5 free Common fighters (KC.STARTERS).
  */
 window.KC = window.KC || {};
 
@@ -29,7 +29,7 @@ KC.PASSIVES = {
 
 KC.ROSTER = [
   {
-    id: 'bengurion', name: 'David Ben-Gurion', short: 'BEN-GURION', title: 'The Founder', rarity: 'rare', starter: true,
+    id: 'bengurion', name: 'David Ben-Gurion', short: 'BEN-GURION', title: 'The Founder', rarity: 'rare',
     group: 'pm', years: '1948–54, 1955–63',
     bio: "Israel's founding Prime Minister. Read the Declaration of Independence in 1948 — and famously did headstands on the beach.",
     look: { height: 0.9, girth: 1.12, skin: '#eab892', hair: 'tufts', hairColor: '#f4f4f0', outfit: 'shirt', top: '#cdbf8e', pants: '#5d5240', shirt: '#cdbf8e', tie: null, shoes: '#3b2a1a' },
@@ -39,7 +39,7 @@ KC.ROSTER = [
     quote: 'This whole chamber was my idea, you know.', victory: 'headstand'
   },
   {
-    id: 'sharett', name: 'Moshe Sharett', short: 'SHARETT', title: 'The Diplomat', rarity: 'common',
+    id: 'sharett', name: 'Moshe Sharett', short: 'SHARETT', title: 'The Diplomat', rarity: 'common', starter: true,
     group: 'pm', years: '1954–55',
     bio: "Second Prime Minister and Israel's first Foreign Minister. A polyglot diplomat with a very fast pen.",
     look: { height: 0.98, girth: 1.0, skin: '#e5b48e', hair: 'combed', hairColor: '#2b2118', mustache: true, mustacheColor: '#2b2118', outfit: 'suit', top: '#4a4f57', pants: '#40444b', shirt: '#f2f2f2', tie: '#7a2430', shoes: '#1d1d1d' },
@@ -58,7 +58,7 @@ KC.ROSTER = [
     quote: 'Stay hydrated. And stay down.', victory: 'fist'
   },
   {
-    id: 'allon', name: 'Yigal Allon', short: 'ALLON', title: 'The Commander', rarity: 'common',
+    id: 'allon', name: 'Yigal Allon', short: 'ALLON', title: 'The Commander', rarity: 'common', starter: true,
     group: 'pm', years: '1969 (interim)',
     bio: "Served as interim Prime Minister in 1969 after Levi Eshkol's death. A former Palmach commander.",
     look: { height: 1.0, girth: 1.02, skin: '#e1ab85', hair: 'parted', hairColor: '#3b2d20', outfit: 'shirt', top: '#8c8a5c', pants: '#4e4a36', shirt: '#8c8a5c', tie: null, shoes: '#2a2018' },
@@ -188,7 +188,7 @@ KC.ROSTER = [
     quote: "And that's the news tonight.", victory: 'wave'
   },
   {
-    id: 'gantz', name: 'Benny Gantz', short: 'GANTZ', title: 'The Chief', rarity: 'common',
+    id: 'gantz', name: 'Benny Gantz', short: 'GANTZ', title: 'The Chief', rarity: 'common', starter: true,
     group: 'contender', years: 'Contender',
     bio: 'Former IDF Chief of Staff and long-time contender for the top job.',
     look: { height: 1.08, girth: 1.0, skin: '#ebb895', hair: 'short', hairColor: '#a8a8a4', outfit: 'open', top: '#2c3a55', pants: '#27344c', shirt: '#f4f4f4', tie: null, shoes: '#1d1d1d' },
@@ -226,7 +226,7 @@ KC.ROSTER = [
     quote: 'The people have spoken. Loudly.', victory: 'fist'
   },
   {
-    id: 'livni', name: 'Tzipi Livni', short: 'LIVNI', title: 'The Negotiator', rarity: 'common',
+    id: 'livni', name: 'Tzipi Livni', short: 'LIVNI', title: 'The Negotiator', rarity: 'common', starter: true,
     group: 'contender', years: 'Contender',
     bio: 'Former Foreign Minister and Kadima leader who won the most seats in 2009 and ran for the top job.',
     look: { height: 0.95, girth: 0.92, skin: '#ebbd9a', hair: 'bob', hairColor: '#cfae7e', outfit: 'open', top: '#34405e', pants: '#2c3650', shirt: '#eef2f7', tie: null, shoes: '#1d1d1d' },
@@ -338,7 +338,7 @@ KC.ROSTER = [
     quote: 'We are all in this chamber together.', victory: 'wave'
   },
   {
-    id: 'navon', name: 'Yitzhak Navon', short: 'NAVON', title: 'The Playwright', rarity: 'common',
+    id: 'navon', name: 'Yitzhak Navon', short: 'NAVON', title: 'The Playwright', rarity: 'common', starter: true,
     group: 'icon', years: 'President',
     bio: "Israel's fifth President, an educator and a playwright.",
     look: { height: 0.98, girth: 1.0, skin: '#e2ad86', hair: 'combed', hairColor: '#6b6660', outfit: 'suit', top: '#353a46', pants: '#2f343f', shirt: '#f2f2f2', tie: '#2a4a7a', shoes: '#1d1d1d' },
@@ -540,6 +540,7 @@ KC.ROSTER = [
   KC.ROSTER.forEach(function (c, i) { c._orig = i; });
   KC.ROSTER.sort(function (a, b) { return (order.indexOf(a.rarity) - order.indexOf(b.rarity)) || (a._orig - b._orig); });
 })();
+KC.STARTERS = ['sharett', 'allon', 'livni', 'gantz', 'navon'];   // free Common fighters every new player owns
 KC.rosterById = {};
 KC.ROSTER.forEach(function (c, i) { c.index = i; KC.rosterById[c.id] = c; });
 

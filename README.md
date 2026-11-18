@@ -4,7 +4,7 @@
 
 A 3D, same-keyboard, player-vs-player fighting game set in the Knesset plenum.
 50 fighters across Common, Rare, Super Rare, Epic, Elite, Mythic and Legendary rarity (1–3 abilities each).
-You start as David Ben-Gurion and earn coins every match to recruit the rest in the Shop.
+You start with 5 free Common fighters, ready for 2-player Versus. Win chests to collect shards and unlock the other 45.
 
 - Play: open [`knesset-combat/index.html`](knesset-combat/index.html) in a browser (double-click works).
 - Details, controls and the unlock list: [`knesset-combat/README.md`](knesset-combat/README.md).

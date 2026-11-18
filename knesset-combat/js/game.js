@@ -11,7 +11,7 @@
   var SAVE_KEY = 'kc26_save_v2', OLD_KEY = 'kc26_save_v1';
   var memoryStore = null;
   function defaults() {
-    return { coins: 0, earned: 0, matches: 0, wins: 0, cpuWins: 0, supers: 0, perfects: 0, campaign: 0, tour: 0, ranks: {}, shards: {}, campWins: 0, chests: 0, wild: {}, themes: ['classic'], theme: 'classic', tutorialDone: false, tutorialPrompted: false, lastDaily: 0, charWins: {}, owned: ['bengurion'], gold: [],
+    return { coins: 0, earned: 0, matches: 0, wins: 0, cpuWins: 0, supers: 0, perfects: 0, campaign: 0, tour: 0, ranks: {}, shards: {}, campWins: 0, chests: 0, wild: {}, themes: ['classic'], theme: 'classic', tutorialDone: false, tutorialPrompted: false, lastDaily: 0, charWins: {}, owned: KC.STARTERS.slice(), gold: [],
       settings: { rounds: 2, timer: 99, stage: 'random', music: true, sfx: true, voice: true } };
   }
   var Save = KC.Save = {
@@ -22,12 +22,12 @@
       if (d) { base = Object.assign(base, d); base.settings = Object.assign(defaults().settings, d.settings || {}); }
       else if (old) { // migrate the v1 "Mandates" save: keep fighters, convert Mandates to coins
         base.coins = (old.mandates || 0) * 5; base.earned = base.coins;
-        base.owned = (old.unlocked || ['bengurion']).filter(function (id) { return KC.rosterById[id]; });
+        base.owned = (old.unlocked || []).filter(function (id) { return KC.rosterById[id]; });
         base.gold = (old.gold || []).filter(function (id) { return KC.rosterById[id]; });
         base.charWins = old.charWins || {}; base.matches = old.matches || 0; base.cpuWins = old.cpuWins || 0;
         base.settings = Object.assign(defaults().settings, old.settings || {});
       }
-      if (base.owned.indexOf('bengurion') < 0) base.owned.push('bengurion');
+      KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });   // everyone gets the 5 free starters
       Save.data = base;
     },
     write: function () { memoryStore = Save.data; try { localStorage.setItem(SAVE_KEY, JSON.stringify(Save.data)); } catch (e) { /* private mode */ } },
@@ -451,7 +451,7 @@
       });
       $('menuDesc').textContent = MENU_ITEMS[this.sel].desc;
       var d = Save.data, locked = Save.lockedByPrice(), own = d.owned.length;
-      var html = (d.pm ? '<div class="pm-badge">👑 PRIME MINISTER ' + esc((KC.rosterById[d.pmFighter] || KC.rosterById.bengurion).short) + '</div>' : '') + '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
+      var html = (d.pm ? '<div class="pm-badge">👑 PRIME MINISTER ' + esc((KC.rosterById[d.pmFighter] || KC.rosterById.sharett).short) + '</div>' : '') + '<div class="mb-top"><div><div class="mb-lbl">COINS</div><div class="mb-num">' + G.coin(d.coins) + '</div></div><div style="text-align:right"><div class="mb-lbl">FIGHTERS</div><div class="mb-num" style="color:#fff">' + own + '/' + KC.ROSTER.length + '</div></div></div>';
       if (locked.length) {
         var nx = locked[0], need = KC.shardsNeeded(nx), have = Save.shards(nx.id);
         html += '<div class="progress"><div style="width:' + Math.round(have / need * 100) + '%"></div></div><div class="mb-next"><img src="' + por(nx) + '" class="dim" alt=""><div>Closest recruit: <b>' + esc(nx.name) + '</b> ' + rarBadge(nx) + '<br>' +
@@ -1243,7 +1243,7 @@
   screens.ending = {
     el: 'ending',
     enter: function () {
-      var d = Save.data, ch = KC.rosterById[d.pmFighter] || KC.rosterById.bengurion;
+      var d = Save.data, ch = KC.rosterById[d.pmFighter] || KC.rosterById.sharett;
       camMode = 'collection'; stage.setMode('night'); clearPreviews();
       var pv = setPreview(0, ch, Save.hasGold(ch.id) ? KC.ALT_SKIN : null, false, 0.15, 0.25); pv.cheer = 9999;
       KC.Audio.playMusic('fight'); KC.Audio.play('unlock'); KC.Audio.play('cheer', 2);
@@ -1719,8 +1719,8 @@
       requestAnimationFrame(loop);
       // optional deep link for quick testing: #fight / #versus / #select
       var h = (location.hash || '').replace('#', '');
-      if (h === 'versus') startMatch({ mode: 'versus', chars: [KC.rosterById.bengurion, KC.rosterById.bengurion], skins: [null, KC.MIRROR_SKIN], ai: [null, null] });
-      else if (h === 'cpu') startMatch({ mode: 'cpu', chars: [KC.rosterById.bengurion, KC.rosterById.netanyahu], skins: [null, null], ai: [null, 'normal'] });
+      if (h === 'versus') startMatch({ mode: 'versus', chars: [KC.rosterById.sharett, KC.rosterById.allon], skins: [null, null], ai: [null, null] });
+      else if (h === 'cpu') startMatch({ mode: 'cpu', chars: [KC.rosterById.sharett, KC.rosterById.netanyahu], skins: [null, null], ai: [null, 'normal'] });
       else if (h === 'demo') startMatch({ mode: 'cpu', chars: [KC.ROSTER[(Math.random() * 14) | 0], KC.ROSTER[(Math.random() * 19) | 0]], skins: [null, KC.MIRROR_SKIN], ai: ['hard', 'hard'] });
       else if (h === 'select') go('select', { mode: 'versus' });
       else if (h.indexOf('vs=') === 0) { var ids = h.slice(3).split(','); startMatch({ mode: 'versus', chars: [KC.rosterById[ids[0]] || KC.rosterById.bengurion, KC.rosterById[ids[1]] || KC.rosterById.bengurion], skins: [null, ids[0] === ids[1] ? KC.MIRROR_SKIN : null], ai: [null, null] }); }

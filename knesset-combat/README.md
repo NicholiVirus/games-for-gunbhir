@@ -137,7 +137,7 @@ Legendary passives:
 
 ## Coins and unlocking
 
-You start with **David Ben-Gurion**, Israel's first Prime Minister (Rare). Every match pays coins:
+You start with **5 free Common fighters**: Moshe Sharett, Yigal Allon, Tzipi Livni, Benny Gantz and Yitzhak Navon. That's enough for you and a friend to play Versus right away. The other 45 fighters, Ben-Gurion included, unlock with shards. Every match pays coins:
 
 | Source | Coins |
 |---|---|
@@ -167,10 +167,10 @@ New icons: Chaim Weizmann (Rare), Moshe Dayan (Legendary, Battle Rhythm passive)
 
 | Fighter | Rarity | Special | Down-Special | Super | Passive |
 |---|---|---|---|---|---|
-| David Ben-Gurion (starter) | Rare | Declaration Scroll | — | Beach Headstand Cyclone | — |
-| Moshe Sharett | Common | Diplomatic Cable | — | — | — |
+| David Ben-Gurion | Rare | Declaration Scroll | — | Beach Headstand Cyclone | — |
+| Moshe Sharett (starter) | Common | Diplomatic Cable | — | — | — |
 | Levi Eshkol | Rare | Water Carrier | — | National Water Wave | — |
-| Yigal Allon | Common | Palmach Dash | — | — | — |
+| Yigal Allon (starter) | Common | Palmach Dash | — | — | — |
 | Golda Meir | Legendary | Handbag Hurl | Iron Retort (counter) | Kitchen Cabinet | Iron Will |
 | Yitzhak Rabin | Epic | Chief of Staff Charge | Olive Branch | Peace Prize Beam | — |
 | Menachem Begin | Epic | Fiery Oration | Point of Order (counter) | Thunderous Speech | — |
@@ -182,11 +182,11 @@ New icons: Chaim Weizmann (Rare), Moshe Dayan (Legendary, Battle Rhythm passive)
 | Ehud Olmert | Rare | Municipal Memo | — | Jerusalem Light Rail | — |
 | Naftali Bennett | Epic | Cyber Byte | Startup Sprint | Unicorn Exit | — |
 | Yair Lapid | Rare | Breaking News | — | Prime Time Special | — |
-| Benny Gantz | Common | Blue & White Banner | — | — | — |
+| Benny Gantz (starter) | Common | Blue & White Banner | — | — | — |
 | Gadi Eisenkot | Rare | Chief's Advance | — | Strategic Barrage | — |
 | Avigdor Liberman | Rare | Kingmaker Crown | — | Coalition Crusher | — |
 | Yair Golan | Common | Rally Flag | — | — | — |
-| Tzipi Livni | Common | Negotiation Briefcase | — | — | — |
+| Tzipi Livni (starter) | Common | Negotiation Briefcase | — | — | — |
 | Isaac Herzog | Common | Presidential Seal | — | — | — |
 | The Speaker (fictional boss) | Legendary | Order! Order! | Gavel Uppercut | Session Adjourned | Filibuster |
 
