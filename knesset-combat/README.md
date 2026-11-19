@@ -12,6 +12,14 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Tutorial box moved:** the instruction card now sits at the bottom center between the HUD panels, so it never covers the fighters. On narrow or short screens it becomes a slim strip under the health bars.
+- **Bug-fix pass:** an automated suite (110 checks, in `tools/tests/`) played through every menu, mode, shop action, chest, the full tutorial and every move of all 51 fighters. Fixes:
+  - **Dropped inputs during hit-pause.** A button pressed during the freeze on impact is now buffered instead of lost, so fast punch-punch combos register (this also made the tutorial's COMBO step get stuck).
+  - **Results buttons off-screen.** On shorter screens such as 1024×640 laptops, the coin breakdown now scrolls and REMATCH / NEXT LEVEL always stay visible.
+  - **Main menu cut off.** On short screens SETTINGS dropped off the bottom; the menu now compacts to fit.
+  - **Phone portrait.** The camera lost both fighters off-screen and the right HUD panel spilled past the edge.
+  - **Phone landscape.** The HUD covered half the screen and character select hid the fighter grid.
+
 - **Sky beams:** every beam Super now comes down from the sky. A reticle locks onto your opponent, flashes, then the beam crashes down. Dash out from under it to dodge. Used by Saar, Arens, Tommy Lapid, Yair Lapid, Ezer Weizman, Chaim Herzog, Rabin and Netanyahu.
 
 - **Balance pass on all 51 fighters:** tuned and retested over 6 rounds of simulated CPU-vs-CPU matches. Fighters of the same rarity are now within a few points of each other, and Netanyahu is finally the strongest fighter. Full patch notes are in the Balance pass section below.

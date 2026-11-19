@@ -525,8 +525,9 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .col-info .buybox.wildbox { border-color: #e6ccff; background: rgba(180,108,255,0.18); color: #f1e6ff; }
 .wild-list { margin: 4px 0; font-size: 13px; }
 /* tutorial overlay */
-#tutorial { position: fixed; left: 50%; top: 108px; transform: translateX(-50%); width: min(620px, calc(100% - 24px)); z-index: 7; display: none; pointer-events: none;
-  background: var(--panel); border: 2px solid var(--gold); border-radius: 14px; padding: 12px 18px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+/* compact card at the bottom centre, between the two HUD panels, so it never covers the fighters */
+#tutorial { position: fixed; left: 50%; bottom: 12px; top: auto; transform: translateX(-50%); width: min(470px, calc(100% - 836px)); z-index: 7; display: none; pointer-events: none;
+  background: rgba(10, 16, 34, 0.82); border: 2px solid var(--gold); border-radius: 12px; padding: 8px 14px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
 #tutorial.show { display: block; }
 #tutorial.flash { box-shadow: 0 0 40px #7dff9b; border-color: #7dff9b; }
 .tut-step { font-family: var(--display); font-size: 12px; color: var(--sky); letter-spacing: 2px; }
@@ -535,7 +536,14 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .tut-dots { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
 .td { width: 22px; height: 6px; border-radius: 3px; background: #2a3550; }
 .td.done { background: #7dff9b; } .td.cur { background: var(--gold); }
-.tut-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.tut-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+#tutorial .tut-title { font-size: clamp(18px, 2vw, 24px); line-height: 1.1; }
+#tutorial .tut-text { font-size: 14px; line-height: 1.35; }
+#tutorial .tut-text kbd { font-size: 12px; }
+#tutorial .tut-dots { margin-top: 6px; } #tutorial .td { width: 16px; height: 5px; }
+/* narrower screens: the HUD panels leave no room at the bottom, so use a slim strip under the health bars */
+@media (max-width: 1180px) { #tutorial { bottom: auto; top: 92px; width: min(560px, calc(100% - 24px)); padding: 6px 12px; } #tutorial .tut-text { font-size: 13px; } }
+@media (max-width: 700px) { #tutorial { top: 70px; padding: 4px 8px; } #tutorial .tut-title { font-size: 15px; } #tutorial .tut-text { font-size: 11px; } #tutorial .tut-hint, #tutorial .tut-dots { display: none; } }
 /* compare overlay */
 .compare { position: absolute; inset: 0; display: none; z-index: 30; background: rgba(5,8,18,0.78); align-items: center; justify-content: center; padding: 12px; }
 .compare.show { display: flex; }
@@ -603,3 +611,54 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 @keyframes splashPop { from { transform: rotate(-14deg) scale(0.2); opacity: 0; } to { transform: rotate(-14deg) scale(1); opacity: 1; } }
 @keyframes splashPulse { from { transform: rotate(-14deg) scale(1); } to { transform: rotate(-14deg) scale(1.1); } }
 @media (max-width: 700px) { .splash { left: 170px; top: 50px; } .splash .sp-word { font-size: 18px; } }
+
+/* short screens (phones in landscape, small laptop windows): slim HUD panels and a one-line tutorial strip */
+@media (max-height: 520px) {
+  .cd { font-size: 11px; padding: 2px 8px; gap: 6px; min-width: 0; border-width: 2px; border-radius: 8px; }
+  .cd b { min-width: 30px; }
+  .cd .ap { width: 12px; height: 12px; border-width: 2px; }
+  .cd-bar { height: 8px; }
+  .meter-col .ammo, .meter-col .ammo.p2 { gap: 3px; }
+  .meter { height: 14px; } .meter .mlabel, .meter .mkey { font-size: 10px; line-height: 11px; }
+  .hud-bottom { bottom: 6px; }
+  #tutorial { top: 62px; bottom: auto; width: min(560px, calc(100% - 24px)); padding: 3px 10px; }
+  #tutorial .tut-step, #tutorial .tut-dots, #tutorial .tut-hint { display: none; }
+  #tutorial .tut-title { font-size: 14px; } #tutorial .tut-text { font-size: 11px; line-height: 1.25; margin-top: 0; }
+  #tutorial .tut-text kbd { font-size: 10px; padding: 0 4px; min-width: 16px; border-bottom-width: 2px; }
+}
+/* phones in portrait: keep both HUD columns inside the screen */
+@media (max-width: 520px) {
+  .hud-bottom { left: 6px; right: 6px; gap: 6px; }
+  .hud-bottom .meter-col { min-width: 0; max-width: calc(50vw - 9px); }
+  .meter { width: min(44vw, 340px); }
+  .cd { font-size: 10px; padding: 2px 6px; gap: 4px; min-width: 0; border-width: 2px; }
+  .cd b { min-width: 0; }
+  .cd .ap { width: 9px; height: 9px; border-width: 1px; }
+  .cd .pips { gap: 2px; }
+  .cd-bar { height: 7px; }
+}
+
+/* ---------- shorter screens: keep every screen's buttons reachable ---------- */
+/* results: the coin breakdown scrolls, the action buttons always stay on screen */
+.results-panel { display: flex; flex-direction: column; overflow: hidden; }
+.results-panel .res-cols { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.results-panel #resMenu { flex: none; }
+@media (max-height: 700px) {
+  .menu-col .logo.small .k { font-size: clamp(26px, 3.6vw, 42px); }
+  .menu-col .logo.small .c { font-size: clamp(22px, 3.2vw, 38px); }
+  .menu-col .logo.small .y { font-size: clamp(16px, 2vw, 24px); }
+  .menu-col .logo { margin-bottom: 8px; }
+  .menu-list li { font-size: clamp(14px, 1.7vw, 18px); padding: 5px 14px; margin: 2px 0; }
+  .menu-desc { margin-top: 8px; font-size: 13px; min-height: 0; }
+  .results-panel h2 { font-size: 26px; }
+}
+@media (max-height: 520px) {
+  .menu-col { top: 8px; transform: none; }
+  .menu-col .logo, .splash, .menu-desc { display: none; }
+  .menu-list li { font-size: 13px; padding: 3px 12px; margin: 1px 0; }
+  .mandate-box { bottom: 8px; padding: 8px 12px; } .mandate-box .mb-next, .mandate-box .progress { display: none; }
+  .sel-head { top: 4px; font-size: 18px; } .sel-mode { display: none; }
+  .sel-panel { padding: 6px 10px; } .sel-panel .moves, .sel-panel .stats, .sel-panel .bio, .sel-panel .abils, .sel-panel .rarline, .sel-panel .skin { display: none; }
+  #selGrid { max-height: 118px; }
+  .results-panel { padding: 10px 14px; } .results-panel h2 { font-size: 20px; }
+}

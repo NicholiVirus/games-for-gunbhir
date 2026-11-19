@@ -87,8 +87,13 @@
   FP.fwdHeld = function () { return this.facing > 0 ? this.input.r : this.input.l; };
   FP.backHeld = function () { return this.facing > 0 ? this.input.l : this.input.r; };
 
-  FP.readInput = function (inp) {
+  FP.readInput = function (inp, frozen) {
     var pi = this.input;
+    if (frozen) {   // hit-pause: record new presses but don't age the buffer or the double-tap timers
+      ['p', 'k', 's', 'x', 'u', 'e'].forEach(function (k) { if (inp[k] && !pi[k]) this.buf[k] = 0; }, this);
+      this.prevInput = pi; this.input = inp;
+      return;
+    }
     ['p', 'k', 's', 'x', 'u', 'e'].forEach(function (k) { this.buf[k] = (inp[k] && !pi[k]) ? 0 : this.buf[k] + 1; }, this);
     // double-tap a direction to dash (CPU fighters press the dash button instead)
     this.inT++;
@@ -980,6 +985,8 @@
     if (this.hitstop > 0) {
       this.hitstop--;
       this.f.forEach(function (f) { if (f.jitter > 0) f.jitter--; });
+      // keep listening during hit-pause so a quick tap (e.g. the 2nd punch of a combo) is buffered, not lost
+      if (this.phase === 'fight') for (var hi = 0; hi < 2; hi++) this.f[hi].readInput(this.game.getInput(hi, this), true);
       return;
     }
     var controllable = this.phase === 'fight';
@@ -1051,6 +1058,8 @@
   };
 
   /* ---------- camera ---------- */
+  // narrow / portrait windows see less horizontally: pull the camera back so both fighters stay in frame
+  MP.camWide = function () { var asp = this.camera.aspect || 1.78; return Math.min(3.4, Math.max(1, 1.6 / asp)); };
   MP.updateCamera = function (dt) {
     var a = this.f[0], b = this.f[1], cam = this.camera;
     var mid = (a.x + b.x) / 2, sep = Math.abs(a.x - b.x);
@@ -1072,11 +1081,11 @@
       tp.set(wf.x + wf.facing * 0.8, 1.5, 3.4); tl.set(wf.x, 1.2 * wf.h, 0);
       k = Math.min(1, dt * 2.5);
     } else if (this.phase === 'ko' && this.koVictim && this.pt < 60) {
-      tp.set(mid, 1.8, 4.4 + sep * 0.35); tl.set(this.koVictim.x * 0.6 + mid * 0.4, 0.9, 0);
+      tp.set(mid, 1.8, (4.4 + sep * 0.35) * this.camWide()); tl.set(this.koVictim.x * 0.6 + mid * 0.4, 0.9, 0);
       k = Math.min(1, dt * 4);
     } else {
       var hy = Math.max(a.y, b.y);
-      var dist = 5.6 + Math.max(0, sep - 1.5) * 0.62 + hy * 0.9;
+      var dist = (5.6 + Math.max(0, sep - 1.5) * 0.62 + hy * 0.9) * this.camWide();
       tp.set(mid, 1.75 + hy * 0.45, dist); tl.set(mid, 1.15 + hy * 0.5, 0);
     }
     this.camPos.lerp(tp, k); this.camLook.lerp(tl, k);
