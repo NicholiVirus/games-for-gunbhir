@@ -58,9 +58,9 @@ const L = require('./lib.js');
     if (ms < 4900) throw new Error('roll ended after ' + ms + ' ms'); return ms + ' ms';
   });
   await check('chest: LEVEL MAP button returns to the map', async () => { await clickLi('#chBtns', 'LEVEL MAP'); await screen('levels'); return true; });
-  await check('campaign: boss levels never use a Mythic', async () => {
-    const v = await page.evaluate(() => { var o = {}; for (var n = 10; n < 250; n += 10) { var r = KC.level(n).ch.rarity; o[r] = (o[r] || 0) + 1; } return o; });
-    if (v.mythic) throw new Error(JSON.stringify(v)); return v;
+  await check('campaign: no Mythic opponent before level 175, Mythics from 175', async () => {
+    const v = await page.evaluate(() => { var early = 0, late = 0; for (var n = 1; n < 250; n++) { var r = KC.level(n).ch.rarity; if (n < 175 && r === 'mythic') early++; if (n >= 175 && r === 'mythic') late++; } return { early: early, late: late }; });
+    if (v.early || !v.late) throw new Error(JSON.stringify(v)); return v;
   });
   await check('campaign: level 250 win -> BECOME PRIME MINISTER -> ending', async () => {
     await page.evaluate(() => { KC.Save.data.tour = 249; KC.Save.write(); KC.Game.startLevel(250, KC.rosterById.sharett, null); });

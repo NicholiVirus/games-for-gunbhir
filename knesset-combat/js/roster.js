@@ -609,11 +609,17 @@ KC.RARITY_ORDER = ['common', 'rare', 'superrare', 'epic', 'elite', 'mythic', 'le
 /* ---------- Campaign: 100 levels vs CPU ---------- */
 KC.LEVELS = 250;
 KC.level = function (n) {
-  // Opponent rarity: Common for 1-50, Rare 51-100, Super Rare 101-150, Epic 151-200, Mythic 201-250.
-  // Every 10th level is a boss one rarity higher; every 50th is two rarities higher. Level 250 = Legendary.
+  // Opponent rarity climbs slowly across all 250 levels. Between anchors the next rarity phases in gradually
+  // (a few opponents first, then most), so there are no sudden jumps:
+  //   1 Common · 35 Rare starts · 70 Super Rare · 105 Epic · 140 Elite · 175 Mythic (never before 175) · 250 Netanyahu.
+  // Every 10th level is a boss one rarity higher, every 50th two higher, both capped by the same Mythic rule.
   var ORDER = KC.RARITY_ORDER, boss = n % 10 === 0;
-  var band = Math.min(4, Math.floor((n - 1) / 50));
-  var tierIdx = Math.min(ORDER.indexOf('elite'), band + (n % 50 === 0 ? 2 : boss ? 1 : 0));   // bosses top out at Elite (no Mythics); level 250 is Netanyahu
+  var A = [[1, 0], [35, 0.5], [70, 1.5], [105, 2.5], [140, 3.5], [175, 5], [250, 5]], t = 0;
+  for (var ai_ = 0; ai_ < A.length - 1; ai_++) if (n >= A[ai_][0] && n <= A[ai_ + 1][0]) { t = A[ai_][1] + (A[ai_ + 1][1] - A[ai_][1]) * (n - A[ai_][0]) / (A[ai_ + 1][0] - A[ai_][0]); break; }
+  var base = Math.floor(t), frac = t - base, roll = ((n * 37) % 100) / 100;   // fixed per level, so a level always has the same opponent
+  var tierIdx = base + (roll < frac ? 1 : 0) + (n % 50 === 0 ? 2 : boss ? 1 : 0);
+  var cap = n < 175 ? ORDER.indexOf('elite') : ORDER.indexOf('mythic');
+  tierIdx = Math.max(0, Math.min(cap, tierIdx));
   var pool = KC.ROSTER.filter(function (c) { return c.rarity === ORDER[tierIdx]; });
   var ch = n === KC.LEVELS ? KC.rosterById.netanyahu : pool[(n * 7 + Math.floor(n / 10) * 3) % pool.length];
   var ai = n <= 30 ? 'easy' : n <= 100 ? 'normal' : n <= 180 ? 'hard' : 'boss';

@@ -12,6 +12,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Smoother campaign difficulty:** opponent rarity now rises gradually across all 250 levels. You won't meet a Mythic before level 175; from 175 to 249 every opponent is Mythic.
+
 - **Tung Tung Tung Sahur joins as a free fighter.** He's a high-detail carved wooden log with growth rings, bark grooves, knots, big cartoon eyes and a baseball bat. He's a Common with the **Tung Tung Charge** rush special, and every player owns him from the start (including existing saves).
 - **Single shards cost a quarter of the old price:** cut 50%, then 50% again. Examples: a Common shard 195 → 49 coins, a Mythic shard 375 → 94.
 - **The free chest refreshes every 20 minutes** (was 90).
@@ -87,7 +89,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Campaign · 250 levels:** fixed CPU rivals that get tougher.
   - Levels 1–30 are Easy, 31–100 Normal, 101–180 Hard and 181–250 Boss.
-  - Opponent rarity climbs every 50 levels: Common (1–50), Rare (51–100), Super Rare (101–150), Epic (151–200) and Elite (201–250).
+  - Opponent rarity climbs slowly across all 250 levels, with each new rarity phasing in gradually: mostly Common early, then Rare (from about 35), Super Rare (about 70), Epic (about 105), Elite (about 140), and **Mythics only from level 175** to 249. Level 250 is Netanyahu.
   - Every 10th level is a boss one rarity higher, and every 50th level is two rarities higher.
   - **Level 250 is the Legendary final boss. Beat it to win the game and become Prime Minister.**
   - Opponents also gain strength and upgrade ranks as you climb.
