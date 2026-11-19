@@ -47,6 +47,105 @@
 
   /* ---------- geometry helpers ---------- */
   function flat(geo) { var g = geo.index ? geo.toNonIndexed() : geo.clone(); g.computeVertexNormals(); return g; }
+  /* ---------- Tung Tung Tung Sahur: a hand-carved wooden log with a baseball bat (high-detail custom model) ---------- */
+  function buildTungTung(ch, opts, L) {
+    var h = L.height || 1;
+    var wood = opts.skin ? opts.skin.top : '#b98656';
+    var bark = shade(wood, 0.62), barkDark = shade(wood, 0.45), endGrain = shade(wood, 1.28), ringCol = shade(wood, 0.82);
+    var root = new T.Group(), body = new T.Group(); root.add(body); body.scale.setScalar(h);
+    var J = { body: body };
+    var hips = grp(0, 0.95, 0); body.add(hips); J.hips = hips;
+    var torso = grp(0, 0.02, 0); hips.add(torso); J.torso = torso;
+    var R = 0.25, LEN = 1.0, base = -0.12;
+    // the log: smooth 24-sided trunk with a slight taper and bulge
+    var logGeo = new T.CylinderGeometry(R * 0.96, R, LEN, 24, 6);
+    var pos = logGeo.attributes.position;
+    for (var i = 0; i < pos.count; i++) {
+      var y = pos.getY(i), a = Math.atan2(pos.getZ(i), pos.getX(i));
+      var bulge = 1 + 0.04 * Math.sin((y / LEN + 0.5) * Math.PI) + 0.012 * Math.sin(a * 7 + y * 9);
+      pos.setX(i, pos.getX(i) * bulge); pos.setZ(i, pos.getZ(i) * bulge);
+    }
+    logGeo.computeVertexNormals();
+    torso.add(part(logGeo, wood, 0, base + LEN / 2, 0));
+    // bark grooves running down the trunk
+    for (var gI = 0; gI < 16; gI++) {
+      var ang = gI / 16 * Math.PI * 2 + (gI % 2) * 0.12;
+      if (Math.abs(Math.sin(ang)) > 0.86 && Math.cos(ang) > -0.2 && Math.sin(ang) > 0) continue;   // keep the face area clean
+      var gl = 0.45 + (gI * 37 % 40) / 100, gy = base + 0.08 + (gI * 53 % 30) / 100 + gl / 2;
+      var groove = part(box(0.018, gl, 0.012), gI % 3 ? bark : barkDark, Math.cos(ang) * (R + 0.006), gy, Math.sin(ang) * (R + 0.006), false);
+      groove.rotation.y = -ang; torso.add(groove);
+    }
+    // knots
+    [[2.2, 0.18, 0.05], [3.6, 0.62, 0.04], [5.4, 0.35, 0.035]].forEach(function (k) {
+      var kn = sph(k[2], 10, 8); kn.scale(1, 1.4, 0.45);
+      var km = part(kn, barkDark, Math.cos(k[0]) * R, base + k[1], Math.sin(k[0]) * R, false); km.rotation.y = -k[0] + Math.PI / 2; torso.add(km);
+      var kr = part(new T.TorusGeometry(k[2] * 1.1, 0.008, 6, 16), bark, Math.cos(k[0]) * (R + 0.004), base + k[1], Math.sin(k[0]) * (R + 0.004), false); kr.rotation.y = -k[0] + Math.PI / 2; kr.scale.y = 1.4; torso.add(kr);
+    });
+    // cut top with growth rings
+    var topY = base + LEN;
+    torso.add(part(new T.CylinderGeometry(R * 0.97, R * 0.97, 0.02, 24), endGrain, 0, topY + 0.006, 0, false));
+    for (var rI = 1; rI <= 5; rI++) torso.add(part(new T.TorusGeometry(R * 0.17 * rI, 0.005, 4, 28), ringCol, 0, topY + 0.017, 0, false)).rotation.x = Math.PI / 2;
+    torso.add(part(sph(0.018, 8, 6), ringCol, 0.02, topY + 0.016, -0.01, false));
+    // bottom bark rim
+    torso.add(part(new T.TorusGeometry(R * 0.98, 0.016, 6, 24), barkDark, 0, base + 0.01, 0, false)).rotation.x = Math.PI / 2;
+    // face (on a head group so it can nod with the poses)
+    var neck = grp(0, 0.62, 0); torso.add(neck); J.neck = neck;
+    var head = grp(0, 0, 0); neck.add(head); J.head = head;
+    var fz = R + 0.01;
+    if (!buildCtx.sil) {
+      [1, -1].forEach(function (s) {
+        var eye = sph(0.068, 16, 12); eye.scale(1, 1.18, 0.45);
+        head.add(part(eye, '#fbfbf6', s * 0.088, 0.08, fz - 0.005));
+        var iris = sph(0.03, 12, 10); iris.scale(1, 1.1, 0.5);
+        head.add(part(iris, '#1a120c', s * 0.08, 0.072, fz + 0.022, false));
+        head.add(part(sph(0.009, 6, 5), '#ffffff', s * 0.07 + 0.006, 0.088, fz + 0.034, false));
+        var brow = part(box(0.11, 0.028, 0.03), '#3b2414', s * 0.092, 0.175, fz + 0.012, false); brow.rotation.z = s * -0.32; head.add(brow);
+      });
+      var nose = sph(0.04, 12, 10); nose.scale(0.8, 1.1, 0.9);
+      head.add(part(nose, shade(wood, 1.08), 0, 0.0, fz + 0.03));
+      var mouth = sph(0.075, 16, 10); mouth.scale(1.25, 0.55, 0.28);
+      head.add(part(mouth, '#2a0f0a', 0, -0.11, fz + 0.002, false));
+      var tongue = sph(0.04, 10, 8); tongue.scale(1.3, 0.5, 0.3);
+      head.add(part(tongue, '#c2413b', 0, -0.13, fz + 0.012, false));
+      head.add(part(box(0.11, 0.018, 0.02), '#fbfbf6', 0, -0.085, fz + 0.012, false));
+    }
+    // thin stick arms with round wooden hands
+    function arm(side) {
+      var sh = grp(side * (R + 0.03), 0.42, 0);
+      sh.add(part(sph(0.045, 10, 8), bark, 0, 0, 0));
+      sh.add(part(cyl(0.032, 0.028, 0.32, 10), wood, 0, -0.16, 0));
+      var el = grp(0, -0.32, 0); sh.add(el);
+      el.add(part(sph(0.032, 8, 6), bark, 0, 0, 0));
+      el.add(part(cyl(0.028, 0.024, 0.27, 10), wood, 0, -0.135, 0));
+      el.add(part(sph(0.048, 12, 10), shade(wood, 1.05), 0, -0.3, 0));
+      return { sh: sh, el: el };
+    }
+    var la = arm(1), ra = arm(-1); torso.add(la.sh); torso.add(ra.sh);
+    J.lSh = la.sh; J.lEl = la.el; J.rSh = ra.sh; J.rEl = ra.el;
+    // stick legs with chunky wooden feet
+    function leg(side) {
+      var hp = grp(side * 0.11, -0.1, 0);
+      hp.add(part(cyl(0.036, 0.032, 0.4, 10), wood, 0, -0.2, 0));
+      var kn = grp(0, -0.4, 0); hp.add(kn);
+      kn.add(part(sph(0.036, 8, 6), bark, 0, 0, 0));
+      kn.add(part(cyl(0.032, 0.03, 0.38, 10), wood, 0, -0.19, 0));
+      var foot = sph(0.07, 12, 8); foot.scale(0.9, 0.55, 1.6);
+      kn.add(part(foot, bark, 0, -0.4, 0.05));
+      return { hp: hp, kn: kn };
+    }
+    var ll = leg(1), rl = leg(-1); hips.add(ll.hp); hips.add(rl.hp);
+    J.lHip = ll.hp; J.lKnee = ll.kn; J.rHip = rl.hp; J.rKnee = rl.kn;
+    // the baseball bat
+    var bat = grp(0, -0.3, 0.02);
+    var batGeo = new T.CylinderGeometry(0.05, 0.017, 0.72, 16); batGeo.translate(0, 0.36, 0);
+    var batM = part(batGeo, '#e3c08a', 0, 0, 0); batM.rotation.x = Math.PI / 2 - 0.25; bat.add(batM);
+    var tip = part(sph(0.05, 14, 10), '#e3c08a', 0, 0, 0); tip.position.set(0, Math.sin(0.25) * 0.72, Math.cos(0.25) * 0.72); tip.scale.set(1, 1, 0.5); bat.add(tip);
+    var knob = part(cyl(0.028, 0.028, 0.02, 12), '#8a5a36', 0, 0, 0, false); knob.rotation.x = Math.PI / 2 - 0.25; bat.add(knob);
+    var grip = part(cyl(0.021, 0.019, 0.14, 12), '#2b2b2b', 0, 0, 0, false); grip.geometry.translate(0, 0.08, 0); grip.rotation.x = Math.PI / 2 - 0.25; bat.add(grip);
+    ra.el.add(bat); J.prop = bat;
+    buildCtx.sil = false; buildCtx.outline = true;
+    return { root: root, body: body, J: J, ch: ch, scale: h, height: 1.86 * h, girth: 1 };
+  }
   var box = function (w, h, d) { return new T.BoxGeometry(w, h, d); };
   var cyl = function (rt, rb, h, s) { return new T.CylinderGeometry(rt, rb, h, s || 8); };
   var sph = function (r, ws, hs) { return new T.SphereGeometry(r, ws || 10, hs || 8); };
@@ -87,6 +186,7 @@
     }
     buildCtx.sil = !!opts.silhouette;
     buildCtx.outline = opts.outline !== false;
+    if (L.custom === 'tungtung') return buildTungTung(ch, opts, L);
     var g = L.girth || 1, h = L.height || 1;
     var root = new T.Group();
     var body = new T.Group();

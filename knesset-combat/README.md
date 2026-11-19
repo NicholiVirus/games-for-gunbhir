@@ -12,6 +12,10 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Tung Tung Tung Sahur joins as a free fighter.** He's a high-detail carved wooden log with growth rings, bark grooves, knots, big cartoon eyes and a baseball bat. He's a Common with the **Tung Tung Charge** rush special, and every player owns him from the start (including existing saves).
+- **Single shards cost a quarter of the old price:** cut 50%, then 50% again. Examples: a Common shard 195 → 49 coins, a Mythic shard 375 → 94.
+- **The free chest refreshes every 20 minutes** (was 90).
+
 - **Tutorial box moved:** the instruction card now sits at the bottom center between the HUD panels, so it never covers the fighters. On narrow or short screens it becomes a slim strip under the health bars.
 - **Bug-fix pass:** an automated suite (110 checks, in `tools/tests/`) played through every menu, mode, shop action, chest, the full tutorial and every move of all 51 fighters. Fixes:
   - **Dropped inputs during hit-pause.** A button pressed during the freeze on impact is now buffered instead of lost, so fast punch-punch combos register (this also made the tutorial's COMBO step get stuck).
@@ -24,7 +28,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 - **Balance pass on all 51 fighters:** tuned and retested over 6 rounds of simulated CPU-vs-CPU matches. Fighters of the same rarity are now within a few points of each other, and Netanyahu is finally the strongest fighter. Full patch notes are in the Balance pass section below.
 
-- **51 fighters**, sorted by rarity on the select screen and in the Shop.
+- **52 fighters**, sorted by rarity on the select screen and in the Shop.
   - **New fighters:** Yitzhak Ben-Zvi, Zalman Shazar, Benny Begin, Yossi Sarid, Shelly Yachimovich, Tommy Lapid, David Levy, Dalia Itzik, Chaim Herzog and Pnina Tamano-Shata, plus the Elite fighters Natan Sharansky and Orna Barbivai.
 - **Elite rarity (orange):** sits between Epic and Mythic. It gets 3 abilities and +40 HP. Rabin and Peres moved up to Elite.
 - **Shards:** Commons need 10. Single shards in the Shop cost 50% more.
@@ -66,7 +70,7 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
   - **Backdash:** hops about 1.8 m back and is invincible for its first 7 frames, so it slips through attacks and projectiles, but its recovery can be punished.
   - **Air dash:** once per jump, double-tap in the air to hover-dash forward or back.
   - A short cooldown (0.2 s) stops endless dash chains.
-- **Free chest:** a free Wooden chest (one tier below the daily Silver chest, 3 upgrade taps) every 90 minutes from the main menu. The menu shows READY or a countdown.
+- **Free chest:** a free Wooden chest (one tier below the daily Silver chest, 3 upgrade taps) every 20 minutes from the main menu. The menu shows READY or a countdown.
 - **CPU zoning:** CPUs with projectiles fire them much more often from mid-range. After getting caught in a combo (2+ hits), a CPU backdashes out and keeps its distance for 1–2 s, throwing projectiles, more reliably at higher skill.
   - **Yigal Allon** has a nerfed dash: 25% shorter, cancels into attacks 4 frames later, and a 0.43 s cooldown. CPU opponents dash in, dash-punch, backdash out of pressure and dash to punish, more often at higher skill.
 - **Super meter:** it fills from damage you deal (about 330 damage fills it). Blocked hits give the attacker nothing.
@@ -251,7 +255,7 @@ The "Power" and "Defense" values are base stats; rarity perks stack on top. Win 
 
 ## Coins and unlocking
 
-You start with **5 free Common fighters**: Moshe Sharett, Yigal Allon, Tzipi Livni, Benny Gantz and Yitzhak Navon. That's enough for you and a friend to play Versus right away. The other 45 fighters, Ben-Gurion included, unlock with shards. Every match pays coins:
+You start with **6 free Common fighters**: Moshe Sharett, Yigal Allon, Tzipi Livni, Benny Gantz, Yitzhak Navon and Tung Tung Tung Sahur. That's enough for you and a friend to play Versus right away. The other 45 fighters, Ben-Gurion included, unlock with shards. Every match pays coins:
 
 | Source | Coins |
 |---|---|

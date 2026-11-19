@@ -1,4 +1,4 @@
-/* Knesset Combat 26' — fighter roster (51 fighters).
+/* Knesset Combat 26' — fighter roster (52 fighters).
  * Every fighter is built procedurally from the "look" block (low-poly, cel-shaded).
  *
  * RARITY decides how many abilities a fighter has and what they cost in the Shop:
@@ -9,7 +9,7 @@
  *   elite      3 abilities — Special + Down-Special + Super          (+40 HP perk)
  *   mythic     3 abilities — Special + Down-Special + Super + a unique passive
  *   legendary  3 abilities — Special + Down-Special + Super + a unique passive
- * Fighters are unlocked with shards from chests. New players start with 5 free Common fighters (KC.STARTERS).
+ * Fighters are unlocked with shards from chests. New players start with 6 free Common fighters (KC.STARTERS).
  */
 window.KC = window.KC || {};
 
@@ -538,6 +538,15 @@ KC.ROSTER = [
     quote: 'Tremendous win. Maybe the best win in the history of the Knesset.', victory: 'point'
   },
   {
+    id: 'tungtung', name: 'Tung Tung Tung Sahur', short: 'TUNG', title: 'The Sahur Drummer', rarity: 'common', starter: true,
+    group: 'guest', years: 'Special Guest',
+    bio: 'An internet-famous carved wooden log with a baseball bat who goes door to door waking everyone for the pre-dawn sahur meal. Tung tung tung!',
+    look: { height: 1.0, girth: 1, custom: 'tungtung', skin: '#b98656', hair: 'bald', outfit: 'shirt', top: '#b98656', pants: '#b98656', shirt: '#b98656', shoes: '#7a5232' },
+    stats: { speed: 1.06, power: 1.0, defense: 1.02, jump: 1.08 },
+    special: { type: 'rush', name: 'Tung Tung Charge', dmg: 86 },
+    quote: 'Tung tung tung tung tung tung tung tung tung SAHUR!', victory: 'point'
+  },
+  {
     id: 'speaker', name: 'The Speaker', short: 'THE SPEAKER', title: 'Order Incarnate', rarity: 'mythic', price: 800,
     group: 'boss', years: 'Final Boss (fictional)',
     bio: 'The fictional keeper of order in the plenum. Final boss of the Election Campaign.',
@@ -556,7 +565,7 @@ KC.ROSTER = [
   KC.ROSTER.forEach(function (c, i) { c._orig = i; });
   KC.ROSTER.sort(function (a, b) { return (order.indexOf(a.rarity) - order.indexOf(b.rarity)) || (a._orig - b._orig); });
 })();
-KC.STARTERS = ['sharett', 'allon', 'livni', 'gantz', 'navon'];   // free Common fighters every new player owns
+KC.STARTERS = ['sharett', 'allon', 'livni', 'gantz', 'navon', 'tungtung'];   // free Common fighters every new player owns
 KC.rosterById = {};
 KC.ROSTER.forEach(function (c, i) { c.index = i; KC.rosterById[c.id] = c; });
 
@@ -622,7 +631,7 @@ KC.level = function (n) {
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
 KC.SHARDS = { common: 10, rare: 15, superrare: 17, epic: 20, elite: 22, mythic: 25, legendary: 30 };
 KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
-KC.shardPrice = function (c) { return Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 15; };   // single shards are a premium shortcut
+KC.shardPrice = function (c) { return Math.max(1, Math.round(Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 15 * 0.25)); };   // single shards: cut 50%, then 50% again (a quarter of the old price)   // single shards are a premium shortcut
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 KC.WILD_CHANCE = 0.01;     // 1% per chest: a Wild Shard that unlocks any locked fighter of its rarity
 

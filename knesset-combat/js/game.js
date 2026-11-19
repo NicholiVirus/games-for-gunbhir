@@ -27,7 +27,7 @@
         base.charWins = old.charWins || {}; base.matches = old.matches || 0; base.cpuWins = old.cpuWins || 0;
         base.settings = Object.assign(defaults().settings, old.settings || {});
       }
-      KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });   // everyone gets the 5 free starters
+      KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });   // everyone gets the free starters
       Save.data = base;
     },
     write: function () { memoryStore = Save.data; try { localStorage.setItem(SAVE_KEY, JSON.stringify(Save.data)); } catch (e) { /* private mode */ } },
@@ -430,7 +430,7 @@
     { id: 'versus', label: 'VERSUS · 2 PLAYERS', desc: 'Same keyboard. Player 1 on WASD + F G R + Q (Super), Player 2 on IJKL + U ; P + O (Super). Both players earn coins for the shared wallet.' },
     { id: 'campaign', label: 'ELECTION ARCADE', desc: 'Quick arcade ladder: beat five random rivals, then face the final boss in one run.' },
     { id: 'store', label: '🎁 CHEST STORE', desc: 'Buy chests with coins. Each spins on the slot machine for coins and shards — the way to unlock fighters. Lucky chests get extra upgrade taps.' },
-    { id: 'free', label: '⏱️ FREE CHEST', desc: 'A free Wooden chest every 90 minutes.' },
+    { id: 'free', label: '⏱️ FREE CHEST', desc: 'A free Wooden chest every 20 minutes.' },
     { id: 'daily', label: '🗳️ DAILY FREE CHEST', desc: 'A free Silver chest every day. Come back tomorrow for another!' },
     { id: 'shop', label: 'SHOP · SHARDS & UPGRADES', desc: 'Buy shards toward locked fighters, upgrade your fighters to Rank 5, use Wild Shards, compare fighters and buy gold skins.' },
     { id: 'skins', label: '🏛️ CHAMBER SKINS', desc: 'Redecorate the Knesset: Hanukkah, Independence Day, Purim and Sukkot themes.' },
@@ -1109,8 +1109,8 @@
     var now = new Date(), mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), ms = mid - now;
     return Math.floor(ms / 3600000) + 'h ' + Math.floor((ms % 3600000) / 60000) + 'm';
   };
-  // Free chest: a Wooden chest (one tier below the daily Silver) every 90 minutes
-  KC.FREE_CHEST_MS = 90 * 60 * 1000;
+  // Free chest: a Wooden chest (one tier below the daily Silver) every 20 minutes
+  KC.FREE_CHEST_MS = 20 * 60 * 1000;
   G.freeLeft = function () { var t = Save.data.lastFree || 0, n = Date.now(); if (t > n) t = n - KC.FREE_CHEST_MS; return Math.max(0, t + KC.FREE_CHEST_MS - n); };
   G.freeReady = function () { return G.freeLeft() <= 0; };
   G.freeWait = function () { var ms = G.freeLeft(); return Math.floor(ms / 3600000) + 'h ' + Math.ceil((ms % 3600000) / 60000) + 'm'; };
