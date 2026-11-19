@@ -583,6 +583,9 @@ KC.priceOf = function (c) { return c.starter ? 0 : (c.price || KC.RARITY[c.rarit
 /* Gold "Election Night" alt skin — win 3 matches with a fighter, or buy it for coins. */
 KC.ALT_SKIN = { top: '#c9a227', pants: '#3a2f12', shirt: '#fffbea', tie: '#111111', dress: '#c9a227', name: 'Election Night Gold' };
 /* Used automatically for P2 in mirror matches. */
+// free skin for every fighter: turns them into the carved Tung Tung Tung Sahur log (keeps their moves and stats)
+KC.TUNG_SKIN = { custom: 'tungtung', top: '#b98656', pants: '#b98656', shirt: '#b98656', tie: '#b98656', dress: '#b98656', name: 'Tung Tung Tung Sahur' };
+KC.TUNG_MIRROR = { custom: 'tungtung', top: '#8e3a2a', pants: '#8e3a2a', shirt: '#8e3a2a', tie: '#8e3a2a', dress: '#8e3a2a', name: 'Tung Tung Tung Sahur (Red)' };
 KC.MIRROR_SKIN = { top: '#7a1f2b', pants: '#4a141c', shirt: '#f4f4f4', tie: '#f2c14e', dress: '#7a1f2b', name: 'Opposition Red' };
 KC.ALT_SKIN_WINS = 3;
 KC.ALT_SKIN_PRICE = 150;
@@ -636,8 +639,10 @@ KC.level = function (n) {
 
 /* ---------- Shards: collect fragments of a leader to recruit them ---------- */
 KC.SHARDS = { common: 10, rare: 15, superrare: 17, epic: 20, elite: 22, mythic: 25, legendary: 30 };
-KC.shardsNeeded = function (c) { return c.starter ? 0 : KC.SHARDS[c.rarity]; };
-KC.shardPrice = function (c) { return Math.max(1, Math.round(Math.ceil(KC.priceOf(c) * 1.25 / KC.shardsNeeded(c)) * 15 * 0.25)); };   // single shards: cut 50%, then 50% again (a quarter of the old price)   // single shards are a premium shortcut
+// limited-time sale: these fighters need half the shards (half the total cost), shown with a 50% OFF badge
+KC.SALE = { netanyahu: 0.5, trump: 0.5 };
+KC.shardsNeeded = function (c) { return c.starter ? 0 : Math.ceil(KC.SHARDS[c.rarity] * (KC.SALE[c.id] || 1)); };
+KC.shardPrice = function (c) { return Math.max(1, Math.round(Math.ceil(KC.priceOf(c) * 1.25 / (c.starter ? 1 : KC.SHARDS[c.rarity])) * 15 * 0.25)); };   // per-shard price ignores the sale (so a sale halves the total)   // single shards: cut 50%, then 50% again (a quarter of the old price)   // single shards are a premium shortcut
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 KC.WILD_CHANCE = 0.01;     // 1% per chest: a Wild Shard that unlocks any locked fighter of its rarity
 

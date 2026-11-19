@@ -27,7 +27,8 @@
         base.charWins = old.charWins || {}; base.matches = old.matches || 0; base.cpuWins = old.cpuWins || 0;
         base.settings = Object.assign(defaults().settings, old.settings || {});
       }
-      KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });   // everyone gets the free starters
+      KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });
+      Object.keys(KC.SALE).forEach(function (id) { var c = KC.rosterById[id]; if (c && base.owned.indexOf(id) < 0 && ((base.shards || {})[id] || 0) >= KC.shardsNeeded(c)) { base.owned.push(id); delete base.shards[id]; } });   // sale lowered the shard need   // everyone gets the free starters
       Save.data = base;
     },
     write: function () { memoryStore = Save.data; try { localStorage.setItem(SAVE_KEY, JSON.stringify(Save.data)); } catch (e) { /* private mode */ } },
@@ -224,6 +225,11 @@
     try { r.dispose(); r.forceContextLoss(); } catch (e) { /* ignore */ }
   }
   function por(ch, gold) { var p = G.portraits[ch.id]; return p ? (gold ? p.g : p.n) : ''; }
+  function porF(f) { return f.skin && f.skin.custom ? por(KC.rosterById.tungtung, false) : por(f.ch, f.skin === KC.ALT_SKIN); }   // HUD portrait matches the skin
+  G.porF = porF;
+  // skin a select-screen player has chosen: Classic, Gold (if owned) or the free Tung Tung Tung Sahur skin
+  function selSkin(p, ch) { return p.tung ? KC.TUNG_SKIN : p.gold && Save.hasGold(ch.id) ? KC.ALT_SKIN : null; }
+  function pairSkins(c0, s0, c1, s1) { if (c0 === c1 && s0 === s1) s1 = s1 === KC.TUNG_SKIN ? KC.TUNG_MIRROR : s1 && s1.custom ? KC.TUNG_SKIN : KC.MIRROR_SKIN; return s1; }
   G.por = por;
 
   /* =====================================================================
@@ -252,7 +258,7 @@
       };
       for (var i = 0; i < 2; i++) {
         var f = m.f[i], el = hudEls.hp[i];
-        el.querySelector('.por').src = por(f.ch, f.skin === KC.ALT_SKIN);
+        el.querySelector('.por').src = porF(f);
         el.querySelector('.nm').textContent = (G.matchCfg && G.ai && G.ai[i] ? 'CPU · ' : (i === 0 ? 'P1 · ' : 'P2 · ')) + f.ch.short + (f.rank ? ' ★' + f.rank : '');
         trails[i] = 1; lastHp[i] = 1; trailDelay[i] = 0; comboT[i] = 0; calloutT[i] = 0;
         hudEls.combo[i].classList.remove('on'); hudEls.callout[i].classList.remove('on');
@@ -274,8 +280,8 @@
     },
     vs: function (a, b) {
       var v = $('vs'), m = G.match;
-      v.querySelector('.l img').src = por(a, m.f[0].skin === KC.ALT_SKIN); v.querySelector('.l .vs-name').textContent = a.short; v.querySelector('.l .vs-title').textContent = a.title.toUpperCase();
-      v.querySelector('.r img').src = por(b, m.f[1].skin === KC.ALT_SKIN); v.querySelector('.r .vs-name').textContent = b.short; v.querySelector('.r .vs-title').textContent = b.title.toUpperCase();
+      v.querySelector('.l img').src = porF(m.f[0]); v.querySelector('.l .vs-name').textContent = a.short; v.querySelector('.l .vs-title').textContent = a.title.toUpperCase();
+      v.querySelector('.r img').src = porF(m.f[1]); v.querySelector('.r .vs-name').textContent = b.short; v.querySelector('.r .vs-title').textContent = b.title.toUpperCase();
       v.classList.add('show');
       KC.Audio.say(a.name + '. Versus. ' + b.name + '.', { rate: 1.0 });
     },
@@ -338,7 +344,7 @@
     },
     superCut: function (f) {
       var s = $('supercut');
-      s.querySelector('img').src = por(f.ch, f.skin === KC.ALT_SKIN);
+      s.querySelector('img').src = porF(f);
       s.querySelector('.sc-who').textContent = f.ch.name.toUpperCase() + ' — SUPER';
       s.querySelector('.sc-move').textContent = f.ch.super.name.toUpperCase();
       s.className = ''; void s.offsetWidth; s.className = 'show' + (f.slot === 1 ? ' right' : '');
@@ -572,7 +578,7 @@
     var owned = Save.owns(ch.id);
     var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'guest' ? 'GUEST' : ch.group === 'icon' ? 'MK' : '';
     var price = owned ? '' : '<span class="price shardp"><span class="shard"></span>' + Save.shards(ch.id) + '/' + KC.shardsNeeded(ch) + '</span>';
-    return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + price + (tags || '') + '</div>';
+    return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + (KC.SALE[ch.id] && !owned ? '<span class="sale">50% OFF</span>' : '') + price + (tags || '') + '</div>';
   }
   G.cellHTML = cellHTML;
   /* keys: {s: 'R', x: 'T'} for P1, {s: 'O', x: 'P'} for P2, or generic words */
@@ -591,7 +597,7 @@
   G.abilityHTML = abilityHTML;
   function panelHTML(ch, who, st) {
     var owned = Save.owns(ch.id), s = ch.stats, price = G.recruitPrice(ch);
-    var head = '<div class="who">' + who + (owned ? ' · <span class="rank">RANK ' + Save.rank(ch.id) + '/' + KC.UPGRADE.max + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + rarBadge(ch) + ' ' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>';
+    var head = '<div class="who">' + who + (owned ? ' · <span class="rank">RANK ' + Save.rank(ch.id) + '/' + KC.UPGRADE.max + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + (KC.SALE[ch.id] && !owned ? '<span class="sale-tag">50% OFF</span>' : '') + '</div><div class="ttl">' + rarBadge(ch) + ' ' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>';
     var body = '<div class="bio">' + esc(ch.bio) + '</div>' + abilityHTML(ch, st.keys) +
       '<div class="stats"><span>SPEED</span>' + statBar(s.speed) + '<span>POWER</span>' + statBar(s.power) + '<span>DEFENSE</span>' + statBar(s.defense) + '<span>JUMP</span>' + statBar(s.jump) + '</div>';
     if (!owned) {
@@ -599,7 +605,7 @@
     }
     var gold = st.gold, goldOk = Save.hasGold(ch.id);
     return head + body +
-      '<div class="skin">SKIN: <b>' + (gold ? KC.ALT_SKIN.name : 'Classic') + '</b> ' + (goldOk ? '<span style="opacity:.7">(' + st.skinKey + ' to switch)</span>' : '<span style="opacity:.6">· Gold: win ' + KC.ALT_SKIN_WINS + ' (' + Math.min(KC.ALT_SKIN_WINS, Save.data.charWins[ch.id] || 0) + '/' + KC.ALT_SKIN_WINS + ') or buy in Shop</span>') + '</div>' +
+      '<div class="skin">SKIN: <b>' + (st.tung ? KC.TUNG_SKIN.name + ' 🥁' : gold ? KC.ALT_SKIN.name : 'Classic') + '</b> <span style="opacity:.7">(' + st.skinKey + ' to switch)</span>' + (goldOk ? '' : '<span style="opacity:.6"> · Gold: win ' + KC.ALT_SKIN_WINS + ' (' + Math.min(KC.ALT_SKIN_WINS, Save.data.charWins[ch.id] || 0) + '/' + KC.ALT_SKIN_WINS + ') or buy in Shop</span>') + '</div>' +
       (st.locked ? '<div class="ready">READY!</div>' : '');
   }
   var sel = null;
@@ -612,8 +618,8 @@
       var mode = arg.mode, two = mode === 'versus';
       var keep = sel && sel.mode === mode ? sel : null;
       sel = { mode: mode, level: arg.level, levelNo: arg.levelNo, two: two, t: 0, startT: 0,
-        p: [{ cur: keep ? keep.p[0].cur : firstOwned(), locked: false, gold: keep ? keep.p[0].gold : false, confirm: -1, confirmT: 0 },
-            { cur: keep ? keep.p[1].cur : firstOwned(), locked: false, gold: keep ? keep.p[1].gold : false, confirm: -1, confirmT: 0 }] };
+        p: [{ cur: keep ? keep.p[0].cur : firstOwned(), locked: false, gold: keep ? keep.p[0].gold : false, tung: keep ? keep.p[0].tung : false, confirm: -1, confirmT: 0 },
+            { cur: keep ? keep.p[1].cur : firstOwned(), locked: false, gold: keep ? keep.p[1].gold : false, tung: keep ? keep.p[1].tung : false, confirm: -1, confirmT: 0 }] };
       $('selTitle').textContent = two ? 'CHOOSE YOUR CANDIDATES' : 'CHOOSE YOUR CANDIDATE';
       $('selMode').innerHTML = (mode === 'versus' ? 'VERSUS · 2 PLAYERS' : mode === 'campaign' ? 'ELECTION ARCADE' : mode === 'tour' ? 'CAMPAIGN · LEVEL ' + arg.levelNo : 'VS CPU · ' + (arg.level || 'normal').toUpperCase()) + ' &nbsp;·&nbsp; ' + G.coin(Save.data.coins);
       var st = Save.data.settings;
@@ -664,9 +670,9 @@
       var me = this;
       $('selMode').innerHTML = $('selMode').innerHTML.replace(/<span class="coin"><\/span>\d+$/, G.coin(Save.data.coins));
       var p1c = KC.ROSTER[sel.p[0].cur];
-      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'Q', p: 'F', k: 'G' }, confirm: sel.p[0].confirm === sel.p[0].cur });
+      $('selP1').innerHTML = panelHTML(p1c, sel.two ? 'PLAYER 1' : 'PLAYER', { gold: sel.p[0].gold, tung: sel.p[0].tung, locked: sel.p[0].locked, skinKey: 'R', pickKey: 'F', keys: { s: 'R', x: 'Q', p: 'F', k: 'G' }, confirm: sel.p[0].confirm === sel.p[0].cur });
       if (sel.two) {
-        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: 'O', p: 'U', k: ';' }, confirm: sel.p[1].confirm === sel.p[1].cur });
+        $('selP2').innerHTML = panelHTML(KC.ROSTER[sel.p[1].cur], 'PLAYER 2', { gold: sel.p[1].gold, tung: sel.p[1].tung, locked: sel.p[1].locked, skinKey: 'P', pickKey: 'U', keys: { s: 'P', x: 'O', p: 'U', k: ';' }, confirm: sel.p[1].confirm === sel.p[1].cur });
       } else {
         if (sel.mode === 'tour') { $('selP2').innerHTML = levelHTML(KC.level(sel.levelNo)); }
         else $('selP2').innerHTML = '<div class="who">' + (sel.mode === 'campaign' ? 'ELECTION ARCADE' : 'CPU OPPONENT') + '</div><div class="name">' + (sel.mode === 'campaign' ? '5 RIVALS + ???' : '???') + '</div><div class="bio">' +
@@ -679,9 +685,8 @@
       for (var i = 0; i < 2; i++) {
         if (i === 1 && !sel.two) { clearPreview(1); continue; }
         var ch = KC.ROSTER[sel.p[i].cur];
-        var skin = sel.p[i].gold && Save.hasGold(ch.id) ? KC.ALT_SKIN : null;
-        var p0skin = sel.p[0].gold && Save.hasGold(ch.id) ? KC.ALT_SKIN : null;
-        if (i === 1 && sel.p[0].cur === sel.p[1].cur && skin === p0skin) skin = KC.MIRROR_SKIN;
+        var skin = selSkin(sel.p[i], ch);
+        if (i === 1) skin = pairSkins(KC.ROSTER[sel.p[0].cur], selSkin(sel.p[0], KC.ROSTER[sel.p[0].cur]), ch, skin);
         setPreview(i, ch, skin, false, i === 0 ? -1.55 : 1.55, i === 0 ? 0.55 : -0.55);
       }
     },
@@ -711,8 +716,11 @@
     unpick: function (i) { var p = sel.p[i]; if (!p.locked) return false; p.locked = false; sel.startT = 0; KC.Audio.play('back'); this.render(false); return true; },
     skin: function (i) {
       var p = sel.p[i], ch = KC.ROSTER[p.cur];
-      if (!Save.hasGold(ch.id)) { KC.Audio.play('deny'); G.toast('Win ' + KC.ALT_SKIN_WINS + ' matches as ' + esc(ch.short) + ' or buy ' + KC.ALT_SKIN.name + ' in the Shop for ' + G.coin(KC.ALT_SKIN_PRICE) + '.'); return; }
-      p.gold = !p.gold; KC.Audio.play('select'); this.render(true);
+      // cycle Classic → Gold (if owned) → Tung Tung Tung Sahur (free) → Classic
+      if (p.tung) { p.tung = false; p.gold = false; }
+      else if (!p.gold && Save.hasGold(ch.id)) p.gold = true;
+      else { p.gold = false; p.tung = true; }
+      KC.Audio.play('select'); this.render(true);
     },
     update: function (dt) {
       if (sel.startT > 0) { sel.startT -= dt; if (sel.startT <= 0) { this.launch(); return; } }
@@ -739,11 +747,10 @@
     },
     launch: function () {
       var c0 = KC.ROSTER[sel.p[0].cur];
-      var s0 = sel.p[0].gold && Save.hasGold(c0.id) ? KC.ALT_SKIN : null;
+      var s0 = selSkin(sel.p[0], c0);
       if (sel.mode === 'versus') {
         var c1 = KC.ROSTER[sel.p[1].cur];
-        var s1 = sel.p[1].gold && Save.hasGold(c1.id) ? KC.ALT_SKIN : null;
-        if (c0 === c1 && s0 === s1) s1 = KC.MIRROR_SKIN;
+        var s1 = pairSkins(c0, s0, c1, selSkin(sel.p[1], c1));
         startMatch({ mode: 'versus', chars: [c0, c1], skins: [s0, s1], ai: [null, null] });
       } else if (sel.mode === 'tour') {
         G.startLevel(sel.levelNo, c0, s0);
@@ -1359,7 +1366,7 @@
       }
       var ch = KC.ROSTER[this.cur], owned = Save.owns(ch.id), price = G.recruitPrice(ch);
       var wins = d.charWins[ch.id] || 0, goldOk = Save.hasGold(ch.id);
-      var html = '<div class="ttl">' + rarBadge(ch) + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
+      var html = '<div class="ttl">' + rarBadge(ch) + (KC.SALE[ch.id] && !Save.owns(ch.id) ? '<span class="sale-tag">50% OFF · ' + KC.shardsNeeded(ch) + ' shards instead of ' + KC.SHARDS[ch.rarity] + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
       html += '<p>' + esc(ch.bio) + '</p>' + abilityHTML(ch, { s: 'Special', x: 'Super' });
       if (!owned) {
         var sp = KC.shardPrice(ch), canS = Save.canAfford(sp);

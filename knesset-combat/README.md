@@ -12,6 +12,9 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Free Tung Tung Tung Sahur skin for every fighter.** On character select, press your skin key (P1 `R`, P2 `P`) to cycle Classic → Gold (if owned) → Tung Tung Tung Sahur. Your fighter turns into the carved log with the bat but keeps their own moves and stats, and the HUD portrait matches. If both players pick the same fighter in this skin, Player 2's log is red.
+- **Sale: Netanyahu and Trump are 50% off.** They need half the shards (Netanyahu 30 → 15, Trump 25 → 13) at the same price per shard, so they cost half as much to unlock. A pulsing **50% OFF** badge shows in the corner of their cells, and the shop and select panels show the sale too. Shards you'd already collected count, and if you already have enough, the fighter unlocks the next time the game loads.
+
 - **Smoother campaign difficulty:** opponent rarity now rises gradually across all 250 levels. You won't meet a Mythic before level 175; from 175 to 249 every opponent is Mythic.
 
 - **Tung Tung Tung Sahur joins as a free fighter.** He's a high-detail carved wooden log with growth rings, bark grooves, knots, big cartoon eyes and a baseball bat. He's a Common with the **Tung Tung Charge** rush special, and every player owns him from the start (including existing saves).

@@ -186,7 +186,7 @@
     }
     buildCtx.sil = !!opts.silhouette;
     buildCtx.outline = opts.outline !== false;
-    if (L.custom === 'tungtung') return buildTungTung(ch, opts, L);
+    if (L.custom === 'tungtung' || (opts.skin && opts.skin.custom === 'tungtung')) return buildTungTung(ch, opts, L);
     var g = L.girth || 1, h = L.height || 1;
     var root = new T.Group();
     var body = new T.Group();
