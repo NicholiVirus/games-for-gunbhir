@@ -641,7 +641,29 @@ KC.level = function (n) {
 KC.SHARDS = { common: 10, rare: 15, superrare: 17, epic: 20, elite: 22, mythic: 25, legendary: 30 };
 // limited-time sale: these fighters need half the shards (half the total cost), shown with a 50% OFF badge
 KC.SALE = { netanyahu: 0.5, trump: 0.5 };
-KC.shardsNeeded = function (c) { return c.starter ? 0 : Math.ceil(KC.SHARDS[c.rarity] * (KC.SALE[c.id] || 1)); };
+// Flash sales: every 20 minutes up to 5 random fighters get 10-20% off. The picks come from the clock (seeded),
+// so everyone sees the same deals and they survive reloads until the window ends.
+KC.SALE_MS = 20 * 60 * 1000;
+KC.saleWindow = function (now) { return Math.floor((now || Date.now()) / KC.SALE_MS); };
+KC.saleEndsIn = function (now) { now = now || Date.now(); return (KC.saleWindow(now) + 1) * KC.SALE_MS - now; };
+var _flash = { w: -1, map: {} };
+KC.flashSales = function (now) {
+  var w = KC.saleWindow(now);
+  if (_flash.w === w) return _flash.map;
+  var seed = (w * 2654435761) >>> 0;
+  function rnd() { seed = (seed + 0x6D2B79F5) >>> 0; var t = seed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }
+  var pool = KC.ROSTER.filter(function (c) { return !c.starter && !KC.SALE[c.id]; }), map = {};
+  var count = 3 + Math.floor(rnd() * 3);   // 3-5 fighters, never more than 5
+  for (var i = 0; i < count && pool.length; i++) {
+    var c = pool.splice(Math.floor(rnd() * pool.length), 1)[0];
+    map[c.id] = (10 + Math.floor(rnd() * 11)) / 100;   // 10-20% off
+  }
+  _flash = { w: w, map: map };
+  return map;
+};
+// discount (0..1) currently applied to a fighter: the fixed sale beats a flash sale
+KC.saleOf = function (c) { return KC.SALE[c.id] ? 1 - KC.SALE[c.id] : (KC.flashSales()[c.id] || 0); };
+KC.shardsNeeded = function (c) { return c.starter ? 0 : Math.max(1, Math.ceil(KC.SHARDS[c.rarity] * (1 - KC.saleOf(c)))); };
 KC.shardPrice = function (c) { return Math.max(1, Math.round(Math.ceil(KC.priceOf(c) * 1.25 / (c.starter ? 1 : KC.SHARDS[c.rarity])) * 15 * 0.25)); };   // per-shard price ignores the sale (so a sale halves the total)   // single shards: cut 50%, then 50% again (a quarter of the old price)   // single shards are a premium shortcut
 KC.SHARD_DUPE_COINS = 8;   // shards of fighters you already own turn into coins
 KC.WILD_CHANCE = 0.01;     // 1% per chest: a Wild Shard that unlocks any locked fighter of its rarity

@@ -667,3 +667,6 @@ kbd { display: inline-block; min-width: 26px; padding: 2px 7px; margin: 0 2px; b
 .cell .sale { position: absolute; top: 2px; right: 2px; z-index: 3; background: linear-gradient(135deg, #ff3b3b, #ff8a00); color: #fff; font-family: var(--display); font-size: 9px; line-height: 1; padding: 3px 4px; border-radius: 5px; transform: rotate(8deg); box-shadow: 0 2px 6px rgba(0,0,0,0.5); letter-spacing: 0.5px; animation: salePulse 1.2s ease-in-out infinite alternate; pointer-events: none; }
 @keyframes salePulse { from { transform: rotate(8deg) scale(1); } to { transform: rotate(8deg) scale(1.12); } }
 .sale-tag { display: inline-block; background: linear-gradient(135deg, #ff3b3b, #ff8a00); color: #fff; font-family: var(--display); font-size: 12px; padding: 2px 8px; border-radius: 6px; margin-left: 6px; vertical-align: 2px; }
+
+.cell .sale.flash { background: linear-gradient(135deg, #7b2cff, #ff3bb0); }
+.flash-line { margin-top: 6px; font-size: 13px; color: #ffd6f2; background: rgba(123,44,255,0.18); border: 1px solid rgba(255,59,176,0.4); border-radius: 8px; padding: 5px 8px; }

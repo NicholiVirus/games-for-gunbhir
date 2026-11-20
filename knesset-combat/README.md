@@ -12,6 +12,8 @@ settle the motion the old-fashioned way. Low-poly, cel-shaded 3D in the browser 
 
 ## New in this update
 
+- **Flash sales every 20 minutes:** 3–5 random fighters (never more than 5) get **10–20% off**, meaning that many fewer shards to unlock. Purple badges mark them in the select and shop grids, and the shop shows the current deals with a live countdown. When the timer hits zero, new deals roll in automatically. The picks come from the clock, so they stay the same if you reload. Netanyahu and Trump keep their fixed 50% off.
+
 - **Free Tung Tung Tung Sahur skin for every fighter.** On character select, press your skin key (P1 `R`, P2 `P`) to cycle Classic → Gold (if owned) → Tung Tung Tung Sahur. Your fighter turns into the carved log with the bat but keeps their own moves and stats, and the HUD portrait matches. If both players pick the same fighter in this skin, Player 2's log is red.
 - **Sale: Netanyahu and Trump are 50% off.** They need half the shards (Netanyahu 30 → 15, Trump 25 → 13) at the same price per shard, so they cost half as much to unlock. A pulsing **50% OFF** badge shows in the corner of their cells, and the shop and select panels show the sale too. Shards you'd already collected count, and if you already have enough, the fighter unlocks the next time the game loads.
 

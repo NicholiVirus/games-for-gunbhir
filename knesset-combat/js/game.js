@@ -28,7 +28,7 @@
         base.settings = Object.assign(defaults().settings, old.settings || {});
       }
       KC.STARTERS.forEach(function (id) { if (base.owned.indexOf(id) < 0) base.owned.push(id); });
-      Object.keys(KC.SALE).forEach(function (id) { var c = KC.rosterById[id]; if (c && base.owned.indexOf(id) < 0 && ((base.shards || {})[id] || 0) >= KC.shardsNeeded(c)) { base.owned.push(id); delete base.shards[id]; } });   // sale lowered the shard need   // everyone gets the free starters
+      Object.keys(KC.SALE).concat(Object.keys(KC.flashSales())).forEach(function (id) { var c = KC.rosterById[id]; if (c && base.owned.indexOf(id) < 0 && ((base.shards || {})[id] || 0) >= KC.shardsNeeded(c)) { base.owned.push(id); delete base.shards[id]; } });   // sale lowered the shard need   // everyone gets the free starters
       Save.data = base;
     },
     write: function () { memoryStore = Save.data; try { localStorage.setItem(SAVE_KEY, JSON.stringify(Save.data)); } catch (e) { /* private mode */ } },
@@ -225,6 +225,16 @@
     try { r.dispose(); r.forceContextLoss(); } catch (e) { /* ignore */ }
   }
   function por(ch, gold) { var p = G.portraits[ch.id]; return p ? (gold ? p.g : p.n) : ''; }
+  G.saleClock = function () { var ms = KC.saleEndsIn(); return Math.floor(ms / 60000) + 'm ' + ('0' + Math.floor(ms % 60000 / 1000)).slice(-2) + 's'; };
+  G.saleTick = function (scr) {
+    document.querySelectorAll('.sale-clock').forEach(function (e) { e.textContent = G.saleClock(); });
+    var w = KC.saleWindow(); if (scr.saleW === undefined) scr.saleW = w;
+    if (w === scr.saleW) return false;
+    scr.saleW = w;
+    // a new sale can drop a fighter's shard need below what the player already holds
+    Object.keys(KC.flashSales()).forEach(function (id) { var c = KC.rosterById[id]; if (!Save.owns(id) && Save.shards(id) >= KC.shardsNeeded(c)) { Save.data.owned.push(id); delete Save.data.shards[id]; Save.write(); G.toast('⚡ Flash sale — ' + esc(c.name) + ' recruited!'); } });
+    G.toast('⚡ New flash sale!'); return true;
+  };
   function porF(f) { return f.skin && f.skin.custom ? por(KC.rosterById.tungtung, false) : por(f.ch, f.skin === KC.ALT_SKIN); }   // HUD portrait matches the skin
   G.porF = porF;
   // skin a select-screen player has chosen: Classic, Gold (if owned) or the free Tung Tung Tung Sahur skin
@@ -578,7 +588,7 @@
     var owned = Save.owns(ch.id);
     var grp = ch.group === 'contender' ? "26'" : ch.group === 'boss' ? 'BOSS' : ch.group === 'guest' ? 'GUEST' : ch.group === 'icon' ? 'MK' : '';
     var price = owned ? '' : '<span class="price shardp"><span class="shard"></span>' + Save.shards(ch.id) + '/' + KC.shardsNeeded(ch) + '</span>';
-    return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + (KC.SALE[ch.id] && !owned ? '<span class="sale">50% OFF</span>' : '') + price + (tags || '') + '</div>';
+    return '<div class="cell r-' + ch.rarity + ' ' + (owned ? '' : 'locked ') + (extraCls || '') + '" data-i="' + i + '"><img src="' + por(ch) + '" alt="">' + (grp ? '<span class="grp">' + grp + '</span>' : '') + (KC.saleOf(ch) && !owned ? '<span class="sale' + (KC.SALE[ch.id] ? '' : ' flash') + '">' + Math.round(KC.saleOf(ch) * 100) + '% OFF</span>' : '') + price + (tags || '') + '</div>';
   }
   G.cellHTML = cellHTML;
   /* keys: {s: 'R', x: 'T'} for P1, {s: 'O', x: 'P'} for P2, or generic words */
@@ -597,7 +607,7 @@
   G.abilityHTML = abilityHTML;
   function panelHTML(ch, who, st) {
     var owned = Save.owns(ch.id), s = ch.stats, price = G.recruitPrice(ch);
-    var head = '<div class="who">' + who + (owned ? ' · <span class="rank">RANK ' + Save.rank(ch.id) + '/' + KC.UPGRADE.max + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + (KC.SALE[ch.id] && !owned ? '<span class="sale-tag">50% OFF</span>' : '') + '</div><div class="ttl">' + rarBadge(ch) + ' ' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>';
+    var head = '<div class="who">' + who + (owned ? ' · <span class="rank">RANK ' + Save.rank(ch.id) + '/' + KC.UPGRADE.max + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + (KC.saleOf(ch) && !owned ? '<span class="sale-tag">' + Math.round(KC.saleOf(ch) * 100) + '% OFF</span>' : '') + '</div><div class="ttl">' + rarBadge(ch) + ' ' + esc(ch.title.toUpperCase()) + ' · ' + esc(ch.years) + '</div>';
     var body = '<div class="bio">' + esc(ch.bio) + '</div>' + abilityHTML(ch, st.keys) +
       '<div class="stats"><span>SPEED</span>' + statBar(s.speed) + '<span>POWER</span>' + statBar(s.power) + '<span>DEFENSE</span>' + statBar(s.defense) + '<span>JUMP</span>' + statBar(s.jump) + '</div>';
     if (!owned) {
@@ -723,6 +733,7 @@
       KC.Audio.play('select'); this.render(true);
     },
     update: function (dt) {
+      if (G.saleTick(this)) this.refresh();
       if (sel.startT > 0) { sel.startT -= dt; if (sel.startT <= 0) { this.launch(); return; } }
       var one = !sel.two;
       if (Input.pp(0, 'l') || (one && Input.pp(1, 'l'))) this.move(0, -1, 0);
@@ -1340,7 +1351,7 @@
     refresh: function () { this.render(true); },
     render: function (rebuild) {
       var self = this, d = Save.data;
-      $('colSub').innerHTML = 'Wallet: <b class="wallet">' + G.coin(d.coins) + '</b> &nbsp;·&nbsp; ' + d.owned.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins';
+      $('colSub').innerHTML = 'Wallet: <b class="wallet">' + G.coin(d.coins) + '</b> &nbsp;·&nbsp; ' + d.owned.length + ' / ' + KC.ROSTER.length + ' fighters · ' + d.gold.length + ' gold skins' + '<div class="flash-line">⚡ Flash sale: ' + Object.keys(KC.flashSales()).map(function (id) { return esc(KC.rosterById[id].short) + ' −' + Math.round(KC.flashSales()[id] * 100) + '%'; }).join(' · ') + ' · new deals in <b class="sale-clock">' + G.saleClock() + '</b></div>';
       var wl = KC.RARITY_ORDER.filter(function (r) { return (d.wild || {})[r] > 0; }).map(function (r) { return '<span class="rar r-' + r + '">✦ ' + d.wild[r] + ' ' + KC.RARITY[r].name.toUpperCase() + '</span>'; }).join(' ');
       if (wl) $('colSub').insertAdjacentHTML('beforeend', '<div class="wild-list">Wild Shards: ' + wl + '</div>');
       $('colSub').insertAdjacentHTML('beforeend', ' <button type="button" class="lv-chest" id="shopStore">🎁 CHEST STORE</button> <button type="button" class="lv-chest cmp-btn" id="shopCompare">⚖ COMPARE (C)</button>');
@@ -1366,7 +1377,7 @@
       }
       var ch = KC.ROSTER[this.cur], owned = Save.owns(ch.id), price = G.recruitPrice(ch);
       var wins = d.charWins[ch.id] || 0, goldOk = Save.hasGold(ch.id);
-      var html = '<div class="ttl">' + rarBadge(ch) + (KC.SALE[ch.id] && !Save.owns(ch.id) ? '<span class="sale-tag">50% OFF · ' + KC.shardsNeeded(ch) + ' shards instead of ' + KC.SHARDS[ch.rarity] + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
+      var html = '<div class="ttl">' + rarBadge(ch) + (KC.saleOf(ch) && !Save.owns(ch.id) ? '<span class="sale-tag">' + Math.round(KC.saleOf(ch) * 100) + '% OFF · ' + KC.shardsNeeded(ch) + ' shards instead of ' + KC.SHARDS[ch.rarity] + (KC.SALE[ch.id] ? '' : ' · ends in <b class="sale-clock">' + G.saleClock() + '</b>') + '</span>' : '') + '</div><div class="name">' + esc(ch.name) + '</div><div class="ttl">' + esc(ch.title) + ' · ' + esc(ch.years) + '</div>';
       html += '<p>' + esc(ch.bio) + '</p>' + abilityHTML(ch, { s: 'Special', x: 'Super' });
       if (!owned) {
         var sp = KC.shardPrice(ch), canS = Save.canAfford(sp);
@@ -1450,6 +1461,7 @@
       } else { KC.Audio.play('deny'); }
     },
     update: function () {
+      if (G.saleTick(this)) { this.gridKey = null; this.render(true); }
       if (this.cmpOpen) { if (Input.hit(['Escape', 'Backspace', 'KeyC', 'Enter', 'Space', 'KeyF', 'Pad0_b', 'Pad1_b'])) { just.Escape = false; this.closeCompare(); } return; }
       if (Input.hit(['KeyC'])) this.compare();
       var list = this.list(), n = list.length, pos = Math.max(0, list.indexOf(this.cur)), cols = 6;
